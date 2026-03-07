@@ -1,0 +1,75 @@
+# EPIC-05 — Creation flows (campaigns/regions/provinces)
+
+**ID:** `EPIC-05`  
+**Priority:** `P0`  
+**Status:** `draft`  
+**Owner:** `<TBD>`  
+**PRD/RFC reference:** `prd.md` (MVP scope, creation flows) / `rfc.md` (epic 5)
+
+## 1) Objective (Outcome)
+Enable fast creation so a user can create the first campaign/regions/provinces in under 2 minutes, without feeling like they are filling out a CRM.
+
+## 3) Scope
+**In scope:**
+- create Campaign/Region/Province;
+- minimal validation;
+- quick-add multiple provinces;
+- auto-assign province initial state (`fog` vs `ready`).
+
+**Out of scope:**
+- project templates and demo content (P1).
+
+## 6) Work breakdown
+
+### T1. Campaign creation form
+**Steps:**
+1) Fields: title (required), description (optional), colorTheme (optional).
+2) Persist and navigate to the campaign.
+**Acceptance criteria:**
+- New campaign appears on the campaign map.
+**DoD:**
+- Campaign creation is stable.
+**Estimate:** `M`
+
+### T2. Region creation form
+**Steps:**
+1) Fields: title (required), description (optional), order (auto).
+2) Link to campaignId.
+**Acceptance criteria:**
+- Region appears in project context (map legend/list at minimum).
+**DoD:**
+- Region creation is stable.
+**Estimate:** `M`
+
+### T3. Province (task) creation form
+**Steps:**
+1) Fields: title (required); optional clarity fields at creation time.
+2) Defaults for effortLevel/clarityLevel.
+3) Auto state: missing clarity fields → `fog`, else `ready`.
+**Acceptance criteria:**
+- Province is visible on the map and can be opened.
+**DoD:**
+- Province creation is stable.
+**Estimate:** `L`
+
+### T4. Quick-add multiple provinces
+**Steps:**
+1) UI: textarea or multi-input list.
+2) Each non-empty line becomes a province.
+3) Validate and handle duplicates (MVP: trim + ignore empty).
+**Acceptance criteria:**
+- Create 5–10 tasks in one action.
+**DoD:**
+- Bulk create works reliably.
+**Estimate:** `M`
+
+### T5. Enforce “max 3–5 required fields”
+**Steps:**
+1) Lock required field list for each create/clarify screen.
+2) Ensure forms do not require extras.
+**Acceptance criteria:**
+- Creating tasks stays lightweight.
+**DoD:**
+- UX limits are respected.
+**Estimate:** `S`
+
