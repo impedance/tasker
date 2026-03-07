@@ -11,7 +11,7 @@ Implement “siege” as a gentle mode for stalled tasks: auto-trigger, tactic s
 
 ## 3) Scope
 **In scope:**
-- siege rule (N=3 days without meaningful update);
+- siege rule (N=3 days without meaningful update, per `epics/EPIC-01-foundation.md` Appendix C `updatedAt` contract);
 - `SiegeEvent` entity;
 - siege screen;
 - 5 tactics with explicit effects;
@@ -62,4 +62,3 @@ Implement “siege” as a gentle mode for stalled tasks: auto-trigger, tactic s
 **DoD:**
 - Events exist (see EPIC-12).
 **Estimate:** `M`
-

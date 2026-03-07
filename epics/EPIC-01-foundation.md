@@ -55,7 +55,7 @@ Make the product rules and definitions unambiguous so the team can implement the
 **Description:** produce a table “from → action/event → to” + conditions + side effects (fields, points, events).  
 **Steps:**
 1) Start from PRD states: fog/ready/siege/in_progress/fortified/captured/retreated.
-2) Define domain actions: clarify, start_move, log_move, apply_tactic, complete, retreat, split, reschedule.
+2) Define domain actions: clarify, decompose, start_move, log_move, apply_tactic, complete, retreat, reschedule.
 3) For each action: what fields change and which event is logged.
 **Acceptance criteria:**
 - Each transition has a condition and an explicit effect.
@@ -126,8 +126,8 @@ Make the product rules and definitions unambiguous so the team can implement the
 - “Meaningful” can become fuzzy → enforce via testable rules.
 
 ## 10) Open questions
-- Day boundary: 00:00 vs 04:00 local time?
-- Do we keep separate actions for “split” vs “decompose”, or treat them as one?
+- Day boundary is fixed to 04:00 local time (see Appendix E).
+- Use a single domain action name `decompose` (UI may call it “split”); avoid duplicating actions for the same intent.
 
 ---
 
@@ -228,6 +228,7 @@ To compute “meaningful days”, every event that counts as a meaningful action
 
 Recommended `meaningfulActionType` values:
 - `clarify` (fog → ready, or adds required clarity fields)
+- `prepare` (reduces friction or improves actionability without a “real step” yet; e.g., decomposition, context prep)
 - `start` (ready → in_progress)
 - `progress` (stage increase / logged real step)
 - `siege_resolve` (siege → ready/in_progress/retreated via a tactic)
@@ -275,6 +276,12 @@ Minimum viable approach:
 **`province_started`**
 - required: `provinceId`, `campaignId`, `seasonId`
 - required: `isMeaningfulAction=true`, `meaningfulActionType=start`
+
+**`province_decomposed`**
+- required: `provinceId`, `campaignId`, `seasonId`
+- required: `isMeaningfulAction=true`, `meaningfulActionType=prepare`
+- optional: `createdProvinceCount`
+- optional: `methodType?` (`engineer | manual | template`)
 
 **`province_progressed`**
 - required: `provinceId`, `campaignId`, `seasonId`
@@ -370,4 +377,114 @@ Default trigger (MVP): 10+ minutes in a session with 0 meaningful actions.
 
 ## B7) Open questions
 - Do we log `app_opened` in MVP, or keep it out until pilot?
-- What is the canonical day boundary (00:00 vs 04:00) for “meaningful day” aggregation?
+
+---
+
+# Appendix C — Meaningful action, movement, and `updatedAt` (MVP contract)
+
+## C1) Definitions
+- **Meaningful action:** a user action that represents real progress, clarification, recovery, or action-prep that materially reduces friction. It can unlock feedback/hero moments and counts toward “meaningful days”.
+- **Movement:** for MVP, treat as the same set as meaningful actions (a “movement event” is any meaningful action event).
+- **`updatedAt` on Province:** the last timestamp of movement for that province. It is used for siege detection.
+
+## C2) What counts as meaningful (MVP)
+Meaningful actions MUST:
+- change at least one domain-relevant field or state (clarity/state/progress/resources), and
+- be represented by an event with `payload.isMeaningfulAction=true` (Appendix B).
+
+Meaningful actions include:
+- Clarification that satisfies fog requirements (`province_clarified`).
+- First start of work (`province_started`).
+- Any real progress step that changes stage (`province_progressed`).
+- Completing a province (`province_completed`).
+- Conscious retreat/reschedule (`province_retreated`).
+- Siege tactics application (`tactic_applied`) including `scout/supply/engineer/raid/retreat`.
+- Decomposition/splitting that creates actionable sub-provinces (`province_decomposed`).
+
+## C3) What does NOT count as meaningful (MVP)
+These actions must never set `isMeaningfulAction=true` and must not unlock strategic progress:
+- opening the app; browsing maps; opening a province; reading stats;
+- check-ins (`checkin_*`) and viewing recommendations (`daily_move_viewed`);
+- creating/editing if-then plans (`if_then_plan_created`);
+- renaming, reordering, styling/theme changes that do not change clarity/progress/actionability;
+- export/share actions (`share_card_*`).
+
+## C4) `updatedAt` rules (MVP)
+Update `province.updatedAt` only when a meaningful action in C2 happens for that province.
+
+Do NOT update `updatedAt` for:
+- cosmetic edits (title/description), reordering, navigation-only actions;
+- viewing a province/map, generating share cards, writing if-then plans.
+
+Rationale: `updatedAt` must reflect “movement”, otherwise siege can be farmed/avoided by low-effort edits.
+
+## C5) Siege eligibility
+Siege detection should consider provinces in states:
+- eligible: `ready`, `in_progress`, `fortified`
+- ineligible: `fog`, `siege`, `captured`, `retreated`
+
+---
+
+# Appendix D — Province transition table v1 (state machine contract)
+
+Notes:
+- UI must never set `province.state` directly. UI dispatches domain actions; rules derive the next state.
+- “Derived” transitions still require an explicit action (e.g., `province_fields_updated`) to re-evaluate rules.
+
+| From state | Action/event | To state | Conditions (MVP) | Side effects (MVP) | Event(s) / meaningful |
+|---|---|---|---|---|---|
+| *(new)* | `province_created` | `fog` or `ready` | `fog` if required clarity fields missing | set `createdAt`, `updatedAt=createdAt` | `province_created` (not meaningful) |
+| `fog` | `clarify` | `ready` | required clarity fields present after change | set clarity fields; set `updatedAt` | `province_clarified` (meaningful: `clarify`) |
+| `ready` | `start_move` | `in_progress` | first real step is recorded | set `progressStage>=started`; set `updatedAt` | `province_started` (meaningful: `start`) |
+| `ready` | `decompose/split` | `ready` | creates 3–5 actionable sub-provinces | create new provinces; optionally bump stage to `decomposed`; set `updatedAt` | `province_decomposed` (meaningful: `prepare`) |
+| `ready` | `complete` | `captured` | user marks done | set state; set stage to `captured`; set `updatedAt` | `province_completed` (meaningful: `complete`) |
+| `ready` | `retreat/reschedule` | `retreated` | user chooses to defer/remove | set state; set `updatedAt` | `province_retreated` (meaningful: `retreat`) |
+| `ready` | `system_siege_trigger` | `siege` | `stalledDays >= N` where N=3 and per C5 eligible | create `SiegeEvent`; set state | `siege_triggered` (not meaningful) |
+| `in_progress` | `log_move` | `in_progress` | user logs real progress | update stage if criteria met; set `updatedAt` | `province_progressed` (meaningful: `progress`, if stage changes) |
+| `in_progress` | `complete` | `captured` | user marks done | set state/stage; set `updatedAt` | `province_completed` (meaningful: `complete`) |
+| `in_progress` | `system_siege_trigger` | `siege` | same as `ready` | create `SiegeEvent`; set state | `siege_triggered` (not meaningful) |
+| `fortified` | `decompose/split` | `ready` or `in_progress` | decomposition reduces scope enough to act | create sub-provinces; set `updatedAt` | `province_decomposed` (meaningful: `prepare`) |
+| `fortified` | `system_siege_trigger` | `siege` | same as `ready` | create `SiegeEvent`; set state | `siege_triggered` (not meaningful) |
+| `siege` | `apply_tactic:scout` | `ready` | clarity improved (or plan created) | update clarity fields; set `updatedAt` | `tactic_applied` (meaningful: `siege_resolve`) |
+| `siege` | `apply_tactic:supply` | `ready` | context/resources were added | update resources/context fields; set `updatedAt` | `tactic_applied` (meaningful: `siege_resolve`) |
+| `siege` | `apply_tactic:engineer` | `ready` | split created actionable sub-provinces | create sub-provinces; set `updatedAt` | `tactic_applied` (meaningful: `siege_resolve`), optionally also `province_decomposed` |
+| `siege` | `apply_tactic:raid` | `in_progress` | a 5-minute entry step is started | create a `DailyMove`; set `updatedAt` | `tactic_applied` (meaningful: `siege_resolve`) |
+| `siege` | `apply_tactic:retreat` | `retreated` | user retreats/reschedules | set state; set `updatedAt` | `tactic_applied` + `province_retreated` (meaningful) |
+| `captured` | *(none in MVP)* | `captured` | no reopen in MVP | — | — |
+| `retreated` | *(none in MVP)* | `retreated` | no restore in MVP | — | — |
+
+---
+
+# Appendix E — Time contract v1 (timezone, day boundary, seasons)
+
+## E1) Timezone
+- Use the user’s **local timezone**.
+- Persist timezone as an IANA string (e.g., `Europe/Moscow`) alongside timestamps (see Appendix B conventions).
+
+## E2) Canonical day boundary (MVP decision)
+- Canonical day boundary is **04:00 local time**.
+- A “meaningful day” is the 24h bucket starting at 04:00 and ending before the next 04:00.
+
+Rationale: reduces late-night “double counting” and makes daily rituals stable for most users.
+
+## E3) Season dayNumber
+- Store `season.timezone` at season creation.
+- Compute `season.dayNumber` using the season timezone and the 04:00 boundary.
+- If the user changes timezone mid-season, keep season aggregation stable by continuing to use `season.timezone` for `dayNumber` (MVP choice).
+
+## E4) DST / timezone shifts (MVP minimum)
+- Treat “04:00 local time” as a wall-clock boundary in the relevant timezone.
+- Events store their `timezone`; analysis can reconcile later if needed, but in-product aggregation should remain stable.
+
+---
+
+# Appendix F — Copy layering contract v1 (fantasy-first, but not childish)
+
+## F1) Layering rule (non-negotiable)
+- **Map/home surfaces:** fantasy-first terms (fog, siege, scout, supply, raid).
+- **Action screens:** plain language must be present for clarity fields (Outcome / First step / Entry time). Fantasy can be a label, but the real-world meaning must be obvious.
+
+## F2) Tone constraints (MVP)
+- Avoid childish slang; prefer “minimal strategy UI” tone.
+- Never use guilt/shame framing.
+- Never imply progress without action.

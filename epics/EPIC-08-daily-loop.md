@@ -42,6 +42,7 @@ Add daily ritual loops: start-of-day “Daily move” (3 suggestions) and end-of
 **DoD:**
 - Screen works end-to-end.
 - Events match EPIC-01 Appendix B (`daily_move_viewed`, `daily_move_selected`) including `interventionId`.
+- The applied domain action follows the meaningful/`updatedAt` contract (EPIC-01 Appendix C).
 **Estimate:** `L`
 
 ### T2. Recommendation algorithm v1 (3 moves)

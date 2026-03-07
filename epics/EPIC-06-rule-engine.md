@@ -28,7 +28,7 @@ Create a single rule engine entry point for all province state transitions, and 
 
 ### T1. Define domain action set
 **Steps:**
-1) Define action types: clarify, start_move, log_move, apply_tactic, complete, retreat, split, reschedule.
+1) Define action types: clarify, decompose, start_move, log_move, apply_tactic, complete, retreat, reschedule.
 2) Define payload schema for each.
 **Acceptance criteria:**
 - Actions cover all transitions from EPIC-01.
@@ -75,4 +75,3 @@ Create a single rule engine entry point for all province state transitions, and 
 **DoD:**
 - Validators exist and are used by repositories/actions.
 **Estimate:** `M`
-
