@@ -15,12 +15,34 @@ Enable fast creation so a user can create the first campaign/regions/provinces i
 - minimal validation;
 - quick-add multiple provinces;
 - auto-assign province initial state (`fog` vs `ready`).
+- first-run onboarding entry: demo/tutorial campaign template (skippable).
 
 **Out of scope:**
-- project templates and demo content (P1).
+- multiple project templates (“template library”).
 - advanced archetype-driven automation.
 
 ## 6) Work breakdown
+
+### T0. First-run onboarding: demo/tutorial campaign (P0)
+**Steps:**
+1) Define a tiny tutorial campaign template:
+   - 1 campaign, 1 region, 3 provinces (fog / siege / ready).
+   - seed only what is necessary to demonstrate the mechanics.
+2) First run detection (empty storage) offers:
+   - “Start with tutorial campaign” (recommended),
+   - “Start empty”.
+3) Guided path (skippable at any step):
+   - clarify a fog province (fog → ready),
+   - resolve a siege via a tactic (siege → ready/retreated),
+   - pick one daily move and start it.
+4) Provide a reset/remove option in Settings (“Remove tutorial campaign”).
+**Acceptance criteria:**
+- A user reaches a first meaningful action in ≤60 seconds.
+- Tutorial is never forced and can be skipped and removed.
+**DoD:**
+- The template is stored as versioned seed data and loaded deterministically.
+- Tutorial path does not require a network connection.
+**Estimate:** `M`
 
 ### T1. Campaign creation form
 **Steps:**

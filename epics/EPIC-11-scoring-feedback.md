@@ -1,47 +1,53 @@
 # EPIC-11 — Scoring, streaks, feedback, and anti-abuse
 
 **ID:** `EPIC-11`  
-**Priority:** `P0`  
+**Priority:** `P1`  
 **Status:** `draft`  
 **Owner:** `<TBD>`  
 **PRD/RFC reference:** `prd.md` (Scoring + anti-abuse) / `rfc.md` (progression rules)
 
 ## 1) Objective (Outcome)
-Deliver game feedback without toxicity: points for meaningful actions, soft streaks, and basic anti-abuse heuristics.
+Deliver game feedback without toxicity: progress-first feedback for meaningful actions, soft streaks (optional), and basic anti-abuse heuristics.
 
 ## 3) Scope
 **In scope:**
-- clarify/momentum/capture/recovery points;
+- progress-first feedback (province progressStage + minimal “meaningful action” feedback);
+- a lightweight “meaningful day” indicator (no harsh punishment);
 - meaningful-day streak;
 - soft anti-abuse warnings;
 - baseline feedback copy;
 - hero moments tied to meaningful actions;
 - explicit no-guilt / no-empty-reward guardrails.
 
+**Out of scope (for the first MVP cut):**
+- a tuned points economy that requires balancing (can be added later as v0.2+).
+
 ## 6) Work breakdown
 
-### T1. Specify scoring model v1
+### T1. Specify feedback model v1 (progress-first)
 **Steps:**
-1) For each domain action: define points granted and type.
-2) Add caps/limits to prevent farming (e.g., max N clarify points per day).
+1) Define which domain actions trigger feedback (clarify, start/move, siege resolved, complete, recover/retreat).
+2) Define what is shown: progressStage changes, short copy, and (optional) a small “meaningful day” marker.
+3) Define caps so celebration never becomes pressure (see EPIC-01 Appendix A prompt budget).
 **Acceptance criteria:**
-- No obvious “open app and farm points” exploits.
-- No reward is granted for passive app opens or empty sessions.
+- No feedback is shown for passive browsing or app opens without meaningful action.
+- Feedback is understandable without a points legend/tutorial.
 **DoD:**
-- Scoring spec is written and ready to implement.
+- Feedback spec is written and ready to implement.
 **Estimate:** `M`
 
-### T2. Implement points and store them in season/profile
+### T2. Implement feedback wiring (UI + domain signals)
 **Steps:**
-1) Transition engine returns point side effects.
-2) Persist points into Season and/or PlayerProfile.
+1) Expose “meaningful action happened” and progressStage change signals from domain transitions.
+2) Wire the UI to show minimal feedback after meaningful actions.
+3) Persist the meaningful-day marker per day/season.
 **Acceptance criteria:**
-- Points match the spec under tests.
+- Feedback triggers only on meaningful actions.
 **DoD:**
-- Points are granted and visible.
+- Feedback is visible in the main flow (province actions, siege tactic resolution, daily move).
 **Estimate:** `L`
 
-### T3. Meaningful-day streak
+### T3. Meaningful-day streak (optional)
 **Steps:**
 1) Define which events/actions mark a day as meaningful.
 2) Implement a streak that breaks softly (no harsh punishment).

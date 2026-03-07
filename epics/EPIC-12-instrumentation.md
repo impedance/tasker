@@ -1,13 +1,17 @@
 # EPIC-12 — Analytics and instrumentation (local)
 
 **ID:** `EPIC-12`  
-**Priority:** `P0`  
+**Priority:** `P1`  
 **Status:** `draft`  
 **Owner:** `<TBD>`  
 **PRD/RFC reference:** `prd.md` (Metrics) / `rfc.md` (instrumentation epic)
 
 ## 1) Objective (Outcome)
 Collect anonymous local events to evaluate MVP hypotheses without a backend: meaningful days, siege/tactic effectiveness, and basic retention proxies.
+
+Notes:
+- The event schema contract lives in `epics/EPIC-01-foundation.md` (Appendix B).
+- Implementation (logger/export/viewer) is optional for the first MVP cut and can ship as v0.2 if time is constrained.
 
 ## 3) Scope
 **In scope:**

@@ -9,6 +9,9 @@
 ## 1) Objective (Outcome)
 Make maps the primary UX: clickable SVG territories, visible province states, and clear navigation to province details.
 
+Notes:
+- Keep the map DOM/SVG-first for MVP (events + CSS styling + tooltips). Avoid Canvas/Phaser complexity unless proven necessary.
+
 ## 3) Scope
 **In scope:**
 - 1 campaign map SVG template + 1 project map SVG template (fixed assets).
@@ -77,4 +80,3 @@ Make maps the primary UX: clickable SVG territories, visible province states, an
 **DoD:**
 - Map works on mobile (baseline).
 **Estimate:** `M`
-

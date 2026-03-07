@@ -11,7 +11,7 @@ Stabilize the MVP for a 21-day pilot: tests for critical rules and flows, a regr
 
 ## 3) Scope
 **In scope:**
-- unit tests for rule engine/scoring;
+- unit tests for rule engine/feedback;
 - integration tests for storage/import/export/migrations;
 - end-to-end E2E smoke scenario;
 - README + user guide + known limitations + feedback form template;
@@ -19,11 +19,11 @@ Stabilize the MVP for a 21-day pilot: tests for critical rules and flows, a regr
 
 ## 6) Work breakdown
 
-### T1. Unit tests for rule engine and scoring
+### T1. Unit tests for rule engine and feedback
 **Steps:**
 1) Cover fog/ready/in_progress/captured/retreated transitions.
 2) Cover siege enter/exit (minimum).
-3) Cover points awarding rules.
+3) Cover feedback/meaningful-day trigger rules (no passive rewards).
 **Acceptance criteria:**
 - Critical cases from EPIC-01 are covered.
 **DoD:**
@@ -43,7 +43,7 @@ Stabilize the MVP for a 21-day pilot: tests for critical rules and flows, a regr
 
 ### T3. E2E “user path” scenario
 **Steps:**
-1) Onboarding → create campaign → create province → clarify → trigger siege → apply tactic → daily move → season summary (minimum).
+1) Onboarding → start tutorial campaign (or create campaign) → open province → clarify → resolve siege via a tactic → daily move → season summary (minimum).
 2) Run in CI (headless).
 **Acceptance criteria:**
 - Stable test (no flakiness).
@@ -72,4 +72,3 @@ Stabilize the MVP for a 21-day pilot: tests for critical rules and flows, a regr
 **DoD:**
 - Docs are complete and readable.
 **Estimate:** `L`
-

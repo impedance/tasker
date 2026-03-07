@@ -1,13 +1,17 @@
 # EPIC-09 — Rule-based adaptation engine
 
 **ID:** `EPIC-09`  
-**Priority:** `P0`  
+**Priority:** `P1`  
 **Status:** `draft`  
 **Owner:** `<TBD>`  
 **PRD/RFC reference:** `prd.md` (Adaptation) / `rfc.md` (rule examples)
 
 ## 1) Objective (Outcome)
 Personalize hints and daily/tactic prioritization using rule-based adaptation grounded in the user’s friction history.
+
+Notes:
+- Baseline (non-personalized) recommendations are part of `epics/EPIC-08-daily-loop.md` (Recommendation algorithm v1).
+- This epic is the “personalization layer” and is optional for the first MVP cut.
 
 ## 3) Scope
 **In scope:**

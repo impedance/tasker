@@ -13,7 +13,7 @@ Add daily ritual loops: start-of-day “Daily move” (3 suggestions) and end-of
 **In scope:**
 - Commander check-in before daily move;
 - Daily move screen;
-- algorithm to pick 3 recommendations v1 (rule-based);
+- algorithm to pick 3 recommendations v1 (rule-based, baseline/non-personalized);
 - War council screen;
 - If-then plan CRUD;
 - Daily move history (minimum: last N).
