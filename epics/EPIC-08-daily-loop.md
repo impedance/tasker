@@ -4,7 +4,7 @@
 **Priority:** `P0`  
 **Status:** `draft`  
 **Owner:** `<TBD>`  
-**PRD/RFC reference:** `prd.md` (Daily Orders, War council) / `rfc.md` (loops)
+**PRD reference:** `prd.md` (Daily Orders, War council)
 
 ## 1) Objective (Outcome)
 Add daily ritual loops: start-of-day “Daily Orders” (3 orders: light/medium/main) and end-of-day “War council” (if-then plans).

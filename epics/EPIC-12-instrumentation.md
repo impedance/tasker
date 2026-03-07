@@ -4,7 +4,7 @@
 **Priority:** `P1`  
 **Status:** `draft`  
 **Owner:** `<TBD>`  
-**PRD/RFC reference:** `prd.md` (Metrics) / `rfc.md` (instrumentation epic)
+**PRD reference:** `prd.md` (Metrics)
 
 ## 1) Objective (Outcome)
 Collect anonymous local events to evaluate MVP hypotheses without a backend: meaningful days, siege/tactic effectiveness, and basic retention proxies.

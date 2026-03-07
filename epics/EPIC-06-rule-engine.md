@@ -4,7 +4,7 @@
 **Priority:** `P0`  
 **Status:** `draft`  
 **Owner:** `<TBD>`  
-**PRD/RFC reference:** `prd.md` (Game rules) / `rfc.md` (states/mechanics)
+**PRD reference:** `prd.md` (Game rules)
 
 ## 1) Objective (Outcome)
 Create a single rule engine entry point for all province state transitions, and compute fog/progress by rules rather than UI mutations.

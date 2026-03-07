@@ -4,7 +4,7 @@
 **Priority:** `P0`  
 **Status:** `draft`  
 **Owner:** `<TBD>`  
-**PRD/RFC reference:** `prd.md` (Architecture, weekly plan) / `rfc.md` (stack, architecture)
+**PRD reference:** `prd.md` (Architecture, weekly plan)
 
 ## 1) Objective (Outcome)
 Ship a working SPA skeleton (React+TS+Vite) with tests and basic automation so juniors can implement features without infrastructure blockers.

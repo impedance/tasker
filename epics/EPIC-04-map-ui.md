@@ -4,7 +4,7 @@
 **Priority:** `P0`  
 **Status:** `draft`  
 **Owner:** `<TBD>`  
-**PRD/RFC reference:** `prd.md` (UX: maps) / `rfc.md` (epic 4)
+**PRD reference:** `prd.md` (UX: maps)
 
 ## 1) Objective (Outcome)
 Make maps the primary UX: clickable SVG territories, visible province states, adjacency-driven affordances, and clear navigation to province actions.

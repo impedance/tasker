@@ -4,7 +4,7 @@
 **Priority:** `P1`  
 **Status:** `draft`  
 **Owner:** `<TBD>`  
-**PRD/RFC reference:** `prd.md` (safe sharing) / `rfc.md` (privacy-safe exports)
+**PRD reference:** `prd.md` (safe sharing)
 
 ## 1) Objective (Outcome)
 Add privacy-safe export artifacts (share cards) that are fully offline and never socially coercive.

@@ -4,7 +4,7 @@
 **Priority:** `P0`  
 **Status:** `draft`  
 **Owner:** `<TBD>`  
-**PRD/RFC reference:** `prd.md` (Season) / `rfc.md` (21-day cycle)
+**PRD reference:** `prd.md` (Season)
 
 ## 1) Objective (Outcome)
 Introduce a 21-day season: show season day number, weekly focus hints, season summary, and auto-start a new season after completion.

@@ -4,7 +4,7 @@
 **Priority:** `P0`  
 **Status:** `draft`  
 **Owner:** `<TBD>`  
-**PRD/RFC reference:** `prd.md` (Capital/Chronicle/Hero moments, theme, IA) / `rfc.md` (world-state desirability)
+**PRD reference:** `prd.md` (Capital/Chronicle/Hero moments, theme, IA)
 
 ## 1) Objective (Outcome)
 Make the MVP feel like a strategy game on first contact: a capital as home, a human-readable chronicle as memory, and a consistent Shogunate/Warring Provinces fantasy layer — without adding a heavy meta-game or economy.

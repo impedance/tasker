@@ -4,7 +4,7 @@
 **Priority:** `P0`  
 **Status:** `draft`  
 **Owner:** `<TBD>`  
-**PRD/RFC reference:** `prd.md` (Testing/Release) / `rfc.md` (epics 13–14)
+**PRD reference:** `prd.md` (Testing/Release)
 
 ## 1) Objective (Outcome)
 Stabilize the MVP for a 21-day pilot: tests for critical rules and flows, a regression checklist, deploy setup, and pilot documentation.

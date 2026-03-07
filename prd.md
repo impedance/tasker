@@ -1,7 +1,9 @@
 # PRD: Tasker — MVP browser-based strategy game for goal execution
 
 Date: 2026-03-07  
-Source: `rfc.md` (RFC / spec)
+System of record: this document (`prd.md`)  
+Epic backlog (system of record): `epics/00-index.md`  
+Note: RFC content was merged into this PRD on 2026-03-07.
 
 ## 0. Context and problem
 
@@ -39,6 +41,21 @@ The user should primarily perceive Tasker as a **single-player strategy campaign
 - Integrations: calendars, push notifications, A/B platform.
 - Toxic reward economies, random loot, and pressure-driven social loops.
 
+### 1.4. Product principles (MVP)
+1) Game progress must be grounded in real progress.  
+2) Reward “good start” and clarification, not only completion.  
+3) Stalling is a game situation (siege), not a moral failure; no punishment loops.  
+4) The game must not require heavy manual input (strict field budget).  
+5) MVP is simple, offline-capable, backend-free.  
+6) It must look/feel like a strategy map, not a to-do list with badges.  
+7) Adaptation is rule-based in MVP.  
+8) Support rhythm, recovery, and reflection — not only conquest.  
+9) No rewards for passive app opens or passive browsing.  
+10) Pressure is ambient and strategic; never punitive (no territory loss, no streak shame).  
+11) Copy is layered: fantasy-first on map/home surfaces, plain language on action screens.  
+12) Sharing is artifact-based and privacy-safe by default; never socially coercive.  
+13) Home must feel like a capital (world-state first), not a dashboard of forms.
+
 ## 2. Users and scenarios
 
 ### 2.1. Primary audience
@@ -50,11 +67,11 @@ The user should primarily perceive Tasker as a **single-player strategy campaign
 1. First run → demo mission (tutorial campaign) → first fog clear → first siege ritual → first hero moment → Chronicle entry → arrive at Capital.
 2. Daily return → Capital shows front situation + hotspots → Daily Orders → execute 1 meaningful move → immediate map feedback → Chronicle updated.
 3. First creation flow → create campaign → pick a clan banner + season name → 1–3 regions → tasks/provinces → region map “comes alive”.
-2. Unclear task → fog of war → fill outcome/first step/entry time → fog is removed.
-3. Stalled task → siege after N days → choose a tactic → resolve siege (or retreat/reschedule).
-4. Commander check-in → Daily Orders → 3 orders (light/medium/main) → do one → world feedback (route + state change) + Chronicle entry.
-5. End of day → war council → 1–3 if-then plans → close the day without chaos.
-6. End of season → Season Debrief (narrative + strategy) → carry forward what worked and drop what should not continue → next season starts.
+4. Unclear task → fog of war → fill outcome/first step/entry time → fog is removed.
+5. Stalled task → siege after N days → choose a tactic → resolve siege (or retreat/reschedule).
+6. Commander check-in → Daily Orders → 3 orders (light/medium/main) → do one → world feedback (route + state change) + Chronicle entry.
+7. End of day → war council → 1–3 if-then plans → close the day without chaos.
+8. End of season → Season Debrief (narrative + strategy) → carry forward what worked and drop what should not continue → next season starts.
 
 ## 3. Success metrics and measurability
 
@@ -128,6 +145,18 @@ The user should primarily perceive Tasker as a **single-player strategy campaign
 ### 4.3. P2 (later)
 - Multiplayer, cloud, mobile app, AI decomposition, procedural maps.
 
+### 4.4. MVP boundaries (explicit)
+Included:
+- Local-only app (1 user), no registration.
+- Demo/tutorial onboarding campaign.
+- Capital (home hub) + Chronicle (memory layer) are P0 (world-state first).
+- Rule-based recommendations (baseline) and optional rule-based adaptation (P1).
+
+Explicitly excluded from MVP:
+- Backend features: accounts, cloud sync, payments, online sharing.
+- Competitive/social loops: feeds, leaderboards, coercive streak mechanics.
+- Complex economy/diplomacy/AI opponents.
+
 ## 5. UX/UI requirements (implementation design contract)
 
 ### 5.1. General principles
@@ -170,6 +199,8 @@ The user should primarily perceive Tasker as a **single-player strategy campaign
 
 ## 6. Game model and rules (MVP)
 
+Conceptual model: the product should make “the path” visible and rewarding — clarification, splitting, starting, and maintaining focus — not just finishing.
+
 ### 6.1. Terms (metaphor)
 - Campaign = project
 - Region = phase / large task
@@ -178,6 +209,8 @@ The user should primarily perceive Tasker as a **single-player strategy campaign
 - Chronicle = campaign history (“chronicle lines”)
 - Fog = ambiguity
 - Siege = stalling/resistance
+- Supply = reducing friction / preparing context
+- Assault = action now (a real step)
 - Commander check-in = short pre-action ritual that captures current state
 - Daily Orders = “daily turn” (3 orders)
 - War council = evening ritual (if-then plans)
@@ -371,12 +404,17 @@ IfThenPlan:
 
 ## 8. Technical architecture (MVP)
 
-Stack (from RFC):
+Stack:
 - React + TypeScript + Vite
 - Zustand (state management)
 - localForage (IndexedDB)
 - SVG map + CSS animations
 - Vitest + React Testing Library; Playwright for E2E
+
+Rationale (MVP):
+- SVG keeps the map in the DOM (native hover/click, cheap state coloring).
+- IndexedDB via localForage avoids `localStorage` size limits and blocking writes.
+- Zustand keeps state wiring lightweight while remaining testable/persistable.
 
 Architecture principles:
 - domain rules and state transitions live in `game/rules` as pure functions;
@@ -387,160 +425,37 @@ Architecture principles:
 Suggested module layout:
 `src/app`, `src/pages`, `src/entities`, `src/features`, `src/game`, `src/storage`, `src/shared`.
 
-## 9. RFC → detailed implementation plan (backlog)
+## 9. Delivery plan and epic backlog (system of record)
 
-Below is an “executable” plan: epics → concrete tasks/deliverables → acceptance criteria.
-Goal: copy into a tracker and deliver within 3 weeks.
+System of record for the detailed “executable” plan (tasks/DoD/acceptance criteria) is the `epics/` folder:
+- Index: `epics/00-index.md`
+- Foundation contracts (meaningful action, time boundary, event schema, guardrails): `epics/EPIC-01-foundation.md`
 
-### 9.1. Epic A — Foundation (product contract)
-Deliverables:
-- agreed entity/state glossary;
-- province state diagram (at least a transition table);
-- MVP screen list and user flows.
-- guardrail rules for healthy engagement and anti-burnout.
-
-Acceptance / DoD:
-- all P0 items are unambiguous (what counts as a meaningful move; what updates `updatedAt`).
-
-### 9.2. Epic B — Project bootstrap
-Tasks:
-- Vite+React+TS project, basic layout, minimal router.
-- Zustand store skeleton (optional devtools).
-- localForage wired with a storage healthcheck.
-- Vitest+RTL, Playwright, CI.
-- Deploy preview.
-
-Acceptance / DoD:
-- unit tests pass; E2E smoke passes locally/in CI.
-- app opens and renders the start screen.
-
-### 9.3. Epic C — Domain model + persistence
-Tasks:
-- TS entity types.
-- CRUD repositories + minimal relationship queries.
-- Storage schema versioning + migrations.
-- JSON export/import.
-
-Acceptance / DoD:
-- Refresh does not lose data.
-- Exported JSON can be imported back without errors (including schema version).
-
-### 9.4. Epic D — Navigation and map (SVG)
-Tasks:
-- campaign map (campaign territories).
-- project map: clickable regions/provinces.
-- binding entities to SVG id/data attributes.
-- status colors + hover/selected + transitions.
-- responsive scaling.
-
-Acceptance / DoD:
-- click a province → open province screen.
-- statuses are distinguishable without text.
-
-### 9.5. Epic E — Campaign/region/province creation
-Tasks:
-- create forms (minimal fields) + validation.
-- quick-add multiple provinces.
-- auto-start province state:
-  - missing clarity fields → `fog`,
-  - otherwise → `ready`.
-
-Acceptance / DoD:
-- first campaign flow in <2 minutes without bugs.
-
-### 9.6. Epic F — Rule engine: fog, progress, transitions
-Tasks:
-- implement `fog` rule (required fields).
-- implement `progressStage` and stage advancement rules.
-- single transition function (e.g., `applyAction(state, action)`).
-- domain-level input validation.
-
-Acceptance / DoD:
-- all transitions happen only through rules; UI never sets `state` directly.
-
-### 9.7. Epic G — Siege + tactics
-Tasks:
-- siege trigger: “no movement for N days” + create `SiegeEvent`.
-- siege UI: tactic selection + short descriptions.
-- 5 tactics implemented as actions with effects (clarify/decompose/retreat/log).
-- log tactic effectiveness (which tactics lead to progress).
-
-Acceptance / DoD:
-- a stalled province enters `siege` automatically.
-- each tactic produces the expected data changes and exits `siege` (or goes `retreated`).
-
-### 9.8. Epic H — Daily loop (Daily Orders + War council)
-Tasks:
-- daily move screen (3 recommendations).
-- algorithm for selecting 3 moves (rule-based v1).
-- war council screen + CRUD for if-then plans.
-- daily move history (P1) or at least last N (MVP minimum).
-
-Acceptance / DoD:
-- user sees 3 concrete daily suggestions.
-- if-then plans persist and are visible next day.
-
-### 9.9. Epic I — Rule-based adaptation (P1 / optional)
-Tasks:
-- profile signals storage (`frictionStats`, emotions, tactic success, active time).
-- 5–8 recommendation rules.
-- prioritization + “why” explanation.
-Notes:
-- Baseline (non-personalized) recommendations + “why” explanation live in Epic H.
-
-Acceptance / DoD:
-- for the same task set, recommendations differ after history accumulates.
-
-### 9.10. Epic J — Season (21 days)
-Tasks:
-- Season entity: start/end, dayNumber.
-- auto-start new season on completion.
-- weekly focus hints (week 1/2/3) as copy (not a complex mechanic).
-- season summary: aggregates and progress.
-
-Acceptance / DoD:
-- user sees current season and a summary after day 21.
-
-### 9.11. Epic K — Feedback + guardrails (progress-first) (P1 / optional)
-Tasks:
-- progress-first feedback model (no points economy in MVP by default).
-- a lightweight “meaningful day” indicator (no harsh punishment).
-- anti-abuse soft warnings:
-  - no progress without clarity,
-  - over-planning detection (splitting without starting),
-  - too many micro-tasks → suggest merging.
-- UI copy: positive, non-toxic feedback.
-
-Acceptance / DoD:
-- no celebration/reward is shown for passive browsing or app opens without meaningful actions.
-
-### 9.12. Epic L — Instrumentation (local analytics for pilot) (P1 / optional)
-Tasks:
-- event schema.
-- local event log + export (JSON/CSV).
-- optional debug event viewer.
-
-Acceptance / DoD:
-- events can be exported and used to compute pilot metrics.
-
-### 9.13. Epic M — Testing/QA + Release
-Tasks:
-- unit: rule engine, feedback/guardrails, transitions.
-- integration: CRUD + migrations + import/export.
-- E2E: onboarding → create campaign → create province → clarify → siege → tactic → daily move → season summary.
-- release checklist: production build, deploy, README, user guide, known limitations, feedback form.
-
-Acceptance / DoD:
-- critical flows are stable; refresh never loses data.
+Epic map (high level):
+- Product foundation contract: `epics/EPIC-01-foundation.md`
+- Tech bootstrap: `epics/EPIC-02-bootstrap.md`
+- Domain + persistence: `epics/EPIC-03-domain-persistence.md`
+- Map UI + navigation: `epics/EPIC-04-map-ui.md`
+- Creation flows: `epics/EPIC-05-creation-flows.md`
+- Rule engine: `epics/EPIC-06-rule-engine.md`
+- Siege + tactics: `epics/EPIC-07-siege-tactics.md`
+- Daily loop (Daily Orders + War council): `epics/EPIC-08-daily-loop.md`
+- Adaptation (P1): `epics/EPIC-09-adaptation.md`
+- Season + debrief: `epics/EPIC-10-season.md`
+- Scoring/feedback/anti-abuse: `epics/EPIC-11-scoring-feedback.md`
+- Instrumentation (P1): `epics/EPIC-12-instrumentation.md`
+- QA/release: `epics/EPIC-13-qa-release.md`
+- Safe sharing/export artifacts (P1): `epics/EPIC-14-engagement-sharing.md`
+- World shell (Capital/Chronicle/theme): `epics/EPIC-15-world-shell.md`
 
 ## 10. Weekly execution plan (3 weeks)
 
 ### Week 1 — foundation and map (critical path)
 Deliverables:
-- bootstrap + base navigation.
-- domain + persistence with import/export.
-- campaign map + project map.
-- create flows.
+- EPIC-02 bootstrap + base navigation.
+- EPIC-03 domain + persistence with import/export.
+- EPIC-04 campaign/region maps + navigation.
+- EPIC-05 create flows.
 
 Week 1 exit (DoD):
 - user creates campaign/region/province and sees them on a map.
@@ -548,10 +463,9 @@ Week 1 exit (DoD):
 
 ### Week 2 — core mechanics
 Deliverables:
-- rule engine: fog + transitions + progress.
-- siege + 5 tactics.
-- feedback v1 (progress-first, no points economy) + basic copy.
-- province screen: actions and progress logic.
+- EPIC-06 rule engine: fog + transitions + stage progress.
+- EPIC-07 siege + 5 tactics.
+- EPIC-11 feedback/anti-abuse guardrails (baseline).
 
 Week 2 exit (DoD):
 - unclear tasks show as fog and can be clarified.
@@ -559,11 +473,11 @@ Week 2 exit (DoD):
 
 ### Week 3 — daily rhythm and adaptation
 Deliverables:
-- daily move + war council.
-- season loop + season summary.
-- optional: rule-based adaptation v1 (if time allows).
-- optional: instrumentation for pilot (if time allows).
-- tests/polish/deploy.
+- EPIC-08 daily move + war council.
+- EPIC-10 season loop + season summary + debrief.
+- Optional: EPIC-09 adaptation v1 (P1).
+- Optional: EPIC-12 instrumentation for pilot (P1).
+- EPIC-13 tests/polish/release checklist.
 
 Week 3 exit (DoD):
 - product is ready for a 21-day pilot: daily ritual, season, event export.
@@ -583,3 +497,17 @@ Week 3 exit (DoD):
 3. Template-based decomposition (no AI) in MVP?
 4. Pomodoro timer in MVP (may distract from core hypothesis)?
 5. Local reminders (if any) without push notifications?
+
+## 13. Experimental hypotheses (to validate in the pilot)
+1) Stage-based progress increases daily returns vs binary done/not-done.  
+2) Siege rituals reduce churn after missed days and lower restart friction.  
+3) Daily Orders increases the chance of 1 meaningful action/day.  
+4) War council (if-then plans) reduces next-day chaos and helps restart.  
+5) Rule-based adaptation improves starts vs generic hints (P1).
+
+## 14. Release recommendation (pilot)
+- v0.1: one map template, manual creation, local storage, daily loop, season + debrief, import/export.
+- v0.2: improved adaptation, extended stats, optional local instrumentation, safe share cards (P1).
+
+## 15. Product pitch (one paragraph)
+Tasker is a browser strategy game for personal project execution: real tasks become provinces on a map, and procrastination becomes a game situation — fog of war, sieges, and supply issues — solved by short rituals and tactics. The MVP proves that a map-first UI, anti-procrastination loops, and a 21-day season can make task execution more engaging and more sustainable than a traditional list.

@@ -4,7 +4,7 @@
 **Priority:** `P0`  
 **Status:** `draft`  
 **Owner:** `<TBD>`  
-**PRD/RFC reference:** `prd.md` (Siege + tactics) / `rfc.md` (mechanics)
+**PRD reference:** `prd.md` (Siege + tactics)
 
 ## 1) Objective (Outcome)
 Implement “siege” as a gentle mode for stalled tasks: auto-trigger, tactic selection UI, tactic effects, and logging.

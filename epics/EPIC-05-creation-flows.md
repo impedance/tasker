@@ -4,7 +4,7 @@
 **Priority:** `P0`  
 **Status:** `draft`  
 **Owner:** `<TBD>`  
-**PRD/RFC reference:** `prd.md` (MVP scope, creation flows) / `rfc.md` (epic 5)
+**PRD reference:** `prd.md` (MVP scope, creation flows)
 
 ## 1) Objective (Outcome)
 Enable fast creation so a user can create the first campaign/regions/provinces in under 2 minutes, without feeling like they are filling out a CRM.

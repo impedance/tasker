@@ -4,7 +4,7 @@
 **Priority:** `P1`  
 **Status:** `draft`  
 **Owner:** `<TBD>`  
-**PRD/RFC reference:** `prd.md` (Adaptation) / `rfc.md` (rule examples)
+**PRD reference:** `prd.md` (Adaptation)
 
 ## 1) Objective (Outcome)
 Personalize hints and daily/tactic prioritization using rule-based adaptation grounded in the user’s friction history.
@@ -48,7 +48,7 @@ Notes:
 
 ### T3. Implement recommendation rules v1
 **Steps:**
-1) Implement RFC-inspired rules: ambiguity → scout; heavy tasks stall → engineer; raid success → boost raids; morning success → schedule main move; no deadlines → suggest soft deadline; low energy + low time → recovery/light move.
+1) Implement PRD-aligned rules: ambiguity → scout; heavy tasks stall → engineer; raid success → boost raids; morning success → schedule main move; no deadlines → suggest soft deadline; low energy + low time → recovery/light move.
 2) Implement rule priority/scoring.
 3) Generate short “why” strings.
 **Acceptance criteria:**

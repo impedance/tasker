@@ -4,7 +4,7 @@
 **Priority:** `P0`  
 **Status:** `draft`  
 **Owner:** `<TBD>`  
-**PRD/RFC reference:** `prd.md` (Data & storage) / `rfc.md` (entities, persistence)
+**PRD reference:** `prd.md` (Data & storage)
 
 ## 1) Objective (Outcome)
 Implement domain types and reliable local persistence (CRUD + import/export + migrations) so data survives refresh and supports future schema evolution.
@@ -38,7 +38,7 @@ Implement domain types and reliable local persistence (CRUD + import/export + mi
 1) Create entity model files (e.g., `entities/*/model.ts`).
 2) Add minimal runtime validation strategy (library or custom).
 **Acceptance criteria:**
-- Types cover PRD/RFC fields, including world shell entities (Capital/Chronicle) and adjacency/role fields.
+- Types cover PRD fields, including world shell entities (Capital/Chronicle) and adjacency/role fields.
 **DoD:**
 - All entities are typed and exported.
 **Estimate:** `L`

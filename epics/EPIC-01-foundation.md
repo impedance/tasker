@@ -4,13 +4,13 @@
 **Priority:** `P0`  
 **Status:** `draft`  
 **Owner:** `<TBD>`  
-**PRD/RFC reference:** `prd.md` / `rfc.md`
+**PRD reference:** `prd.md`
 
 ## 1) Objective (Outcome)
 Make the product rules and definitions unambiguous so the team can implement the MVP without guessing, and QA can accept work against testable criteria.
 
 ## 2) Context
-- `rfc.md` contains many rules and terms, but some need to be turned into an explicit contract (what counts as movement, day boundaries, what is “meaningful”).
+- `prd.md` defines MVP rules and terms, but some need to be turned into an explicit contract (what counts as movement, day boundaries, what is “meaningful”).
 - Without this, implementation will diverge (rule engine, siege, scoring, metrics).
 
 ## 3) Scope
@@ -41,7 +41,7 @@ Make the product rules and definitions unambiguous so the team can implement the
 ### T1. Glossary of terms and entities
 **Description:** extract terms and write strict definitions (Campaign/Region/Province, fog/siege, commander check-in, daily move, war council, integration review, progressStage).  
 **Steps:**
-1) Extract terms from `prd.md`/`rfc.md`.
+1) Extract terms from `prd.md`.
 2) For each term: 1–2 sentence definition + examples (1 valid, 1 not-valid).
 3) Define minimum required fields per entity (what is needed for MVP).
 **Acceptance criteria:**

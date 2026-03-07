@@ -2,6 +2,7 @@
 
 Template: `PLANS/plan.md`.
 Shared contracts: `epics/EPIC-01-foundation.md` (Appendix A/B).
+Product spec (system of record): `prd.md`.
 
 - `epics/EPIC-01-foundation.md` — product foundation (terms/rules/flows)
 - `epics/EPIC-02-bootstrap.md` — tech setup + project skeleton

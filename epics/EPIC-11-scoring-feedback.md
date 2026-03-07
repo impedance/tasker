@@ -4,7 +4,7 @@
 **Priority:** `P0`  
 **Status:** `draft`  
 **Owner:** `<TBD>`  
-**PRD/RFC reference:** `prd.md` (Scoring + anti-abuse) / `rfc.md` (progression rules)
+**PRD reference:** `prd.md` (Scoring + anti-abuse)
 
 ## 1) Objective (Outcome)
 Deliver MVP game feedback without toxicity: progress-first feedback for meaningful actions, Hero Moments Lite (capped), and basic anti-abuse heuristics.
