@@ -80,3 +80,24 @@ Notes:
 **DoD:**
 - Map works on mobile (baseline).
 **Estimate:** `M`
+
+### T6. Campaign hub panel (“Capital”) (P1 / optional)
+**Goal:** add a lightweight “home/hub” UI surface that increases world attachment without introducing new mechanics.
+
+**Notes:**
+- This is a UI metaphor only. It must not grant progress or rewards by itself.
+- It should not add required input or a “dashboard to maintain”.
+
+**Suggested contents (minimal):**
+- season day number + meaningful days (read-only);
+- a single “next suggested move” CTA (links to Daily move);
+- quick links to season summary / export (if available).
+
+**Dependencies:**
+- EPIC-10 (season dayNumber / summary), EPIC-08 (Daily move).
+
+**Acceptance criteria:**
+- The panel does not add friction to the core map interactions.
+- No rewards/prompts are shown without a meaningful action (EPIC-01 Appendix A).
+
+**Estimate:** `S`

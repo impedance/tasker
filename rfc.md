@@ -63,6 +63,7 @@ Secondary:
 8) The game should support rhythm, recovery, and reflection, not only conquest.  
 9) No reward should be granted for passive app opens or empty engagement.  
 10) Sharing must be privacy-safe and artifact-based, not socially coercive.
+11) Copy must be layered: fantasy-first terms on map/home surfaces, but plain language on action screens (outcome/first step/entry time). Never hide the real-world meaning once the user is inside an action.
 
 ## 6. Conceptual model
 
@@ -92,7 +93,11 @@ Recommended:
 - Vitest + RTL (unit/integration), Playwright (E2E)
 - Deploy via Vercel/Netlify/GitHub Pages
 
-Rationale: SVG is fast to iterate and keeps complexity low. If later needed, the map can be moved to Phaser.
+Rationale:
+- SVG keeps the map in the DOM: native click/hover events, CSS class-based state coloring, and cheap HTML tooltips.
+- localForage (IndexedDB) avoids `localStorage` size limits and blocking writes; persistence stays async and resilient.
+- Zustand keeps state wiring lightweight (fewer abstractions than Redux) while still being testable and persistence-friendly.
+- If later needed, the map layer can be upgraded (Canvas/Phaser) without rewriting domain rules.
 
 ## 8. MVP boundaries
 
@@ -102,12 +107,15 @@ Included:
 - Creation of campaigns/regions/provinces.
 - Province states (fog/siege/in_progress/captured/etc).
 - Anti-procrastination tactics (5).
-- Rule-based adaptation v1.
+- Baseline rule-based recommendations v1 (non-personalized).
 - 21-day season loop + daily ritual.
 - Basic stats.
 - JSON import/export.
 
 Backlog:
+- Chronicle (local timeline of meaningful actions and season highlights).
+- “Capital” hub panel on the campaign map (UI metaphor only; no new mechanics).
+- Archetype-based theming (“faction identity”) without adding new systems.
 - Multiplayer/alliances, cloud sync, mobile app.
 - AI decomposition, procedural maps.
 - Complex economy, avatars, diplomacy, PvP.
@@ -116,7 +124,7 @@ Backlog:
 
 ## 9. Core user flows
 
-1) First run: onboarding → create campaign → add 1–3 regions → add tasks → see the map filled.  
+1) First run: onboarding → start tutorial campaign (or create campaign) → add 1–3 regions → add tasks → see the map filled.  
 2) Unclear task: open province → fog → fill outcome/first step/entry time → fog removed.  
 3) Stalled task: no updates N days → siege → pick a tactic → task becomes actionable or is retreated/rescheduled.  
 4) Commander check-in → daily turn: see 3 recommended actions (light/medium/main) → do one → see map feedback.  
@@ -231,7 +239,7 @@ At the end of the 21-day season, present a short review flow:
 - what to release.
 
 ### 12.8. Rewards (MVP)
-Simple: influence points, intel, supplies, morale/streaks. Rewards only for real steps (or meaningful clarification).
+Progress-first: progressStage changes + short feedback copy + a lightweight “meaningful day” marker. No points economy by default; rewards only for real steps (or meaningful clarification).
 
 ### 12.9. Hero moments (P1)
 Short celebratory feedback is allowed only after meaningful actions and must never replace task progress.
@@ -313,12 +321,10 @@ Constraints:
 Suggested folders:
 `src/app`, `src/pages`, `src/entities`, `src/features`, `src/game`, `src/storage`, `src/shared`.
 
-## 18. Progression rules (scoring)
+## 18. Progression rules (feedback-first)
 
-- Clarify points
-- Momentum points
-- Capture points
-- Recovery points
+- MVP: stage-based progress + meaningful-day marker.
+- Optional (v0.2+): points buckets (clarify/momentum/capture/recovery) if needed for analytics or richer feedback.
 
 Streak:
 - “meaningful-day streak” (>=1 meaningful move per day)
@@ -374,10 +380,10 @@ See detailed epic breakdown in `epics/00-index.md`.
 ## 23. Development priorities
 
 P0:
-bootstrap, local storage, maps, creation, fog, siege + 5 tactics, daily move, war council, season, adaptation v1, import/export.
+bootstrap, local storage, maps, creation, onboarding (demo/tutorial campaign), fog, siege + 5 tactics, daily move, war council, season, import/export, baseline rule-based recommendations + “why”.
 
 P1:
-animations, move history, extended stats, better onboarding.
+animations, move history, extended stats, rule-based adaptation (history-driven personalization), feedback/guardrails polish, local instrumentation (if time allows).
 
 P2:
 multiplayer, AI decomposition, procedural maps, cross-device sync.
@@ -385,8 +391,8 @@ multiplayer, AI decomposition, procedural maps, cross-device sync.
 ## 24. 3-week execution plan (rough)
 
 Week 1: foundation + persistence + maps + creation + navigation.  
-Week 2: core mechanics (fog/siege/tactics/scoring/province screen).  
-Week 3: daily loop + war council + season + adaptation + tests + deploy.
+Week 2: core mechanics (fog/siege/tactics/feedback/province screen).  
+Week 3: daily loop + war council + season + tests + deploy (optional: adaptation + instrumentation).
 
 ## 25. Risks
 
@@ -400,7 +406,7 @@ Week 3: daily loop + war council + season + adaptation + tests + deploy.
 
 - Dark mode in MVP?
 - Faction/theme customization?
-- Demo project in onboarding?
+- Demo/tutorial campaign in onboarding: confirm exact content + skip/reset behavior.
 - Template-based decomposition (no AI)?
 - Pomodoro timer in MVP?
 - Local reminders (no push)?
@@ -408,7 +414,7 @@ Week 3: daily loop + war council + season + adaptation + tests + deploy.
 ## 27. Release recommendation
 
 v0.1: one campaign map type, one project map type, manual creation, one theme, local storage, working daily loop.  
-v0.2: improved adaptation, extended stats, templates, better onboarding.
+v0.2: improved adaptation, extended stats, templates, optional local instrumentation.
 
 ## 28. Product pitch (final)
 

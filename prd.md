@@ -15,6 +15,9 @@ MVP hypothesis: if we replace a to-do list with a strategic map of projects and 
 
 ## 1. Goals and non-goals
 
+### 1.0. Primary experiential goal
+The user should primarily perceive Tasker as a strategy game about campaigns, territories, fog, and sieges; real task progress is the fuel that advances the world, but the first impression is the world.
+
 ### 1.1. MVP goals (product)
 - Validate the “progress map instead of task list” mechanic.
 - Increase the likelihood of starting stalled tasks (entering action).
@@ -76,11 +79,19 @@ MVP hypothesis: if we replace a to-do list with a strategic map of projects and 
 - “It’s more interesting to return”
 - “It feels more like a game than a task list”
 
+### 3.4. Experience KPIs (research prompts)
+- `feels_like_a_game_score`
+- `desire_to_return_for_world_state`
+- `hero_moment_recall`
+- `world_attachment_score`
+- `started_within_24h_after_move` (already tracked in behavioral metrics)
+
 ## 4. MVP scope (priorities)
 
 ### 4.1. P0 (must-have)
 - SPA, offline, local storage (IndexedDB/localForage), JSON import/export.
 - Campaign map and project map in SVG (clickable regions/provinces).
+- First-run onboarding with a demo/tutorial campaign (fast “first win”, skippable).
 - CRUD: campaigns/regions/provinces.
 - Province states + transitions via rule engine.
 - Fog-of-war (clarity: outcome/first step/entry time).
@@ -88,18 +99,21 @@ MVP hypothesis: if we replace a to-do list with a strategic map of projects and 
 - Stage-based province progress (not binary).
 - Daily move (3 recommendations) + War council (if-then plans).
 - Season (21 days): season day + season summary.
-- Rule-based adaptation v1 (signal collection + “why” explanation).
+- Baseline rule-based recommendations v1 + “why” explanation (non-personalized).
 
 ### 4.2. P1 (nice-to-have if time allows)
 - Capture/fog animations and solid feedback copy.
 - Daily move history.
 - Extended season stats.
-- Better onboarding (demo project/hints).
+- Rule-based adaptation v1 (history-driven personalization).
 - Hero moments for meaningful milestones.
 - Season integration review.
+- Chronicle (local timeline of meaningful actions and season highlights).
 - Privacy-safe shareable map cards.
+- “Capital” hub panel on the campaign map (UI metaphor only; no new mechanics).
 - Tactics codex / personal strategy insights.
 - Campaign archetypes (Foundation / Drive / Joy / Neutral).
+- Archetype-based theming (“faction identity”) without adding new systems.
 
 ### 4.3. P2 (later)
 - Multiplayer, cloud, mobile app, AI decomposition, procedural maps.
@@ -113,6 +127,7 @@ MVP hypothesis: if we replace a to-do list with a strategic map of projects and 
 - Every “stalled” task should lead to a short ritual (siege → tactic).
 - The product should reinforce rhythm and recovery, not only pressure to finish.
 - No guilt/FOMO mechanics and no reward for app opens without meaningful action.
+- Copy layering rule: map/home surfaces use fantasy-first terms; action screens use plain language for clarity fields (outcome / first step / entry time). Never hide the real-world meaning once the user is inside an action.
 - Rituals must stay short by design (see `epics/EPIC-01-foundation.md`, Appendix A).
 - Prefer “do” over “plan”: apply the 10/90 heuristic to prevent endless planning (see `epics/EPIC-01-foundation.md`, Appendix A).
 
@@ -418,11 +433,13 @@ Acceptance / DoD:
 - user sees 3 concrete daily suggestions.
 - if-then plans persist and are visible next day.
 
-### 9.9. Epic I — Rule-based adaptation
+### 9.9. Epic I — Rule-based adaptation (P1 / optional)
 Tasks:
 - profile signals storage (`frictionStats`, emotions, tactic success, active time).
 - 5–8 recommendation rules.
 - prioritization + “why” explanation.
+Notes:
+- Baseline (non-personalized) recommendations + “why” explanation live in Epic H.
 
 Acceptance / DoD:
 - for the same task set, recommendations differ after history accumulates.
@@ -437,10 +454,10 @@ Tasks:
 Acceptance / DoD:
 - user sees current season and a summary after day 21.
 
-### 9.11. Epic K — Scoring + feedback + anti-abuse
+### 9.11. Epic K — Feedback + guardrails (progress-first) (P1 / optional)
 Tasks:
-- scoring model: clarify/momentum/capture/recovery points.
-- streaks without harsh punishment.
+- progress-first feedback model (no points economy in MVP by default).
+- a lightweight “meaningful day” indicator (no harsh punishment).
 - anti-abuse soft warnings:
   - no progress without clarity,
   - over-planning detection (splitting without starting),
@@ -448,9 +465,9 @@ Tasks:
 - UI copy: positive, non-toxic feedback.
 
 Acceptance / DoD:
-- points are granted only for meaningful actions (not for just opening the app).
+- no celebration/reward is shown for passive browsing or app opens without meaningful actions.
 
-### 9.12. Epic L — Instrumentation (local analytics for pilot)
+### 9.12. Epic L — Instrumentation (local analytics for pilot) (P1 / optional)
 Tasks:
 - event schema.
 - local event log + export (JSON/CSV).
@@ -461,7 +478,7 @@ Acceptance / DoD:
 
 ### 9.13. Epic M — Testing/QA + Release
 Tasks:
-- unit: rule engine, scoring, transitions.
+- unit: rule engine, feedback/guardrails, transitions.
 - integration: CRUD + migrations + import/export.
 - E2E: onboarding → create campaign → create province → clarify → siege → tactic → daily move → season summary.
 - release checklist: production build, deploy, README, user guide, known limitations, feedback form.
@@ -486,7 +503,7 @@ Week 1 exit (DoD):
 Deliverables:
 - rule engine: fog + transitions + progress.
 - siege + 5 tactics.
-- scoring v1 + basic feedback.
+- feedback v1 (progress-first, no points economy) + basic copy.
 - province screen: actions and progress logic.
 
 Week 2 exit (DoD):
@@ -497,8 +514,8 @@ Week 2 exit (DoD):
 Deliverables:
 - daily move + war council.
 - season loop + season summary.
-- rule-based adaptation v1.
-- instrumentation for pilot.
+- optional: rule-based adaptation v1 (if time allows).
+- optional: instrumentation for pilot (if time allows).
 - tests/polish/deploy.
 
 Week 3 exit (DoD):
@@ -515,7 +532,7 @@ Week 3 exit (DoD):
 ## 12. Open questions (decide before/early in implementation)
 
 1. Dark mode in MVP (or P1)?
-2. Demo project during onboarding (faster learning vs extra work)?
+2. Demo/tutorial campaign during onboarding: confirm exact content + skip/reset behavior.
 3. Template-based decomposition (no AI) in MVP?
 4. Pomodoro timer in MVP (may distract from core hypothesis)?
 5. Local reminders (if any) without push notifications?

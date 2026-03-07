@@ -15,6 +15,7 @@ Add a second engagement layer that increases return motivation without toxicity:
 - private/public-safe export modes;
 - links from season summary and hero moments into export flows;
 - minimum design contract for recovery-friendly celebratory surfaces.
+- a local Chronicle view (timeline of meaningful actions and season highlights), derived from existing events (no new mechanics).
 
 **Out of scope:**
 - online social graph;
@@ -27,6 +28,7 @@ Add a second engagement layer that increases return motivation without toxicity:
 - Local render/export flow for cards.
 - Privacy-safe defaults.
 - Entry points from season summary / hero moments / tactics codex.
+- Chronicle view IA + minimal implementation plan (P1).
 
 ## 5) Dependencies
 - EPIC-03 for `ShareCard` persistence.
@@ -80,6 +82,24 @@ Add a second engagement layer that increases return motivation without toxicity:
 **DoD:**
 - Users can reach export from at least two meaningful contexts.
 - Export prompts respect the prompt budget in EPIC-01 Appendix A.
+**Estimate:** `M`
+
+### T5. Chronicle view (local-only)
+**Goal:** provide a lightweight “world memory” surface that increases return motivation without adding grind or requiring extra input.
+
+**Inputs (preferred):**
+- event log / meaningful-action markers (EPIC-01 Appendix B; implemented in EPIC-12).
+- season boundaries and summary (EPIC-10).
+
+**Steps:**
+1) Define chronicle entry types (e.g., fog cleared, siege resolved, first start, high-effort capture, season end).
+2) Implement a simple timeline screen (reverse chronological) with strict privacy rules.
+3) Add entry points from season summary and (optionally) from the campaign “Capital” hub panel (EPIC-04 T6).
+
+**Acceptance criteria:**
+- Chronicle contains only derived/structured data in public-safe contexts (no raw task text by default).
+- No chronicle prompts appear before action; it’s discoverable but not spammy (EPIC-01 Appendix A).
+
 **Estimate:** `M`
 
 ## 7) Risks and mitigations
