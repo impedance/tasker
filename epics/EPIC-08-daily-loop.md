@@ -1,22 +1,22 @@
-# EPIC-08 — Daily move and war council loops
+# EPIC-08 — Daily Orders and War Council loops
 
 **ID:** `EPIC-08`  
 **Priority:** `P0`  
 **Status:** `draft`  
 **Owner:** `<TBD>`  
-**PRD/RFC reference:** `prd.md` (Daily move, War council) / `rfc.md` (loops)
+**PRD/RFC reference:** `prd.md` (Daily Orders, War council) / `rfc.md` (loops)
 
 ## 1) Objective (Outcome)
-Add daily ritual loops: start-of-day “Daily move” (3 suggestions) and end-of-day “War council” (if-then plans).
+Add daily ritual loops: start-of-day “Daily Orders” (3 orders: light/medium/main) and end-of-day “War council” (if-then plans).
 
 ## 3) Scope
 **In scope:**
-- Commander check-in before daily move;
-- Daily move screen;
+- Commander check-in before Daily Orders;
+- Daily Orders screen;
 - algorithm to pick 3 recommendations v1 (rule-based, baseline/non-personalized);
 - War council screen;
 - If-then plan CRUD;
-- Daily move history (minimum: last N).
+- Daily Orders history (minimum: last N).
 
 ## 6) Work breakdown
 
@@ -33,7 +33,7 @@ Add daily ritual loops: start-of-day “Daily move” (3 suggestions) and end-of
 - Events match EPIC-01 Appendix B (`checkin_started`, `checkin_completed`).
 **Estimate:** `M`
 
-### T1. Daily move screen
+### T1. Daily Orders screen
 **Steps:**
 1) UI: 3 cards (raid/supply/scout/assault/retreat) with durations.
 2) “Do it” creates a DailyMove and applies the corresponding domain action.
@@ -68,7 +68,7 @@ Add daily ritual loops: start-of-day “Daily move” (3 suggestions) and end-of
 - CRUD works.
 **Estimate:** `L`
 
-### T4. Daily move history (minimum)
+### T4. Daily Orders history (minimum)
 **Steps:**
 1) List last N moves (date, province, type, duration).
 2) Optional: filter by date.

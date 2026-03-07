@@ -1,11 +1,11 @@
 # RFC: Tasker — MVP browser-based strategy game for goal execution
 
-Date: 2026-03-06  
+Date: 2026-03-07  
 Original (Russian): `rfc.ru.md`
 
 ## 1. Summary
 
-Build an MVP browser-based strategy game where the user’s real projects and tasks become a conquest map. The product should not only visualize progress but actively help users overcome procrastination, ambiguity, overwhelm, and emotional resistance.
+Build an MVP browser-based **single-player strategy campaign** where the user’s real projects and tasks become provinces on a conquest map. The product should not only visualize progress but actively help users overcome procrastination, ambiguity, overwhelm, and emotional resistance — while making the world-state desirable on its own (Capital → front situation → map).
 
 Working idea: the user “conquers” territories by doing real tasks, decomposing stalled projects, and taking small entry steps. The game must feel like a strategy game, but almost every meaningful game action must map to a real-world action on a task.
 
@@ -64,6 +64,8 @@ Secondary:
 9) No reward should be granted for passive app opens or empty engagement.  
 10) Sharing must be privacy-safe and artifact-based, not socially coercive.
 11) Copy must be layered: fantasy-first terms on map/home surfaces, but plain language on action screens (outcome/first step/entry time). Never hide the real-world meaning once the user is inside an action.
+12) Pressure must be ambient and strategic, never punitive (no territory loss, no snowball punishment).
+13) Home must feel like a **capital**, not a dashboard: it exists to make the campaign state legible and desirable, not to add forms.
 
 ## 6. Conceptual model
 
@@ -78,7 +80,7 @@ Secondary:
 - Morale = emotional state
 - Commander check-in = pre-action ritual
 - War council = end-of-day planning ritual
-- Integration review = end-of-season reflection ritual
+- Season Debrief = end-of-season reflection ritual
 
 ### Meaning
 The product should make “the path” visible and rewarding: clarification, splitting, starting, maintaining focus—not just finishing.
@@ -103,9 +105,16 @@ Rationale:
 
 Included:
 - Local-only app, no registration, 1 user.
-- Campaign map + project map (regions + provinces).
+- Shogunate / Warring Provinces fantasy layer (stylized; not historical reconstruction).
+- Demo mission (tutorial campaign) onboarding.
+- Capital Lite (default daily entry hub).
+- Chronicle Lite (human-readable campaign history) as a first-class screen.
+- Hero Moments Lite (capped celebratory overlays after meaningful action).
+- Seasonal fantasy naming (auto-generated + editable).
+- Campaign map + region map (regions + provinces) in SVG.
 - Creation of campaigns/regions/provinces.
 - Province states (fog/siege/in_progress/captured/etc).
+- Province roles (lightweight flags) and role icons.
 - Anti-procrastination tactics (5).
 - Baseline rule-based recommendations v1 (non-personalized).
 - 21-day season loop + daily ritual.
@@ -113,9 +122,9 @@ Included:
 - JSON import/export.
 
 Backlog:
-- Chronicle (local timeline of meaningful actions and season highlights).
-- “Capital” hub panel on the campaign map (UI metaphor only; no new mechanics).
-- Archetype-based theming (“faction identity”) without adding new systems.
+- Privacy-safe share cards and export artifacts.
+- Richer Chronicle (filters, recap cards).
+- Richer capital cosmetics (purely visual).
 - Multiplayer/alliances, cloud sync, mobile app.
 - AI decomposition, procedural maps.
 - Complex economy, avatars, diplomacy, PvP.
@@ -124,20 +133,27 @@ Backlog:
 
 ## 9. Core user flows
 
-1) First run: onboarding → start tutorial campaign (or create campaign) → add 1–3 regions → add tasks → see the map filled.  
+1) First run: demo mission (tutorial campaign) → clear first fog → resolve first siege ritual → first hero moment → Chronicle entry → arrive at Capital.  
 2) Unclear task: open province → fog → fill outcome/first step/entry time → fog removed.  
 3) Stalled task: no updates N days → siege → pick a tactic → task becomes actionable or is retreated/rescheduled.  
-4) Commander check-in → daily turn: see 3 recommended actions (light/medium/main) → do one → see map feedback.  
+4) Daily return: Capital → Daily Orders (3 orders: light/medium/main) → do one → see map feedback (route + state change) → Chronicle updated.  
 5) End of day: war council → write 1–3 if-then plans → close the day.  
-6) End of season: integration review → carry forward useful patterns and drop stale fronts.
+6) End of season: Season Debrief (narrative + strategy) → carry forward useful patterns and drop stale fronts → start next season.
 
-## 10. Data entities (MVP)
+## 10. Data entities (MVP, plus optional P1)
 
 Campaign:
 - id, title, description, colorTheme, createdAt, seasonId, status, regionIds[], archetype?
+- factionId?, factionName?, bannerStyle?
+- seasonFantasyName?
+- chronicleEnabled (default true)
+- capitalProvinceId? (or capitalRegionId?)
 
 Region:
 - id, campaignId, title, description, order, provinceIds[], progressPercent, status
+- mapRole? (core/frontier/archive/supply/neutral)
+- pressureLevel?
+- adjacentRegionIds[]?
 
 Province:
 - id, regionId, title, description
@@ -145,6 +161,12 @@ Province:
 - dueDate?, effortLevel(1–5), clarityLevel(1–5), emotionalFrictionType
 - state, progressStage, resistanceTags[]
 - updatedAt, createdAt
+- provinceRole? (standard/fortress/watchtower/archive/depot)
+- adjacentProvinceIds[]
+- frontPressureLevel?
+- lastMeaningfulActionAt?
+- heroMomentShownAt?
+- isHotspot?
 
 DailyMove:
 - id, date, provinceId, moveType (raid/supply/scout/assault/retreat), durationMinutes, result
@@ -168,11 +190,17 @@ SeasonReview:
 HeroMoment:
 - id, type, provinceId?, seasonId, triggeredAt, shareCardId?
 
-ShareCard:
+ShareCard (P1 / optional):
 - id, type, seasonId?, generatedAt, privacyMode, payload
 
 IfThenPlan:
 - id, provinceId, triggerText, actionText, scheduledFor
+
+ChronicleEntry:
+- id, campaignId, seasonId?, provinceId?, regionId?, entryType, title, body?, createdAt, importance (low/medium/high)
+
+CapitalState:
+- campaignId, visualTier, unlockedDecor[], lastViewedAt
 
 ## 11. Province states (MVP)
 
@@ -199,9 +227,9 @@ Transitions:
 ### 12.1. Stage-based capture
 Progress stages (example):
 - scouted (15%)
-- decomposed (30%)
-- started (55%)
-- sustained (80%)
+- prepared (30%)
+- entered (55%)
+- held (80%)
 - captured (100%)
 
 ### 12.2. Fog of war
@@ -220,7 +248,7 @@ If there is no movement for X days, province becomes `siege` (MVP: X=3).
 ### 12.5. Morale (signal)
 User can mark a feeling: anxiety, boredom, fatigue, irritation, fear of outcome, ambiguity. The system uses it to suggest tactics/moves.
 
-### 12.6. Daily move
+### 12.6. Daily Orders
 Every day show 3 options: light (5m), medium (15m), main (25m+).
 
 ### 12.6.1. Commander check-in
@@ -230,7 +258,7 @@ The system uses it as a short ritual and must explain why the suggested moves fi
 ### 12.7. War council
 At the end of the day, write 1–3 if-then plans.
 
-### 12.7.1. Integration review
+### 12.7.1. Season Debrief
 At the end of the 21-day season, present a short review flow:
 - what worked;
 - what repeatedly caused siege;
@@ -241,8 +269,25 @@ At the end of the 21-day season, present a short review flow:
 ### 12.8. Rewards (MVP)
 Progress-first: progressStage changes + short feedback copy + a lightweight “meaningful day” marker. No points economy by default; rewards only for real steps (or meaningful clarification).
 
-### 12.9. Hero moments (P1)
+### 12.9. Hero moments (MVP Lite)
 Short celebratory feedback is allowed only after meaningful actions and must never replace task progress.
+
+### 12.10. Pressure Layer (non-AI opposition, MVP)
+Pressure is ambient and strategic:
+- fog/siege/fortified are primary pressure states;
+- repeated retreat and chronic stalling increase “front pressure” highlights around hotspots;
+- pressure must never remove captured territory or punish missing days.
+
+### 12.11. Province roles (MVP)
+Provinces can have lightweight roles (flags) that shape icons, recommended tactics, and Chronicle phrasing:
+standard, fortress, watchtower, depot, archive, capital-adjacent.
+
+### 12.12. Command movement + Supply lines (MVP)
+In MVP, the “moving” entity is an order (not units). Selecting an action draws a short route from Capital to the target province as a feedback affordance (not a logistics simulator).
+
+### 12.13. Capital Lite + Chronicle Lite (MVP)
+- Capital is the daily entry hub showing season/campaign naming, clan banner, front situation, hotspots, and fast CTAs into Daily Orders / maps / Chronicle.
+- Chronicle is a human-readable campaign memory layer (short “chronicle lines”), not an analytics log.
 
 ### 12.10. Safe sharing (P1)
 Sharing is limited to exportable privacy-safe artifacts such as weekly map cards and season comparison cards.
@@ -260,7 +305,7 @@ The system tracks where the user gets stuck and adjusts suggestions:
 Examples:
 - 3+ “ambiguous” in a row → push Scout + first-step template.
 - effort 4–5 often stalls → suggest splitting to 15-minute chunks.
-- raid often succeeds → boost raids in daily move.
+- raid often succeeds → boost raids in Daily Orders.
 - morning success → recommend main assault in the morning.
 - no deadlines → suggest a soft deadline.
 - low energy + low available time → prefer recovery/light moves over main assaults.
@@ -289,7 +334,7 @@ Style:
 - minimal tables; mostly visual states
 
 Main screens:
-onboarding, campaign map, project map, province, siege, commander check-in (P1), daily move, war council, season summary, integration review (P1), settings (export/import).
+demo mission, capital, campaign map, region map, province drawer, siege, commander check-in (optional), daily orders, war council, chronicle, season summary/debrief, settings (export/import, accessibility).
 
 Constraints:
 - max 3–5 required fields per task.
@@ -358,7 +403,7 @@ Behavioral:
 - time from siege to tactic selection
 - tactic → progress conversion rate
 - session duration
-- start within 24 hours after an intervention (daily move / siege / review), via `epics/EPIC-01-foundation.md` (Appendix B)
+- start within 24 hours after an intervention (Daily Orders / siege / review), via `epics/EPIC-01-foundation.md` (Appendix B)
 
 Qualitative:
 - “easier to start”
@@ -369,7 +414,7 @@ Qualitative:
 
 1) Stage-based capture increases returns.
 2) Siege reduces churn after missed days.
-3) Daily move increases chance of 1 meaningful action/day.
+3) Daily Orders increases chance of 1 meaningful action/day.
 4) War council reduces next-day chaos.
 5) Rule-based adaptation boosts starts vs generic hints.
 
@@ -380,7 +425,7 @@ See detailed epic breakdown in `epics/00-index.md`.
 ## 23. Development priorities
 
 P0:
-bootstrap, local storage, maps, creation, onboarding (demo/tutorial campaign), fog, siege + 5 tactics, daily move, war council, season, import/export, baseline rule-based recommendations + “why”.
+bootstrap, local storage, maps, creation, onboarding (demo mission), **capital shell**, **chronicle**, fog, siege + 5 tactics, province roles, pressure layer (front pressure highlights), daily orders, war council, season + debrief, import/export, baseline rule-based recommendations + “why”.
 
 P1:
 animations, move history, extended stats, rule-based adaptation (history-driven personalization), feedback/guardrails polish, local instrumentation (if time allows).
@@ -405,7 +450,7 @@ Week 3: daily loop + war council + season + tests + deploy (optional: adaptation
 ## 26. Open questions
 
 - Dark mode in MVP?
-- Faction/theme customization?
+- Faction/theme customization scope (MVP: banner + naming only; no economy/diplomacy).
 - Demo/tutorial campaign in onboarding: confirm exact content + skip/reset behavior.
 - Template-based decomposition (no AI)?
 - Pomodoro timer in MVP?

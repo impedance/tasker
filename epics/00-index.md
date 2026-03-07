@@ -17,3 +17,4 @@ Shared contracts: `epics/EPIC-01-foundation.md` (Appendix A/B).
 - `epics/EPIC-12-instrumentation.md` — events/logs + analytics export
 - `epics/EPIC-13-qa-release.md` — tests/QA/release artifacts
 - `epics/EPIC-14-engagement-sharing.md` — safe sharing, map cards, and engagement surfaces
+- `epics/EPIC-15-world-shell.md` — capital, chronicle, theme shell (MVP game-first surfaces)

@@ -1,13 +1,13 @@
 # EPIC-11 — Scoring, streaks, feedback, and anti-abuse
 
 **ID:** `EPIC-11`  
-**Priority:** `P1`  
+**Priority:** `P0`  
 **Status:** `draft`  
 **Owner:** `<TBD>`  
 **PRD/RFC reference:** `prd.md` (Scoring + anti-abuse) / `rfc.md` (progression rules)
 
 ## 1) Objective (Outcome)
-Deliver game feedback without toxicity: progress-first feedback for meaningful actions, soft streaks (optional), and basic anti-abuse heuristics.
+Deliver MVP game feedback without toxicity: progress-first feedback for meaningful actions, Hero Moments Lite (capped), and basic anti-abuse heuristics.
 
 ## 3) Scope
 **In scope:**
@@ -80,7 +80,7 @@ Deliver game feedback without toxicity: progress-first feedback for meaningful a
 - Copy is wired into UI components.
 **Estimate:** `S`
 
-### T6. Hero moments (P1)
+### T6. Hero moments (MVP Lite)
 **Steps:**
 1) Define allowed triggers: siege resolved, first clarity unlock, first start, 3 meaningful days, high-effort capture.
 2) Add caps so only one strong hero moment appears per session.

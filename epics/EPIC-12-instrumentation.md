@@ -38,11 +38,13 @@ Notes:
 - `checkin_completed`
 - `daily_move_viewed`
 - `daily_move_selected`
+- `capital_viewed`
+- `chronicle_viewed`
 - `hero_moment_triggered`
 - `share_card_generated`
 - `share_card_exported`
-- `season_review_started`
-- `season_review_completed`
+- `season_debrief_started`
+- `season_debrief_completed`
 - `archetype_selected`
 - `session_long_no_progress`
 - `reward_seen_no_meaningful_action`

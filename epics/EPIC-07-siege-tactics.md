@@ -11,7 +11,7 @@ Implement “siege” as a gentle mode for stalled tasks: auto-trigger, tactic s
 
 ## 3) Scope
 **In scope:**
-- siege rule (N=3 days without meaningful update, per `epics/EPIC-01-foundation.md` Appendix C `updatedAt` contract);
+- siege rule (N=3 days without meaningful update; prefer `lastMeaningfulActionAt`, fallback `updatedAt`);
 - `SiegeEvent` entity;
 - siege screen;
 - 5 tactics with explicit effects;
@@ -52,6 +52,17 @@ Implement “siege” as a gentle mode for stalled tasks: auto-trigger, tactic s
 **DoD:**
 - All tactics work end-to-end.
 **Estimate:** `XL`
+
+### T3.1. World feedback hooks (MVP)
+**Goal:** keep the siege resolution emotionally readable without adding grind.
+
+**Requirements:**
+- On siege resolution, write a Chronicle entry (EPIC-15).
+- If a hero moment trigger is eligible, allow a capped Hero Moment (EPIC-11).
+
+**Acceptance criteria:**
+- No hero moment triggers without meaningful action.
+- Chronicle entries are short human-readable “chronicle lines”, not analytics dumps.
 
 ### T4. Log tactic effectiveness
 **Steps:**

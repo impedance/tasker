@@ -1,6 +1,6 @@
 # PRD: Tasker — MVP browser-based strategy game for goal execution
 
-Date: 2026-03-06  
+Date: 2026-03-07  
 Source: `rfc.md` (RFC / spec)
 
 ## 0. Context and problem
@@ -16,7 +16,7 @@ MVP hypothesis: if we replace a to-do list with a strategic map of projects and 
 ## 1. Goals and non-goals
 
 ### 1.0. Primary experiential goal
-The user should primarily perceive Tasker as a strategy game about campaigns, territories, fog, and sieges; real task progress is the fuel that advances the world, but the first impression is the world.
+The user should primarily perceive Tasker as a **single-player strategy campaign** about reclaiming control over a fractured realm; real task progress is the only fuel that advances the world, but the first impression is a desirable world-state (capital → front situation → map).
 
 ### 1.1. MVP goals (product)
 - Validate the “progress map instead of task list” mechanic.
@@ -47,18 +47,24 @@ The user should primarily perceive Tasker as a strategy game about campaigns, te
 - Users who dislike “task manager UI”.
 
 ### 2.2. Key scenarios (MVP + near-term extensions)
-1. First run → onboarding → create campaign → 1–3 regions → tasks/provinces → the map “comes alive”.
+1. First run → demo mission (tutorial campaign) → first fog clear → first siege ritual → first hero moment → Chronicle entry → arrive at Capital.
+2. Daily return → Capital shows front situation + hotspots → Daily Orders → execute 1 meaningful move → immediate map feedback → Chronicle updated.
+3. First creation flow → create campaign → pick a clan banner + season name → 1–3 regions → tasks/provinces → region map “comes alive”.
 2. Unclear task → fog of war → fill outcome/first step/entry time → fog is removed.
 3. Stalled task → siege after N days → choose a tactic → resolve siege (or retreat/reschedule).
-4. Commander check-in → daily move → 3 suggested actions (raid/supply/scout/assault/retreat) → do one → game feedback.
+4. Commander check-in → Daily Orders → 3 orders (light/medium/main) → do one → world feedback (route + state change) + Chronicle entry.
 5. End of day → war council → 1–3 if-then plans → close the day without chaos.
-6. End of season → integration review → carry forward what worked and drop what should not continue.
+6. End of season → Season Debrief (narrative + strategy) → carry forward what worked and drop what should not continue → next season starts.
 
 ## 3. Success metrics and measurability
 
 ### 3.1. Product metrics
 - D1/D7 retention (for pilot: cohort-relative comparison is sufficient).
 - Mean “meaningful days” per season (21 days): days with at least 1 meaningful move.
+- `capital_visits_per_meaningful_day`
+- `chronicle_open_rate`
+- `hero_moment_seen_after_real_action_rate`
+- `desire_to_return_for_world_state` (survey-backed)
 - Average counts:
   - clarified tasks (fog → ready),
   - sieges resolved (siege → ready),
@@ -90,30 +96,34 @@ The user should primarily perceive Tasker as a strategy game about campaigns, te
 
 ### 4.1. P0 (must-have)
 - SPA, offline, local storage (IndexedDB/localForage), JSON import/export.
-- Campaign map and project map in SVG (clickable regions/provinces).
+- Shogunate / Warring Provinces fantasy layer (copy + minimal theming; not historical reconstruction).
+- Capital Lite (home hub) as the default daily entry surface.
+- Chronicle Lite (human-readable campaign history) as a first-class screen.
+- Hero Moments Lite (capped celebratory overlays) for meaningful milestones.
+- Seasonal fantasy naming (auto-generated + editable campaign/season names).
+- Province roles (lightweight flags) + role icons.
+- Campaign map + region map in SVG (clickable regions/provinces).
 - First-run onboarding with a demo/tutorial campaign (fast “first win”, skippable).
 - CRUD: campaigns/regions/provinces.
 - Province states + transitions via rule engine.
 - Fog-of-war (clarity: outcome/first step/entry time).
 - Siege (trigger: N=3 days without updates) + 5 tactics.
-- Stage-based province progress (not binary).
-- Daily move (3 recommendations) + War council (if-then plans).
-- Season (21 days): season day + season summary.
+- Pressure Layer (ambient non-AI opposition): fog/siege/fortified/front pressure (soft, never punitive).
+- Stage-based province progress (not binary) with world-facing capture naming.
+- Daily Orders (3 orders) + War council (if-then plans).
+- Season (21 days): season day + season summary + Season Debrief.
 - Baseline rule-based recommendations v1 + “why” explanation (non-personalized).
 
 ### 4.2. P1 (nice-to-have if time allows)
 - Capture/fog animations and solid feedback copy.
-- Daily move history.
+- Daily Orders history.
 - Extended season stats.
 - Rule-based adaptation v1 (history-driven personalization).
-- Hero moments for meaningful milestones.
-- Season integration review.
-- Chronicle (local timeline of meaningful actions and season highlights).
 - Privacy-safe shareable map cards.
-- “Capital” hub panel on the campaign map (UI metaphor only; no new mechanics).
 - Tactics codex / personal strategy insights.
-- Campaign archetypes (Foundation / Drive / Joy / Neutral).
-- Archetype-based theming (“faction identity”) without adding new systems.
+- Richer capital cosmetics (purely visual).
+- Richer Chronicle (filters, highlights, recap cards).
+- Stronger clan identity (more banner styles, optional lore snippets).
 
 ### 4.3. P2 (later)
 - Multiplayer, cloud, mobile app, AI decomposition, procedural maps.
@@ -132,17 +142,17 @@ The user should primarily perceive Tasker as a strategy game about campaigns, te
 - Prefer “do” over “plan”: apply the 10/90 heuristic to prevent endless planning (see `epics/EPIC-01-foundation.md`, Appendix A).
 
 ### 5.2. Product screens (MVP + P1 IA)
-1. Onboarding
-2. Campaign map
-3. Project map
-4. Province/task (details + actions)
-5. Siege (tactic selection)
-6. Commander check-in (P1)
-7. Daily move (3 recommendations)
+1. Demo mission (tutorial campaign)
+2. Capital (Home)
+3. Campaign map (overview)
+4. Region map (primary play surface)
+5. Province Drawer (action panel)
+6. Siege screen (ritual)
+7. Daily Orders (3 orders: light/medium/main)
 8. War council (if-then plans)
-9. Season summary / stats
-10. Season integration review (P1)
-11. Settings (import/export, optional debug)
+9. Chronicle (campaign history)
+10. Season Debrief (end-of-season debrief)
+11. Settings (import/export, accessibility)
 
 ### 5.3. Map interactions
 - Hover/selected states.
@@ -164,20 +174,22 @@ The user should primarily perceive Tasker as a strategy game about campaigns, te
 - Campaign = project
 - Region = phase / large task
 - Province = task / subtask
+- Capital = home hub (campaign seat)
+- Chronicle = campaign history (“chronicle lines”)
 - Fog = ambiguity
 - Siege = stalling/resistance
 - Commander check-in = short pre-action ritual that captures current state
-- Daily move = “daily turn” (3 suggestions)
+- Daily Orders = “daily turn” (3 orders)
 - War council = evening ritual (if-then plans)
-- Integration review = post-season reflection ritual
+- Season Debrief = post-season reflection ritual
 
 ### 6.2. Province progress (stages)
 Provinces have stage-based progress (example scale):
-- scouted: 15%
-- decomposed: 30%
-- started: 55%
-- sustained: 80%
-- captured: 100%
+- scouted: 15% (fog cleared / clarity achieved)
+- prepared: 30% (supply or engineer/split applied; entry is easier)
+- entered: 55% (first real step recorded)
+- held: 80% (sustained progress / repeat action)
+- captured: 100% (completed)
 
 Important: stage increases must be tied to real action (or meaningful clarification).
 
@@ -223,7 +235,7 @@ Before daily recommendations, the user can optionally complete a 3–5 second ri
 
 The system should explain why the 3 recommended moves were chosen.
 
-### 6.6. Daily move (3 recommendations)
+### 6.6. Daily Orders (3 orders)
 Every day show 3 suggestions:
 - light move (~5 minutes),
 - medium move (~15 minutes),
@@ -236,7 +248,7 @@ states, move history, friction, and time-of-day activity.
 In the evening, the user writes 1–3 if-then plans:
 “If (trigger), then (action)”, linked to a province and/or time.
 
-### 6.8. Integration review
+### 6.8. Season Debrief
 At the end of the 21-day season, the user completes a short debrief:
 - what worked;
 - where sieges repeated;
@@ -246,7 +258,7 @@ At the end of the 21-day season, the user completes a short debrief:
 
 The review should take about 1–2 minutes and support an immediate next-season start.
 
-### 6.9. Hero moments (P1)
+### 6.9. Hero moments (MVP Lite)
 Short celebratory feedback moments may appear only after meaningful actions such as:
 - first fog → ready transition;
 - first started province;
@@ -259,7 +271,21 @@ Rules:
 - no more than one strong hero moment per session;
 - animations must be optionally reducible/disableable.
 
-### 6.10. Safe sharing (P1)
+### 6.10. Pressure Layer (non-AI opposition, MVP)
+Pressure is ambient and strategic, never punitive:
+- fog/siege/fortified remain the core states;
+- “front pressure” is a map-level highlight around hotspots (stalled/fortified/repeatedly retreated provinces) to make strategy legible;
+- pressure must not remove already captured territory or snowball against the user.
+
+### 6.11. Capital Lite (MVP)
+Capital is the default entry and daily hub: campaign + season naming, clan banner, front situation (fog/siege/hotspots), and fast CTAs into Daily Orders / Chronicle / maps.
+
+### 6.12. Chronicle Lite (MVP)
+Chronicle is a human-readable campaign memory layer:
+- entries are written as short “chronicle lines” after meaningful actions (fog cleared, siege resolved, region captured, meaningful-day streak milestones, season end);
+- it is not an analytics event log; it exists to strengthen world attachment.
+
+### 6.13. Safe sharing (P1)
 The MVP+ social layer is based on exportable artifacts, not online competition:
 - weekly map card;
 - before/after season card;
@@ -274,15 +300,28 @@ Public-safe exports should hide task titles, deadlines, and private text by defa
 Campaign:
 - `id`, `title`, `description?`, `colorTheme?`, `createdAt`, `seasonId`, `status`, `regionIds[]`
 - `archetype?` (`foundation | drive | joy | neutral`)
+- `factionId?`, `factionName?`, `bannerStyle?`
+- `seasonFantasyName?`
+- `chronicleEnabled` (default `true`)
+- `capitalProvinceId?` (or `capitalRegionId?`)
 
 Region:
 - `id`, `campaignId`, `title`, `description?`, `order`, `provinceIds[]`, `progressPercent`, `status`
+- `mapRole?` (`core | frontier | archive | supply | neutral`)
+- `pressureLevel?`
+- `adjacentRegionIds[]?`
 
 Province:
 - `id`, `regionId`, `title`, `description?`
 - `desiredOutcome`, `firstStep`, `estimatedEntryMinutes`
 - `dueDate?`, `effortLevel(1..5)`, `clarityLevel(1..5)`, `emotionalFrictionType?`
 - `state`, `progressStage`, `resistanceTags[]`
+- `provinceRole?` (`standard | fortress | watchtower | archive | depot`)
+- `adjacentProvinceIds[]` (for adjacency-driven map logic)
+- `frontPressureLevel?` (`0..3`)
+- `lastMeaningfulActionAt?`
+- `heroMomentShownAt?`
+- `isHotspot?`
 - `updatedAt`, `createdAt`
 
 DailyMove:
@@ -306,7 +345,15 @@ SeasonReview:
 - `id`, `seasonId`, `workedWell[]`, `mainObstacles[]`, `carryForward[]`, `dropList[]`
 
 HeroMoment:
-- `id`, `type`, `provinceId?`, `seasonId`, `triggeredAt`, `shareCardId?`
+- `id`, `type`, `provinceId?`, `seasonId`, `triggeredAt`, `shownAt?`, `shareCardId?`
+
+ChronicleEntry:
+- `id`, `campaignId`, `seasonId?`, `regionId?`, `provinceId?`
+- `entryType`, `title`, `body?`, `importance` (`low | medium | high`)
+- `createdAt`
+
+CapitalState:
+- `campaignId`, `visualTier`, `unlockedDecor[]`, `lastViewedAt`
 
 ShareCard:
 - `id`, `type`, `seasonId?`, `generatedAt`, `privacyMode`, `payload`
@@ -422,7 +469,7 @@ Acceptance / DoD:
 - a stalled province enters `siege` automatically.
 - each tactic produces the expected data changes and exits `siege` (or goes `retreated`).
 
-### 9.8. Epic H — Daily loop (Daily move + War council)
+### 9.8. Epic H — Daily loop (Daily Orders + War council)
 Tasks:
 - daily move screen (3 recommendations).
 - algorithm for selecting 3 moves (rule-based v1).

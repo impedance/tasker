@@ -15,9 +15,9 @@ Introduce a 21-day season: show season day number, weekly focus hints, season su
 - auto-start next season;
 - UI display for current day number;
 - season summary page (aggregates);
-- short integration review after season end;
+- short Season Debrief after season end;
 - archetype balance stats in the summary (P1 if available).
-- chronicle highlights derived from meaningful actions (P1 / optional).
+- a chronicle recap link/section powered by Chronicle (EPIC-15).
 
 ## 6) Work breakdown
 
@@ -62,7 +62,7 @@ Introduce a 21-day season: show season day number, weekly focus hints, season su
 - Summary screen is implemented.
 **Estimate:** `M`
 
-### T5. Integration review flow
+### T5. Season Debrief flow
 **Steps:**
 1) Add a 3-screen debrief: worked well / obstacles / carry forward or drop.
 2) Pre-fill review suggestions from season data where possible.
@@ -73,17 +73,3 @@ Introduce a 21-day season: show season day number, weekly focus hints, season su
 **DoD:**
 - Review data is persisted and available for the next season.
 **Estimate:** `L`
-
-### T6. Chronicle highlights (P1 / optional)
-**Goal:** strengthen “world state” attachment by showing a short, skimmable timeline derived from meaningful actions (no new mechanics).
-
-**Steps:**
-1) Define a minimal “chronicle entry” model derived from existing events (EPIC-01 Appendix B).
-2) Add a “Highlights” section to season summary (or a link to a full chronicle page if implemented in EPIC-14).
-3) Ensure entries never include raw free-text in public-safe contexts (EPIC-01 Appendix A).
-
-**Acceptance criteria:**
-- Highlights are fully offline and computed from local data.
-- Entries only appear after meaningful actions (never from app open).
-
-**Estimate:** `M`

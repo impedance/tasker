@@ -22,7 +22,8 @@ Implement domain types and reliable local persistence (CRUD + import/export + mi
 
 ## 4) Deliverables
 - Entities: Campaign/Region/Province/Season/PlayerProfile/DailyMove/SiegeEvent/IfThenPlan.
-- Extended entities: PlayerCheckIn/SeasonReview/HeroMoment/ShareCard.
+- Extended entities: PlayerCheckIn/SeasonReview/HeroMoment/ChronicleEntry/CapitalState.
+- Optional (P1) entities: ShareCard.
 - Repositories with CRUD and basic relationship queries.
 - Stored `schemaVersion` and migration pipeline.
 - Export/import of full app state.
@@ -37,7 +38,7 @@ Implement domain types and reliable local persistence (CRUD + import/export + mi
 1) Create entity model files (e.g., `entities/*/model.ts`).
 2) Add minimal runtime validation strategy (library or custom).
 **Acceptance criteria:**
-- Types cover PRD fields, including new ritual/feedback/share entities.
+- Types cover PRD/RFC fields, including world shell entities (Capital/Chronicle) and adjacency/role fields.
 **DoD:**
 - All entities are typed and exported.
 **Estimate:** `L`
@@ -58,6 +59,7 @@ Implement domain types and reliable local persistence (CRUD + import/export + mi
 1) For each entity: `getById`, `list`, `create`, `update`, `delete`.
 2) Relationship queries: regions by campaign, provinces by region.
 3) Keep relationship arrays consistent (regionIds/provinceIds).
+4) Support adjacency lists on provinces (store + validate IDs).
 **Acceptance criteria:**
 - Relationship operations keep data consistent.
 **DoD:**

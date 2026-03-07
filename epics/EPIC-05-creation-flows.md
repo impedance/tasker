@@ -34,7 +34,9 @@ Enable fast creation so a user can create the first campaign/regions/provinces i
 3) Guided path (skippable at any step):
    - clarify a fog province (fog → ready),
    - resolve a siege via a tactic (siege → ready/retreated),
-   - pick one daily move and start it.
+   - execute one Daily Order and start it,
+   - see a hero moment (if eligible) and a Chronicle entry,
+   - arrive at Capital.
 4) Provide a reset/remove option in Settings (“Remove tutorial campaign”).
 **Acceptance criteria:**
 - A user reaches a first meaningful action in ≤60 seconds.
@@ -46,7 +48,8 @@ Enable fast creation so a user can create the first campaign/regions/provinces i
 
 ### T1. Campaign creation form
 **Steps:**
-1) Fields: title (required), description (optional), colorTheme (optional), archetype (optional P1).
+1) Fields: title (required), description (optional), colorTheme (optional).
+2) World shell fields (MVP): factionName (optional), bannerStyle (optional), seasonFantasyName (auto-generated + editable).
 2) Persist and navigate to the campaign.
 **Acceptance criteria:**
 - New campaign appears on the campaign map.

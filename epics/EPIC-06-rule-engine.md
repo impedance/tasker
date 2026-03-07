@@ -14,6 +14,8 @@ Create a single rule engine entry point for all province state transitions, and 
 - domain actions + pure transition functions;
 - fog rule (required clarity fields);
 - stage-based progress (`progressStage`);
+- province roles (lightweight flags) and their rule-level implications (recommended moves/copy hooks);
+- pressure signals (front pressure level, hotspot tagging) computed from states/history;
 - minimal runtime validation.
 
 **Out of scope:**
@@ -58,7 +60,7 @@ Create a single rule engine entry point for all province state transitions, and 
 
 ### T4. Stage-based progress (`progressStage`)
 **Steps:**
-1) Define criteria for each stage (scouted/decomposed/started/sustained/captured).
+1) Define criteria for each stage (scouted/prepared/entered/held/captured).
 2) Update progress via actions only.
 **Acceptance criteria:**
 - Progress increases only when rules allow it.
@@ -66,7 +68,28 @@ Create a single rule engine entry point for all province state transitions, and 
 - Tests cover stage changes.
 **Estimate:** `L`
 
-### T5. Minimal runtime validation
+### T5. Province roles (MVP)
+**Steps:**
+1) Define `provinceRole` enum and defaults (`standard`).
+2) Define lightweight rule hooks:
+   - fortress → prefer engineer/supply before assault,
+   - watchtower → prefer scout/fog clearing,
+   - depot/archive → prefer supply/clarify actions.
+3) Ensure roles never create new mechanics; they only influence recommendations/copy/icons.
+**Acceptance criteria:**
+- Roles are optional and safe to ignore without breaking flows.
+**Estimate:** `M`
+
+### T6. Pressure signals (front pressure, hotspots)
+**Steps:**
+1) Define `frontPressureLevel` computation inputs (siege/fortified/repeated retreat/long stalling).
+2) Update `isHotspot` and `frontPressureLevel` as derived fields (or persisted if needed for performance).
+3) Ensure pressure is never punitive: no territory loss; no penalties for missed days.
+**Acceptance criteria:**
+- Pressure can be rendered as map highlights without additional UI forms.
+**Estimate:** `M`
+
+### T7. Minimal runtime validation
 **Steps:**
 1) Validate ranges (effort/clarity), required IDs, and required fields for actions.
 2) Provide user-friendly errors for UI.

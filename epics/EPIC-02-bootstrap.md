@@ -56,7 +56,7 @@ Ship a working SPA skeleton (React+TS+Vite) with tests and basic automation so j
 **Steps:**
 1) Add React Router.
 2) Implement minimal layout (header/nav).
-3) Wire routes for 3 pages (campaign map / project map / province).
+3) Wire routes for 3–5 pages (capital / campaign map / region map / province drawer / chronicle) as stubs.
 **Acceptance criteria:**
 - Direct URL navigation to each page works.
 **DoD:**
@@ -93,4 +93,3 @@ Ship a working SPA skeleton (React+TS+Vite) with tests and basic automation so j
 **DoD:**
 - CI is present and green on main.
 **Estimate:** `M`
-

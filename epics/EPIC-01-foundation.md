@@ -83,7 +83,7 @@ Make the product rules and definitions unambiguous so the team can implement the
 2) Decide day boundary (e.g., 00:00 or 04:00 local time) and document it.
 3) Define behavior for DST/timezone changes (MVP minimum: how we interpret them).
 **Acceptance criteria:**
-- Daily move screen is stable across refreshes.
+- Daily Orders screen is stable across refreshes.
 **DoD:**
 - Time rules are documented with 2–3 edge cases.
 **Estimate:** `M`
@@ -146,9 +146,9 @@ The MVP uses game feedback to help users start and recover, not to maximize time
 
 ## A3) Ritual time budgets (anti-burnout UX)
 - Commander check-in: 3–5 seconds.
-- Daily move selection: under 60 seconds to pick and start.
+- Daily Orders selection: under 60 seconds to pick and start.
 - War council: under 2 minutes (1–3 if-then plans).
-- Integration review: 1–2 minutes total (3 short screens).
+- Season Debrief: 1–2 minutes total (3 short screens).
 
 If a ritual becomes “a form to fill”, it is a bug.
 
@@ -309,7 +309,7 @@ Minimum viable approach:
 - required: `isMeaningfulAction=true`, `meaningfulActionType=siege_resolve`
 - optional: `interventionId?` (if applied from an intervention surface)
 
-### B6.6. Commander check-in + Daily move
+### B6.6. Commander check-in + Daily Orders
 **`checkin_started`**
 - required: `checkinId`, `seasonId`
 

@@ -43,7 +43,7 @@ Stabilize the MVP for a 21-day pilot: tests for critical rules and flows, a regr
 
 ### T3. E2E “user path” scenario
 **Steps:**
-1) Onboarding → start tutorial campaign (or create campaign) → open province → clarify → resolve siege via a tactic → daily move → season summary (minimum).
+1) Onboarding → start tutorial campaign (or create campaign) → clarify fog → resolve siege via a tactic → Daily Orders → Chronicle → Capital → season summary/debrief (minimum).
 2) Run in CI (headless).
 **Acceptance criteria:**
 - Stable test (no flakiness).
