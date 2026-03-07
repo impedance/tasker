@@ -20,32 +20,36 @@ MVP hypothesis: if we replace a to-do list with a strategic map of projects and 
 - Increase the likelihood of starting stalled tasks (entering action).
 - Increase decomposition of unclear/large tasks.
 - Achieve regular return usage over a 21-day season.
+- Support healthy return rituals, not only completion pressure.
 
 ### 1.2. User goals
 - See projects as “campaigns” on a map.
 - Quickly turn vague projects into concrete steps.
 - Get rewarded for clarification/start/progress, not only for “done”.
 - Get rule-based hints tailored to their friction type.
+- Feel safe to recover, reflect, and restart after overload.
 
 ### 1.3. Non-goals (out of scope for MVP)
 - Full 4X (economy/diplomacy/AI opponents/multiplayer).
 - Accounts, cloud sync, payments.
 - Advanced ML, procedural maps, “AI decomposition”.
 - Integrations: calendars, push notifications, A/B platform.
+- Toxic reward economies, random loot, and pressure-driven social loops.
 
-## 2. Users and scenarios (MVP)
+## 2. Users and scenarios
 
 ### 2.1. Primary audience
 - Knowledge workers with many parallel projects.
 - People who procrastinate due to ambiguity/overload/resistance.
 - Users who dislike “task manager UI”.
 
-### 2.2. Key scenarios
+### 2.2. Key scenarios (MVP + near-term extensions)
 1. First run → onboarding → create campaign → 1–3 regions → tasks/provinces → the map “comes alive”.
 2. Unclear task → fog of war → fill outcome/first step/entry time → fog is removed.
 3. Stalled task → siege after N days → choose a tactic → resolve siege (or retreat/reschedule).
-4. Daily move → 3 suggested actions (raid/supply/scout/assault/retreat) → do one → game feedback.
+4. Commander check-in → daily move → 3 suggested actions (raid/supply/scout/assault/retreat) → do one → game feedback.
 5. End of day → war council → 1–3 if-then plans → close the day without chaos.
+6. End of season → integration review → carry forward what worked and drop what should not continue.
 
 ## 3. Success metrics and measurability
 
@@ -57,12 +61,15 @@ MVP hypothesis: if we replace a to-do list with a strategic map of projects and 
   - sieges resolved (siege → ready),
   - tasks with a written first step,
   - tasks advanced through progress stages.
+- Share-card generation/export rate (privacy-safe only).
 
 ### 3.2. Behavioral metrics
 - Time from province creation to first real step.
 - Time from entering siege to selecting a tactic.
 - Tactic effectiveness: share of cases where a tactic leads to progress (per rules).
 - Average session duration and distribution by weekday/time.
+- Start within 24 hours after a recommendation/tactic/check-in intervention.
+- Long sessions with no meaningful action (guardrail metric).
 
 ### 3.3. Qualitative metrics (survey/interviews)
 - “It’s easier for me to start”
@@ -88,6 +95,11 @@ MVP hypothesis: if we replace a to-do list with a strategic map of projects and 
 - Daily move history.
 - Extended season stats.
 - Better onboarding (demo project/hints).
+- Hero moments for meaningful milestones.
+- Season integration review.
+- Privacy-safe shareable map cards.
+- Tactics codex / personal strategy insights.
+- Campaign archetypes (Foundation / Drive / Joy / Neutral).
 
 ### 4.3. P2 (later)
 - Multiplayer, cloud, mobile app, AI decomposition, procedural maps.
@@ -99,17 +111,23 @@ MVP hypothesis: if we replace a to-do list with a strategic map of projects and 
 - No more than 3–5 required fields when creating/clarifying a task.
 - No more than 1–2 clicks from opening a province to a real action.
 - Every “stalled” task should lead to a short ritual (siege → tactic).
+- The product should reinforce rhythm and recovery, not only pressure to finish.
+- No guilt/FOMO mechanics and no reward for app opens without meaningful action.
+- Rituals must stay short by design (see `epics/EPIC-01-foundation.md`, Appendix A).
+- Prefer “do” over “plan”: apply the 10/90 heuristic to prevent endless planning (see `epics/EPIC-01-foundation.md`, Appendix A).
 
-### 5.2. MVP screens (IA)
+### 5.2. Product screens (MVP + P1 IA)
 1. Onboarding
 2. Campaign map
 3. Project map
 4. Province/task (details + actions)
 5. Siege (tactic selection)
-6. Daily move (3 recommendations)
-7. War council (if-then plans)
-8. Season summary / stats
-9. Settings (import/export, optional debug)
+6. Commander check-in (P1)
+7. Daily move (3 recommendations)
+8. War council (if-then plans)
+9. Season summary / stats
+10. Season integration review (P1)
+11. Settings (import/export, optional debug)
 
 ### 5.3. Map interactions
 - Hover/selected states.
@@ -133,8 +151,10 @@ MVP hypothesis: if we replace a to-do list with a strategic map of projects and 
 - Province = task / subtask
 - Fog = ambiguity
 - Siege = stalling/resistance
+- Commander check-in = short pre-action ritual that captures current state
 - Daily move = “daily turn” (3 suggestions)
 - War council = evening ritual (if-then plans)
+- Integration review = post-season reflection ritual
 
 ### 6.2. Province progress (stages)
 Provinces have stage-based progress (example scale):
@@ -180,6 +200,14 @@ Before acting, the user can mark (MVP list):
 anxiety, boredom, fatigue, irritation, fear of outcome, ambiguity.
 Based on this, the system suggests tactics or daily move types.
 
+### 6.5.1. Commander check-in
+Before daily recommendations, the user can optionally complete a 3–5 second ritual:
+- emotion: anxiety / boredom / fatigue / irritation / fear of outcome / ambiguity;
+- available time: 5 / 15 / 25+ minutes;
+- energy: low / medium / high.
+
+The system should explain why the 3 recommended moves were chosen.
+
 ### 6.6. Daily move (3 recommendations)
 Every day show 3 suggestions:
 - light move (~5 minutes),
@@ -193,11 +221,44 @@ states, move history, friction, and time-of-day activity.
 In the evening, the user writes 1–3 if-then plans:
 “If (trigger), then (action)”, linked to a province and/or time.
 
+### 6.8. Integration review
+At the end of the 21-day season, the user completes a short debrief:
+- what worked;
+- where sieges repeated;
+- which tactics helped;
+- what to carry into the next season;
+- what to let go.
+
+The review should take about 1–2 minutes and support an immediate next-season start.
+
+### 6.9. Hero moments (P1)
+Short celebratory feedback moments may appear only after meaningful actions such as:
+- first fog → ready transition;
+- first started province;
+- siege resolved;
+- 3 meaningful days in a row;
+- capturing a high-effort province.
+
+Rules:
+- never trigger from app open or passive browsing;
+- no more than one strong hero moment per session;
+- animations must be optionally reducible/disableable.
+
+### 6.10. Safe sharing (P1)
+The MVP+ social layer is based on exportable artifacts, not online competition:
+- weekly map card;
+- before/after season card;
+- siege recovery card;
+- campaign style card.
+
+Public-safe exports should hide task titles, deadlines, and private text by default.
+
 ## 7. Data and storage (local)
 
 ### 7.1. Entities (minimum required fields)
 Campaign:
 - `id`, `title`, `description?`, `colorTheme?`, `createdAt`, `seasonId`, `status`, `regionIds[]`
+- `archetype?` (`foundation | drive | joy | neutral`)
 
 Region:
 - `id`, `campaignId`, `title`, `description?`, `order`, `provinceIds[]`, `progressPercent`, `status`
@@ -212,6 +273,10 @@ Province:
 DailyMove:
 - `id`, `date`, `provinceId`, `moveType`, `durationMinutes`, `result`
 
+PlayerCheckIn:
+- `id`, `date`, `energyLevel`, `availableMinutes`, `emotionType`
+- `recommendedMoveIds[]`, `selectedMoveId?`
+
 SiegeEvent:
 - `id`, `provinceId`, `triggeredAt`, `reasonType`, `selectedTactic`, `resolvedAt?`
 
@@ -221,6 +286,18 @@ PlayerProfile:
 
 Season:
 - `id`, `title`, `startedAt`, `endsAt`, `dayNumber`, `goals?`, `score`
+
+SeasonReview:
+- `id`, `seasonId`, `workedWell[]`, `mainObstacles[]`, `carryForward[]`, `dropList[]`
+
+HeroMoment:
+- `id`, `type`, `provinceId?`, `seasonId`, `triggeredAt`, `shareCardId?`
+
+ShareCard:
+- `id`, `type`, `seasonId?`, `generatedAt`, `privacyMode`, `payload`
+
+CampaignArchetypeStats:
+- `seasonId`, `foundationCount`, `driveCount`, `joyCount`
 
 IfThenPlan:
 - `id`, `provinceId`, `triggerText`, `actionText`, `scheduledFor?`
@@ -258,6 +335,7 @@ Deliverables:
 - agreed entity/state glossary;
 - province state diagram (at least a transition table);
 - MVP screen list and user flows.
+- guardrail rules for healthy engagement and anti-burnout.
 
 Acceptance / DoD:
 - all P0 items are unambiguous (what counts as a meaningful move; what updates `updatedAt`).
@@ -441,4 +519,3 @@ Week 3 exit (DoD):
 3. Template-based decomposition (no AI) in MVP?
 4. Pomodoro timer in MVP (may distract from core hypothesis)?
 5. Local reminders (if any) without push notifications?
-

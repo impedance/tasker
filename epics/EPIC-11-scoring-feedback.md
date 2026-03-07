@@ -14,7 +14,9 @@ Deliver game feedback without toxicity: points for meaningful actions, soft stre
 - clarify/momentum/capture/recovery points;
 - meaningful-day streak;
 - soft anti-abuse warnings;
-- baseline feedback copy.
+- baseline feedback copy;
+- hero moments tied to meaningful actions;
+- explicit no-guilt / no-empty-reward guardrails.
 
 ## 6) Work breakdown
 
@@ -24,6 +26,7 @@ Deliver game feedback without toxicity: points for meaningful actions, soft stre
 2) Add caps/limits to prevent farming (e.g., max N clarify points per day).
 **Acceptance criteria:**
 - No obvious “open app and farm points” exploits.
+- No reward is granted for passive app opens or empty sessions.
 **DoD:**
 - Scoring spec is written and ready to implement.
 **Estimate:** `M`
@@ -53,10 +56,12 @@ Deliver game feedback without toxicity: points for meaningful actions, soft stre
 1) Prevent progress without clarity (fog).
 2) Detect over-planning: frequent splitting without starting.
 3) Detect too many micro-tasks and suggest merging.
+4) Detect long sessions without meaningful action and reduce celebratory feedback.
 **Acceptance criteria:**
 - Warnings do not block legitimate use.
 **DoD:**
 - Warnings are implemented and testable.
+- Guardrails from EPIC-01 Appendix A are enforced (no rewards without action, prompt budget).
 **Estimate:** `L`
 
 ### T5. Feedback copy (minimum viable)
@@ -69,3 +74,14 @@ Deliver game feedback without toxicity: points for meaningful actions, soft stre
 - Copy is wired into UI components.
 **Estimate:** `S`
 
+### T6. Hero moments (P1)
+**Steps:**
+1) Define allowed triggers: siege resolved, first clarity unlock, first start, 3 meaningful days, high-effort capture.
+2) Add caps so only one strong hero moment appears per session.
+3) Add an accessibility setting to reduce/disable celebratory intensity.
+**Acceptance criteria:**
+- Hero moments never trigger without meaningful action.
+- Hero moments amplify progress without adding pressure.
+**DoD:**
+- Trigger rules, UI contract, and tests/spec are in place.
+**Estimate:** `M`

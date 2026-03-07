@@ -14,19 +14,34 @@ Collect anonymous local events to evaluate MVP hypotheses without a backend: mea
 - event schema (from EPIC-01);
 - local append-only event log;
 - export events (JSON/CSV);
-- optional debug viewer.
+- optional debug viewer;
+- guardrail events for unhealthy engagement patterns.
 
 ## 6) Work breakdown
 
 ### T1. Finalize event schema v1
 **Steps:**
 1) Take the event list from EPIC-01.
-2) Define payload types and required fields.
+2) Define payload types and required fields in `epics/EPIC-01-foundation.md` (Appendix B).
 **Acceptance criteria:**
 - Enough to compute MVP metrics in PRD.
 **DoD:**
-- Schema is documented in this file or a linked md.
+- EPIC-01 Appendix B is complete and consistent with EPIC-01 definitions.
 **Estimate:** `M`
+
+**Event additions to include:**
+- `checkin_started`
+- `checkin_completed`
+- `daily_move_viewed`
+- `daily_move_selected`
+- `hero_moment_triggered`
+- `share_card_generated`
+- `share_card_exported`
+- `season_review_started`
+- `season_review_completed`
+- `archetype_selected`
+- `session_long_no_progress`
+- `reward_seen_no_meaningful_action`
 
 ### T2. Implement event logger
 **Steps:**
@@ -58,4 +73,3 @@ Collect anonymous local events to evaluate MVP hypotheses without a backend: mea
 **DoD:**
 - Enabled only in dev via a flag.
 **Estimate:** `S`
-

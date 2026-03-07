@@ -12,8 +12,10 @@ Personalize hints and daily/tactic prioritization using rule-based adaptation gr
 ## 3) Scope
 **In scope:**
 - signal collection into `PlayerProfile.frictionStats`;
+- check-in state as a recommendation signal;
 - 5–8 recommendation rules;
-- a short “why this is recommended” explanation.
+- a short “why this is recommended” explanation;
+- a lightweight tactics codex / personal strategy layer.
 
 **Out of scope:**
 - ML, complex segmentation.
@@ -22,7 +24,7 @@ Personalize hints and daily/tactic prioritization using rule-based adaptation gr
 
 ### T1. Define frictionStats and signals
 **Steps:**
-1) Define fields: stall ratios by friction type, tactic success rate, active time windows.
+1) Define fields: stall ratios by friction type, tactic success rate, active time windows, check-in patterns.
 2) Decide which actions/events update each signal.
 **Acceptance criteria:**
 - Enough data to power 5–8 rules.
@@ -32,7 +34,7 @@ Personalize hints and daily/tactic prioritization using rule-based adaptation gr
 
 ### T2. Implement profile updates from actions/events
 **Steps:**
-1) Update aggregates on clarify/start/complete/siege/tactic actions.
+1) Update aggregates on clarify/start/complete/siege/tactic/check-in actions.
 2) Add tests for predictable updates.
 **Acceptance criteria:**
 - Profile changes as expected given a sequence of actions.
@@ -42,7 +44,7 @@ Personalize hints and daily/tactic prioritization using rule-based adaptation gr
 
 ### T3. Implement recommendation rules v1
 **Steps:**
-1) Implement RFC-inspired rules: ambiguity → scout; heavy tasks stall → engineer; raid success → boost raids; morning success → schedule main move; no deadlines → suggest soft deadline.
+1) Implement RFC-inspired rules: ambiguity → scout; heavy tasks stall → engineer; raid success → boost raids; morning success → schedule main move; no deadlines → suggest soft deadline; low energy + low time → recovery/light move.
 2) Implement rule priority/scoring.
 3) Generate short “why” strings.
 **Acceptance criteria:**
@@ -51,3 +53,14 @@ Personalize hints and daily/tactic prioritization using rule-based adaptation gr
 - Tests cover “before/after history” for 3–4 cases.
 **Estimate:** `XL`
 
+### T4. Tactics codex (P1)
+**Steps:**
+1) Summarize successful tactics, repeated siege patterns, and productive time windows.
+2) Expose the codex as a read-only personal strategy view.
+3) Allow daily move explanations to reference codex insights.
+**Acceptance criteria:**
+- Codex is generated only from real events.
+- It helps interpretation without becoming required for the main flow.
+**DoD:**
+- A minimum codex view/spec is documented and backed by data.
+**Estimate:** `L`

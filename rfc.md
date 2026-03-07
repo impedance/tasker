@@ -16,18 +16,21 @@ Working idea: the user “conquers” territories by doing real tasks, decomposi
 - Increase the probability of starting stalled tasks.
 - Increase decomposition of unclear work (not just postponing).
 - Confirm users return daily for 3 weeks (pilot season).
+- Make returning feel healthy and interesting, not guilt-driven.
 
 ### User goals
 - See projects as a conquerable map.
 - Quickly turn vague projects into concrete next steps.
 - Get rewards for clarification, starting, and progress (not only completion).
 - Get tips tailored to their resistance type.
+- Recover from overload without feeling punished for slowing down.
 
 ### Non-goals (MVP)
 - Full 4X (economy/diplomacy/AI opponents/multiplayer).
 - Full-feature task manager (Notion/Todoist/Jira level).
 - Complex backend (accounts/cloud sync/payments).
 - Advanced ML (MVP uses rule-based adaptation).
+- Toxic reward economies, random loot, and pressure-heavy social loops.
 
 ## 3. Product hypothesis
 
@@ -56,7 +59,10 @@ Secondary:
 4) The game must not require heavy manual input.  
 5) MVP must be simple, offline-capable, and backend-free.  
 6) It must look like a strategy map, not a to-do list with badges.  
-7) Adaptation is rule-based in MVP.
+7) Adaptation is rule-based in MVP.  
+8) The game should support rhythm, recovery, and reflection, not only conquest.  
+9) No reward should be granted for passive app opens or empty engagement.  
+10) Sharing must be privacy-safe and artifact-based, not socially coercive.
 
 ## 6. Conceptual model
 
@@ -69,7 +75,9 @@ Secondary:
 - Supply = reducing friction / preparing context
 - Assault = action now
 - Morale = emotional state
+- Commander check-in = pre-action ritual
 - War council = end-of-day planning ritual
+- Integration review = end-of-season reflection ritual
 
 ### Meaning
 The product should make “the path” visible and rewarding: clarification, splitting, starting, maintaining focus—not just finishing.
@@ -104,19 +112,21 @@ Backlog:
 - AI decomposition, procedural maps.
 - Complex economy, avatars, diplomacy, PvP.
 - Push notifications, calendar integration, A/B testing, ML recommender.
+- Dynamic reward economies, random loot, or pressure-heavy social loops.
 
 ## 9. Core user flows
 
 1) First run: onboarding → create campaign → add 1–3 regions → add tasks → see the map filled.  
 2) Unclear task: open province → fog → fill outcome/first step/entry time → fog removed.  
 3) Stalled task: no updates N days → siege → pick a tactic → task becomes actionable or is retreated/rescheduled.  
-4) Daily turn: see 3 recommended actions (light/medium/main) → do one → see map feedback.  
-5) End of day: war council → write 1–3 if-then plans → close the day.
+4) Commander check-in → daily turn: see 3 recommended actions (light/medium/main) → do one → see map feedback.  
+5) End of day: war council → write 1–3 if-then plans → close the day.  
+6) End of season: integration review → carry forward useful patterns and drop stale fronts.
 
 ## 10. Data entities (MVP)
 
 Campaign:
-- id, title, description, colorTheme, createdAt, seasonId, status, regionIds[]
+- id, title, description, colorTheme, createdAt, seasonId, status, regionIds[], archetype?
 
 Region:
 - id, campaignId, title, description, order, provinceIds[], progressPercent, status
@@ -131,6 +141,9 @@ Province:
 DailyMove:
 - id, date, provinceId, moveType (raid/supply/scout/assault/retreat), durationMinutes, result
 
+PlayerCheckIn:
+- id, date, energyLevel, availableMinutes, emotionType, recommendedMoveIds[], selectedMoveId
+
 SiegeEvent:
 - id, provinceId, triggeredAt, reasonType, selectedTactic, resolvedAt
 
@@ -140,6 +153,15 @@ PlayerProfile:
 
 Season:
 - id, title, startedAt, endsAt, dayNumber, goals, score
+
+SeasonReview:
+- id, seasonId, workedWell[], mainObstacles[], carryForward[], dropList[]
+
+HeroMoment:
+- id, type, provinceId?, seasonId, triggeredAt, shareCardId?
+
+ShareCard:
+- id, type, seasonId?, generatedAt, privacyMode, payload
 
 IfThenPlan:
 - id, provinceId, triggerText, actionText, scheduledFor
@@ -193,11 +215,29 @@ User can mark a feeling: anxiety, boredom, fatigue, irritation, fear of outcome,
 ### 12.6. Daily move
 Every day show 3 options: light (5m), medium (15m), main (25m+).
 
+### 12.6.1. Commander check-in
+Before recommendations, the user can optionally declare current emotion, energy, and available time.
+The system uses it as a short ritual and must explain why the suggested moves fit the current state.
+
 ### 12.7. War council
 At the end of the day, write 1–3 if-then plans.
 
+### 12.7.1. Integration review
+At the end of the 21-day season, present a short review flow:
+- what worked;
+- what repeatedly caused siege;
+- which tactics helped;
+- what to carry forward;
+- what to release.
+
 ### 12.8. Rewards (MVP)
 Simple: influence points, intel, supplies, morale/streaks. Rewards only for real steps (or meaningful clarification).
+
+### 12.9. Hero moments (P1)
+Short celebratory feedback is allowed only after meaningful actions and must never replace task progress.
+
+### 12.10. Safe sharing (P1)
+Sharing is limited to exportable privacy-safe artifacts such as weekly map cards and season comparison cards.
 
 ## 13. Rule-based adaptation (v1)
 
@@ -215,6 +255,8 @@ Examples:
 - raid often succeeds → boost raids in daily move.
 - morning success → recommend main assault in the morning.
 - no deadlines → suggest a soft deadline.
+- low energy + low available time → prefer recovery/light moves over main assaults.
+- repeated successful tactics → surface them in a personal codex/history layer.
 
 ## 14. Season (21-day cycle)
 
@@ -228,6 +270,8 @@ Season metrics:
 - sieges resolved
 - tasks completed
 - meaningful days
+- integration review completion
+- share-card generation/export rate
 
 ## 15. UX/UI requirements
 
@@ -237,13 +281,16 @@ Style:
 - minimal tables; mostly visual states
 
 Main screens:
-onboarding, campaign map, project map, province, siege, daily move, war council, season summary, settings (export/import).
+onboarding, campaign map, project map, province, siege, commander check-in (P1), daily move, war council, season summary, integration review (P1), settings (export/import).
 
 Constraints:
 - max 3–5 required fields per task.
 - max 1–2 clicks to get to a real action.
 - no “CRM feeling”.
 - every stalled task leads to a short ritual.
+- no guilt/FOMO mechanics.
+- no rewards for opening the app without a meaningful action.
+- public sharing must hide private task text by default.
 
 ## 16. Non-functional requirements
 
@@ -286,6 +333,10 @@ Balance: reward starts, honest decomposition, completions, and returning after a
 - Too many micro-tasks → suggest merging.
 - No rewards for opening the app without action.
 
+Contracts:
+- Engagement/recovery guardrails: `epics/EPIC-01-foundation.md` (Appendix A).
+- Local analytics event schema: `epics/EPIC-01-foundation.md` (Appendix B).
+
 ## 20. MVP success metrics
 
 Product:
@@ -301,6 +352,7 @@ Behavioral:
 - time from siege to tactic selection
 - tactic → progress conversion rate
 - session duration
+- start within 24 hours after an intervention (daily move / siege / review), via `epics/EPIC-01-foundation.md` (Appendix B)
 
 Qualitative:
 - “easier to start”
@@ -361,4 +413,3 @@ v0.2: improved adaptation, extended stats, templates, better onboarding.
 ## 28. Product pitch (final)
 
 Tasker is a browser strategy game for personal project execution: real tasks become provinces on a map, and procrastination is treated as a game situation—fog of war, sieges, and supply issues—solved by short rituals and tactics. The MVP must prove that a map, anti-procrastination loops, and a 21-day season can make task execution more engaging and more sustainable than a traditional list.
-

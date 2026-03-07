@@ -18,12 +18,13 @@ Enable fast creation so a user can create the first campaign/regions/provinces i
 
 **Out of scope:**
 - project templates and demo content (P1).
+- advanced archetype-driven automation.
 
 ## 6) Work breakdown
 
 ### T1. Campaign creation form
 **Steps:**
-1) Fields: title (required), description (optional), colorTheme (optional).
+1) Fields: title (required), description (optional), colorTheme (optional), archetype (optional P1).
 2) Persist and navigate to the campaign.
 **Acceptance criteria:**
 - New campaign appears on the campaign map.
@@ -33,7 +34,7 @@ Enable fast creation so a user can create the first campaign/regions/provinces i
 
 ### T2. Region creation form
 **Steps:**
-1) Fields: title (required), description (optional), order (auto).
+1) Fields: title (required), description (optional), order (auto), archetype override (optional P1).
 2) Link to campaignId.
 **Acceptance criteria:**
 - Region appears in project context (map legend/list at minimum).
@@ -73,3 +74,14 @@ Enable fast creation so a user can create the first campaign/regions/provinces i
 - UX limits are respected.
 **Estimate:** `S`
 
+### T6. Optional archetype selection (P1)
+**Steps:**
+1) Add a lightweight choice: `Foundation`, `Drive`, `Joy`, `Neutral`.
+2) Keep it optional and hidden behind progressive disclosure.
+3) Store the choice without adding mandatory complexity.
+**Acceptance criteria:**
+- Archetype can be selected in under 1 extra click/tap.
+- Skipping archetype does not harm the core flow.
+**DoD:**
+- Archetype field is persisted and available to recommendations/season stats.
+**Estimate:** `M`

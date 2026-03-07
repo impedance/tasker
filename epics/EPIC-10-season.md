@@ -14,7 +14,9 @@ Introduce a 21-day season: show season day number, weekly focus hints, season su
 - Season entity + dayNumber;
 - auto-start next season;
 - UI display for current day number;
-- season summary page (aggregates).
+- season summary page (aggregates);
+- short integration review after season end;
+- archetype balance stats in the summary (P1 if available).
 
 ## 6) Work breakdown
 
@@ -51,10 +53,22 @@ Introduce a 21-day season: show season day number, weekly focus hints, season su
 ### T4. Season summary screen
 **Steps:**
 1) Show: clarified, sieges resolved, completed, meaningful days.
-2) Optional: “Start new season” CTA.
+2) Show P1 stats if available: archetype balance, hero moments, share cards generated.
+3) Optional: “Start new season” CTA.
 **Acceptance criteria:**
 - Numbers match stored data.
 **DoD:**
 - Summary screen is implemented.
 **Estimate:** `M`
 
+### T5. Integration review flow
+**Steps:**
+1) Add a 3-screen debrief: worked well / obstacles / carry forward or drop.
+2) Pre-fill review suggestions from season data where possible.
+3) Allow immediate next-season start after the review.
+**Acceptance criteria:**
+- Review can be completed in about 1–2 minutes.
+- User can skip deep writing but still finish the ritual cleanly.
+**DoD:**
+- Review data is persisted and available for the next season.
+**Estimate:** `L`
