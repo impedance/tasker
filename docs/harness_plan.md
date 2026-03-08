@@ -1,15 +1,15 @@
 # Harness Plan
 
 - Harness version: 0.6
-- Detected stacks: <unknown>
+- Detected stacks: Node
 
 ## Current tooling
-- Lint: `npm run lint` (planned; wire in EPIC-02)
-- Typecheck: `npm run typecheck` (planned; wire in EPIC-02)
-- Tests: `npm test` (planned; wire in EPIC-02)
-- CI: `.github/workflows/agent-harness.yml`
+- Lint: `npm run lint` via `eslint.config.mjs`
+- Typecheck: `npm run typecheck` via `tsconfig.json` + `tsconfig.node.json`
+- Tests: `npm test` (Vitest) and `npm run e2e` (Playwright)
+- CI: `.github/workflows/agent-harness.yml`, `.github/workflows/ci.yml`
 
 ## Open placeholders
-- Code map paths: `src/app`, `src/pages`, `src/entities`, `src/features`, `src/game`, `src/map`, `src/storage`, `src/shared`
-- Typing surfaces: `src/game/rules`, `src/storage`, `src/map`, `src/storage/import_export`
-- Test map wiring: `make smoke` (structural + best-effort), `make preflight` (structural + best-effort + typecheck)
+- Code map paths: resolved in `docs/index.md`
+- Typing surfaces: resolved in `docs/index.md`
+- Test map wiring: `make smoke` runs structural + `npm run lint` + `npm test`; `make preflight` adds `npm run typecheck`

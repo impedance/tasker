@@ -13,10 +13,12 @@
 ## Planned (MVP stack)
 - Unit/integration: Vitest + React Testing Library (`npm test`)
 - E2E: Playwright (`npm run e2e`)
+- Static analysis: ESLint (`npm run lint`)
+- Type checks: TypeScript (`npm run typecheck`)
 
 ## Notes
 - Optional flags:
   - `QUIET=1` — reduce successful tool output to one-line summaries (full output on failure).
   - `FAIL_FAST=1` — (Python/pytest) stop after the first failure (`--maxfail=1`).
 - Put CI/debug output in `artifacts/`.
-- If host-mode is supported, document it here.
+- In restricted sandboxes, Playwright may fail before tests start because Vite cannot bind a local port (`listen EPERM`). In host-capable environments and CI, `npm run e2e` should work as-is.

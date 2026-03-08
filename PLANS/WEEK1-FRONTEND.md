@@ -21,13 +21,13 @@ Source of truth for ticket text: `PLANS/EPIC-02-05-junior-tickets.md`
 
 ### EPIC-02 (Bootstrap)
 - [x] `02-T1` Initialize Vite + React + TypeScript (PR/commit: initialized)
-- [x] `02-T2` Add routing + 3 stub pages (PR/commit: implemented)
+- [x] `02-T2` Add routing + 3 stub pages (PR/commit: aligned to `/`, `/campaigns`, `/settings`)
 - [x] `02-T3` Create `src/` module skeleton (PRD-aligned) (PR/commit: implemented)
 
 Shared (can be taken by FE if needed):
-- [x] `02-T4` Configure Vitest + RTL (one smoke) (PR/commit: implemented)
-- [x] `02-T5` Configure Playwright E2E (one smoke) (PR/commit: implemented)
-- [x] `02-T6` Add minimal CI workflow (PR/commit: implemented)
+- [x] `02-T4` Configure Vitest + RTL (one smoke) (PR/commit: smoke asserts `Tasker MVP`)
+- [x] `02-T5` Configure Playwright E2E (one smoke) (PR/commit: routes + direct URL smoke wired; CI-ready)
+- [x] `02-T6` Add minimal CI workflow (PR/commit: lint + typecheck + unit + build + e2e)
 
 ### EPIC-04 (Map UI)
 - [ ] `04-T1` Add SVG templates + slot ID convention (PR/commit: )
@@ -47,4 +47,3 @@ Shared (can be taken by FE if needed):
 Shared (coordination-heavy):
 - [ ] `05-T5` First-run tutorial seed (FE: onboarding UI + “remove tutorial”) (PR/commit: )  
   - BLOCKED:
-

@@ -15,6 +15,8 @@ Keep this file short. Prefer links over duplication.
 - `make smoke` — fastest verification loop
 - `make preflight` — broader verification loop
 - `make doctor` — harness wiring status
+- `npm run lint` — ESLint 80/20 static checks for TS/TSX
+- `npm run typecheck` — TypeScript checks for app + config files
 
 ## Code Map (planned after EPIC-02 bootstrap)
 - **Entrypoints (web app):** `src/app/main.tsx`, `src/app/App.tsx`
@@ -35,4 +37,4 @@ Keep this file short. Prefer links over duplication.
 ## Test Map (planned)
 - Smoke path: `npm test` (Vitest) via `make smoke`
 - Full path: `npm run lint`, `npm run typecheck`, `npm test` via `make preflight`
-- E2E path: `npm run e2e` (Playwright) — recommended for preflight once added
+- E2E path: `npm run e2e` (Playwright) — wired in CI, optional locally when host-mode is available
