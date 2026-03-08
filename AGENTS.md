@@ -1,29 +1,37 @@
-# AGENTS.md
+# Agent instructions (repo-wide)
 
-## 1) What this repo is
-One short paragraph describing the product, runtime shape, and key constraints.
+## Language policy
+- **Chat (assistant responses to the user): always in Russian.**
+- **Repository artifacts (documentation, markdown files, comments, commit messages, UI copy stubs): always in English.**
 
-System-of-record map: `docs/index.md`.
+If a user message is in Russian, still keep repository documentation in English and only communicate in Russian in the chat.
 
-## 2) Fast commands (run these first)
+## System of record (read first)
+- Product requirements: `prd.md`
+- Epic backlog + build order: `epics/00-index.md`
+- Executable junior ticket plan (Week 1 slice): `PLANS/EPIC-02-05-junior-tickets.md`
+- Plan template: `PLANS/plan.md`
+- Implementation readiness checklist: `epics/IMPLEMENTATION-READINESS.md`
+- Repo map: `docs/index.md`
+
+## Fast commands (agent harness)
 - Smoke: `make smoke`
-- Agent smoke (optional): `make agent-smoke`
 - Preflight: `make preflight`
 - Strict smoke: `make smoke STRICT=1`
 - Harness info (optional): `make doctor`
 
-## 3) Non-negotiable invariants
+## Non-negotiable invariants
 - Wire existing tooling first; do not migrate the stack just to satisfy the harness.
 - Keep default verification offline and deterministic unless the repo documents an opt-in integration path.
 - Never commit secrets or generated credentials.
 
-## 4) Repo map
-- Entrypoints: `<paths>`
-- Core domain logic: `<paths>`
-- Boundaries / DTOs / config: `<paths>`
-- Adapters (I/O): `<paths>`
+## Repo map (planned after EPIC-02 bootstrap)
+- Entrypoints: `src/app/main.tsx`, `src/app/App.tsx`
+- Core domain logic (pure rules): `src/game/rules/**`
+- Boundaries / DTOs / config: `src/entities/**`, `src/storage/**`, `src/map/**`
+- Adapters (I/O): `src/storage/**`
 
-## 5) How to finish a task
+## How to finish a task
 - Make the change.
 - Run `make smoke`.
 - (If relevant) run `make agent-smoke`.

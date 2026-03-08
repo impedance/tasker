@@ -3,11 +3,16 @@
 ## Goals
 - Keep default checks fast enough for agent iteration.
 - Prefer offline-by-default verification; gate real external calls behind an explicit opt-in (e.g. `INTEGRATION=1`).
+- Keep mechanics tests in pure domain code; keep UI tests minimal and stable.
 
 ## Default commands
 - `make smoke` — fastest verification loop
 - `make agent-smoke` — optional black-box checks (if wired)
 - `make preflight` — broader verification loop
+
+## Planned (MVP stack)
+- Unit/integration: Vitest + React Testing Library (`npm test`)
+- E2E: Playwright (`npm run e2e`)
 
 ## Notes
 - Optional flags:

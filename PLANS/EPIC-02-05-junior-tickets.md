@@ -6,6 +6,10 @@
 **Owner:** `<assign>`  
 **PRD/RFC reference:** `prd.md:440` (epic map), `prd.md:463` (Week 1 exit DoD)
 
+Handoff docs:
+- Frontend track: `PLANS/WEEK1-FRONTEND.md`
+- Domain/Backend track: `PLANS/WEEK1-BACKEND.md`
+
 ## 1) Objective (Outcome)
 Ship a first usable MVP slice: a user can create a campaign/region/province, see provinces on an SVG region map, open a province drawer, and the whole state persists across refresh with import/export.
 
@@ -49,11 +53,13 @@ Conventions for tickets:
 - Keep each task 1–4 hours (target).
 - Every task must have acceptance criteria + a quick “how to verify”.
 - Use PRs per task; avoid multi-day “mega PRs”.
+- Add `**Track:** FE|BE|SHARED` so staffing is explicit.
 
 ### EPIC-02 — Tech setup and project bootstrap
 Source: `epics/EPIC-02-bootstrap.md`, PRD Week 1 (`prd.md:465`).
 
 #### 02-T1. Initialize Vite + React + TypeScript
+**Track:** `FE`  
 **Description:** Create the project and make sure it runs locally.  
 **Steps:**
 1) Create Vite React TS app.
@@ -68,6 +74,7 @@ Source: `epics/EPIC-02-bootstrap.md`, PRD Week 1 (`prd.md:465`).
 **Estimate:** `S`
 
 #### 02-T2. Add routing + 3 stub pages
+**Track:** `FE`  
 **Description:** Add stable navigation primitives early.  
 **Steps:**
 1) Add React Router.
@@ -82,6 +89,7 @@ Source: `epics/EPIC-02-bootstrap.md`, PRD Week 1 (`prd.md:465`).
 **Estimate:** `S`
 
 #### 02-T3. Create `src/` module skeleton (PRD-aligned)
+**Track:** `FE`  
 **Description:** Align folder structure to PRD conventions.  
 **Steps:**
 1) Add folders: `src/app`, `src/pages`, `src/entities`, `src/features`, `src/game`, `src/storage`, `src/shared`.
@@ -95,6 +103,7 @@ Source: `epics/EPIC-02-bootstrap.md`, PRD Week 1 (`prd.md:465`).
 **Estimate:** `S`
 
 #### 02-T4. Configure Vitest + React Testing Library (one smoke)
+**Track:** `SHARED`  
 **Description:** Unit test harness baseline.  
 **Steps:**
 1) Add Vitest + RTL.
@@ -108,6 +117,7 @@ Source: `epics/EPIC-02-bootstrap.md`, PRD Week 1 (`prd.md:465`).
 **Estimate:** `S`
 
 #### 02-T5. Configure Playwright E2E (one smoke)
+**Track:** `SHARED`  
 **Description:** E2E baseline to catch routing/build regressions.  
 **Steps:**
 1) Add Playwright.
@@ -121,6 +131,7 @@ Source: `epics/EPIC-02-bootstrap.md`, PRD Week 1 (`prd.md:465`).
 **Estimate:** `M`
 
 #### 02-T6. Add minimal CI workflow
+**Track:** `SHARED`  
 **Description:** PR checks must be non-optional.  
 **Steps:**
 1) Add CI: install → unit tests → build → e2e (optional if too slow).
@@ -139,6 +150,7 @@ Source: `epics/EPIC-02-bootstrap.md`, PRD Week 1 (`prd.md:465`).
 Source: `epics/EPIC-03-domain-persistence.md`.
 
 #### 03-T1. Pick runtime validation strategy (decision + baseline)
+**Track:** `BE`  
 **Description:** Reduce “it compiles but crashes at runtime” risk.  
 **Steps:**
 1) Choose `zod` (recommended) or a tiny custom validator module.
@@ -152,6 +164,7 @@ Source: `epics/EPIC-03-domain-persistence.md`.
 **Estimate:** `S`
 
 #### 03-T2. Define P0 entity types (Campaign/Region/Province)
+**Track:** `BE`  
 **Description:** P0 entities needed for Week 1 exit.  
 **Steps:**
 1) Add TS types for `Campaign`, `Region`, `Province`.
@@ -166,6 +179,7 @@ Source: `epics/EPIC-03-domain-persistence.md`.
 **Estimate:** `S`
 
 #### 03-T3. Storage adapter (localForage) + key namespaces
+**Track:** `BE`  
 **Description:** A single stable storage API for the app.  
 **Steps:**
 1) Initialize localForage with an app-level store name/version.
@@ -180,6 +194,7 @@ Source: `epics/EPIC-03-domain-persistence.md`.
 **Estimate:** `M`
 
 #### 03-T4. Repository: Campaign (CRUD)
+**Track:** `BE`  
 **Description:** First repository to establish patterns.  
 **Steps:**
 1) Implement `create/getById/list/update/delete` for Campaign.
@@ -193,6 +208,7 @@ Source: `epics/EPIC-03-domain-persistence.md`.
 **Estimate:** `M`
 
 #### 03-T5. Repository: Region (CRUD + list by campaign)
+**Track:** `BE`  
 **Description:** Relationship query baseline.  
 **Steps:**
 1) Implement Region CRUD.
@@ -207,6 +223,7 @@ Source: `epics/EPIC-03-domain-persistence.md`.
 **Estimate:** `M`
 
 #### 03-T6. Repository: Province (CRUD + list by region + mapSlot assignment helper)
+**Track:** `BE`  
 **Description:** Province storage and the minimum helpers EPIC-04/05 rely on.  
 **Steps:**
 1) Implement Province CRUD.
@@ -221,6 +238,7 @@ Source: `epics/EPIC-03-domain-persistence.md`.
 **Estimate:** `M`
 
 #### 03-T7. Schema version + migration pipeline (minimal)
+**Track:** `BE`  
 **Description:** Avoid “breaking users” when types evolve.  
 **Steps:**
 1) Store `schemaVersion` in storage.
@@ -235,6 +253,7 @@ Source: `epics/EPIC-03-domain-persistence.md`.
 **Estimate:** `M`
 
 #### 03-T8. JSON export/import (Settings)
+**Track:** `BE`  
 **Description:** Week 1 exit requires import/export. (`prd.md:468`)  
 **Steps:**
 1) Export: gather all entities + schemaVersion into one JSON.
@@ -254,6 +273,7 @@ Source: `epics/EPIC-03-domain-persistence.md`.
 Source: `epics/EPIC-05-creation-flows.md`.
 
 #### 05-T1. Campaign create flow (minimal form)
+**Track:** `FE`  
 **Description:** Create Campaign in under 30 seconds.  
 **Steps:**
 1) UI form: title required; description optional.
@@ -267,6 +287,7 @@ Source: `epics/EPIC-05-creation-flows.md`.
 **Estimate:** `S`
 
 #### 05-T2. Region create flow (scoped to campaign)
+**Track:** `FE`  
 **Description:** Regions must always belong to a campaign.  
 **Steps:**
 1) UI form: title required; description optional.
@@ -280,6 +301,7 @@ Source: `epics/EPIC-05-creation-flows.md`.
 **Estimate:** `S`
 
 #### 05-T3. Province create flow (auto mapSlot + fog/ready)
+**Track:** `FE`  
 **Description:** Provinces are the main “tasks”; keep the form lightweight.  
 **Steps:**
 1) UI: title required; optional clarity fields.
@@ -294,6 +316,7 @@ Source: `epics/EPIC-05-creation-flows.md`.
 **Estimate:** `M`
 
 #### 05-T4. Quick-add multiple provinces (bulk)
+**Track:** `FE`  
 **Description:** Create 5–10 tasks in one action.  
 **Steps:**
 1) Add a textarea: one province per line.
@@ -308,6 +331,7 @@ Source: `epics/EPIC-05-creation-flows.md`.
 **Estimate:** `S`
 
 #### 05-T5. First-run tutorial seed (versioned)
+**Track:** `SHARED`  
 **Description:** Offer a deterministic tutorial campaign on first run.  
 **Steps:**
 1) Define seed data: 1 campaign, 1 region, 3 provinces with mixed initial states.
@@ -328,6 +352,7 @@ Source: `epics/EPIC-05-creation-flows.md`.
 Source: `epics/EPIC-04-map-ui.md`, asset conventions `epics/ASSET-PLAN.md`.
 
 #### 04-T1. Add SVG templates (placeholders ok) + slot ID convention
+**Track:** `FE`  
 **Description:** Establish the “map slot” contract early.  
 **Steps:**
 1) Add two SVG assets (campaign + region) with `data-slot-id="p01"` style markers.
@@ -343,6 +368,7 @@ Source: `epics/EPIC-04-map-ui.md`, asset conventions `epics/ASSET-PLAN.md`.
 **Estimate:** `S`
 
 #### 04-T2. Map CSS tokens file + province class mapping
+**Track:** `FE`  
 **Description:** Implement the CSS contract so UI stays consistent.  
 **Steps:**
 1) Add `src/shared/theme/map.css` (or equivalent).
@@ -357,6 +383,7 @@ Source: `epics/EPIC-04-map-ui.md`, asset conventions `epics/ASSET-PLAN.md`.
 **Estimate:** `M`
 
 #### 04-T3. Region map page: bind provinces to SVG slots
+**Track:** `FE`  
 **Description:** Show real province data on the map.  
 **Steps:**
 1) Load provinces for the selected region.
@@ -371,6 +398,7 @@ Source: `epics/EPIC-04-map-ui.md`, asset conventions `epics/ASSET-PLAN.md`.
 **Estimate:** `M`
 
 #### 04-T4. Unplaced provinces list panel
+**Track:** `FE`  
 **Description:** No province can become “unreachable” due to missing slots.  
 **Steps:**
 1) List provinces with missing `mapSlotId`.
@@ -384,6 +412,7 @@ Source: `epics/EPIC-04-map-ui.md`, asset conventions `epics/ASSET-PLAN.md`.
 **Estimate:** `S`
 
 #### 04-T5. Province Drawer skeleton (map click → drawer)
+**Track:** `FE`  
 **Description:** Keep primary interaction lightweight (drawer over map).  
 **Steps:**
 1) Implement drawer component (open/close).
@@ -397,6 +426,7 @@ Source: `epics/EPIC-04-map-ui.md`, asset conventions `epics/ASSET-PLAN.md`.
 **Estimate:** `M`
 
 #### 04-T6. Hover/selected styles + reduced motion
+**Track:** `FE`  
 **Description:** Make the map feel responsive but not distracting.  
 **Steps:**
 1) Add hover and selected visuals.
@@ -443,4 +473,3 @@ After Week 1 is stable, slice the next EPICs in this order:
 - EPIC-11 + EPIC-15 (feedback + shell),
 - EPIC-08 + EPIC-10 (daily + season),
 - EPIC-13 (QA hardening + pilot kit).
-

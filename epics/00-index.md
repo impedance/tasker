@@ -3,6 +3,7 @@
 Template: `PLANS/plan.md`.
 Executable junior ticket plan (EPIC-02..05): `PLANS/EPIC-02-05-junior-tickets.md`.
 Shared contracts: `epics/EPIC-01-foundation.md` (Appendix A/B).
+Workstream split (Frontend vs Domain/Backend): `epics/WORKSTREAMS.md`.
 Product spec (system of record): `prd.md`.
 Implementation readiness checklist: `epics/IMPLEMENTATION-READINESS.md`.
 
