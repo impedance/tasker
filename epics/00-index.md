@@ -3,7 +3,6 @@
 Template: `PLANS/plan.md`.
 Executable junior ticket plan (EPIC-02..05): `PLANS/EPIC-02-05-junior-tickets.md`.
 Shared contracts: `epics/EPIC-01-foundation.md` (Appendix A/B).
-Workstream split (Frontend vs Domain/Backend): `epics/WORKSTREAMS.md`.
 Product spec (system of record): `prd.md`.
 Implementation readiness checklist: `epics/IMPLEMENTATION-READINESS.md`.
 
@@ -21,6 +20,43 @@ Implementation readiness checklist: `epics/IMPLEMENTATION-READINESS.md`.
 - `EPIC-09` adaptation is P1.
 - `EPIC-12` local instrumentation is P1 (recommended for a measured pilot, but not required for the first MVP cut).
 - `EPIC-14` share cards/export artifacts is P1.
+
+## Workstreams (Frontend vs Domain/Backend)
+Tasker MVP is a **backend-free** offline SPA. In this repo, “backend” means **in-browser domain logic** (not a server).
+
+- **Frontend (FE):** React UI, routing/navigation, screens, SVG map rendering + interactions, theming tokens, copy wiring, accessibility affordances.
+- **Domain/Backend (BE):** entity schemas + runtime validation, repositories + IndexedDB/localForage storage, import/export + migrations, rule engine transitions, recommendation algorithms, derived signals (pressure/hotspots), event logging.
+- **Shared:** contracts, cross-cutting wiring, tests (unit/integration/E2E), CI, QA checklists.
+
+### Epic ownership (lead vs support)
+| Epic | Lead | Support |
+|---|---|---|
+| `EPIC-01` contracts | Shared | Shared |
+| `EPIC-02` bootstrap | FE | Shared |
+| `EPIC-03` domain + persistence | BE | Shared |
+| `EPIC-04` map UI | FE | BE |
+| `EPIC-05` creation flows | FE | BE |
+| `EPIC-06` rule engine | BE | FE |
+| `EPIC-07` siege + tactics | BE | FE |
+| `EPIC-08` daily loop | BE | FE |
+| `EPIC-09` adaptation (P1) | BE | FE |
+| `EPIC-10` season | BE | FE |
+| `EPIC-11` feedback + anti-abuse | Shared | Shared |
+| `EPIC-12` instrumentation (P1) | BE | FE |
+| `EPIC-13` QA + release | Shared | Shared |
+| `EPIC-14` sharing (P1) | FE | BE |
+| `EPIC-15` world shell | FE | BE |
+
+### Two-junior parallelization (recommended)
+Phase 0 (shared, short): lock minimal contracts (types, repos API, import/export shape, rule engine entry point).
+
+Week 1 (parallel):
+- **BE lead:** `EPIC-03` (types + validation + repos + schemaVersion/migrations + import/export).
+- **FE lead:** `EPIC-02` + `EPIC-04` + `EPIC-05` (skeleton + map + forms), wiring to BE repos as soon as available.
+
+Sync checkpoints (non-negotiable):
+1) After BE lands minimal repos for Campaign/Region/Province, FE replaces mocks with real repos.
+2) After BE lands import/export + schemaVersion, FE wires Settings UI to it (no custom JSON shape).
 
 - `epics/EPIC-01-foundation.md` — product foundation (terms/rules/flows)
 - `epics/EPIC-02-bootstrap.md` — tech setup + project skeleton
