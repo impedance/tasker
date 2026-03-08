@@ -6,6 +6,10 @@
 **Owner:** `<assign>`  
 **PRD/RFC reference:** `prd.md:440` (epic map), `prd.md:463` (Week 1 exit DoD)
 
+Handoff trackers:
+- Frontend (FE): `PLANS/WEEK1-FRONTEND.md`
+- Domain/Backend (BE): `PLANS/WEEK1-BACKEND.md`
+
 ## 1) Objective (Outcome)
 Ship a first usable MVP slice: a user can create a campaign/region/province, see provinces on an SVG region map, open a province drawer, and the whole state persists across refresh with import/export.
 
@@ -50,59 +54,6 @@ Conventions for tickets:
 - Every task must have acceptance criteria + a quick “how to verify”.
 - Use PRs per task; avoid multi-day “mega PRs”.
 - Add `**Track:** FE|BE|SHARED` so staffing is explicit.
-
-## 6.1) Week 1 trackers (use as the only handoff)
-How to use this tracker:
-- For every checkbox you complete, change `[ ]` → `[x]`.
-- Add a PR link or commit hash in parentheses.
-- If blocked, add a 1-line `BLOCKED:` note under the item.
-
-### Frontend (FE) checklist
-
-EPIC-02:
-- [ ] `02-T1` Init Vite + React + TS (PR/commit: )
-- [ ] `02-T2` Routing + 3 stub pages (PR/commit: )
-- [ ] `02-T3` PRD-aligned `src/` skeleton (PR/commit: )
-
-Shared (can be taken by FE if needed):
-- [ ] `02-T4` Vitest + RTL smoke (PR/commit: )
-- [ ] `02-T5` Playwright E2E smoke (PR/commit: )
-- [ ] `02-T6` Minimal CI workflow (PR/commit: )
-
-EPIC-04:
-- [ ] `04-T1` SVG templates + slot ID convention (PR/commit: )
-- [ ] `04-T2` Map CSS tokens + province class mapping (PR/commit: )
-- [ ] `04-T5` Province Drawer skeleton (PR/commit: )
-- [ ] `04-T4` Unplaced provinces list panel (PR/commit: )
-- [ ] `04-T3` Province-to-slot binding (PR/commit: )  
-  - BLOCKED:
-- [ ] `04-T6` Hover/selected + reduced motion (PR/commit: )
-
-EPIC-05:
-- [ ] `05-T1` Campaign create flow (PR/commit: )
-- [ ] `05-T2` Region create flow (PR/commit: )
-- [ ] `05-T3` Province create flow (PR/commit: )
-- [ ] `05-T4` Quick-add provinces (bulk) (PR/commit: )
-
-Shared (coordination-heavy):
-- [ ] `05-T5` First-run tutorial seed (FE: onboarding UI + “remove tutorial”) (PR/commit: )  
-  - BLOCKED:
-
-### Domain/Backend (BE) checklist
-
-EPIC-03:
-- [ ] `03-T1` Runtime validation strategy + wire into import (PR/commit: )
-- [ ] `03-T2` P0 entity types (Campaign/Region/Province) (PR/commit: )
-- [ ] `03-T3` Storage adapter + key namespaces (PR/commit: )
-- [ ] `03-T4` Campaign repository CRUD (PR/commit: )
-- [ ] `03-T5` Region repository CRUD + listByCampaignId (PR/commit: )
-- [ ] `03-T6` Province repository CRUD + listByRegionId + slot helper (PR/commit: )
-- [ ] `03-T7` SchemaVersion + migrations runner (PR/commit: )
-- [ ] `03-T8` Import/export pipeline (validate → migrate → write) (PR/commit: )
-
-Shared (coordination-heavy):
-- [ ] `05-T5` First-run tutorial seed (BE: seed data + deterministic loader + removal/reset mechanics) (PR/commit: )  
-  - BLOCKED:
 
 ### EPIC-02 — Tech setup and project bootstrap
 Source: `epics/EPIC-02-bootstrap.md`, PRD Week 1 (`prd.md:465`).
