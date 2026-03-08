@@ -129,7 +129,150 @@ Make the product rules and definitions unambiguous so the team can implement the
 
 ## 10) Open questions
 - Day boundary is fixed to 04:00 local time (see Appendix E).
-- Use a single domain action name `decompose` (UI may call it “split”); avoid duplicating actions for the same intent.
+- Use a single domain action name `decompose` (UI may call it "split"); avoid duplicating actions for the same intent.
+
+---
+
+# Appendix Z — Glossary of terms and entities (T1 deliverable)
+
+## Z1) Core entities
+
+### Campaign
+**Definition:** A top-level project or initiative that the user wants to track. In the fantasy layer, a "campaign" is a shogunate/clan's overall war effort.
+- **Required fields:** `id`, `title`, `createdAt`, `seasonId`, `status`
+- **Optional fields:** `description`, `colorTheme`, `regionIds[]`, `archetype`, `factionId`, `factionName`, `bannerStyle`, `seasonFantasyName`, `chronicleEnabled`, `capitalProvinceId`
+- **Example (valid):** `{ id: "camp-1", title: "Q1 Product Launch", seasonId: "season-1", status: "active" }`
+- **Example (invalid):** `{ title: "My Project" }` — missing `id`, `seasonId`, `status`
+
+### Region
+**Definition:** A phase, milestone, or large component within a campaign. In the fantasy layer, a "region" is a territory on the campaign map.
+- **Required fields:** `id`, `campaignId`, `title`, `order`, `provinceIds[]`, `progressPercent`, `status`
+- **Optional fields:** `description`, `mapTemplateId`, `mapRole`, `pressureLevel`, `adjacentRegionIds[]`
+- **Example (valid):** `{ id: "reg-1", campaignId: "camp-1", title: "Development Phase", order: 1, provinceIds: ["prov-1", "prov-2"], progressPercent: 45, status: "in_progress" }`
+- **Example (invalid):** `{ id: "reg-1", title: "Phase 1" }` — missing `campaignId`, `provinceIds[]`, `progressPercent`, `status`
+
+### Province
+**Definition:** A single task or subtask within a region. In the fantasy layer, a "province" is a territory to be captured through real work.
+- **Required fields:** `id`, `regionId`, `title`, `state`, `progressStage`, `updatedAt`, `createdAt`
+- **Required to exit `fog` state:** `desiredOutcome`, `firstStep`, `estimatedEntryMinutes`
+- **Optional fields:** `description`, `mapSlotId`, `dueDate`, `effortLevel`, `clarityLevel`, `emotionalFrictionType`, `provinceRole`, `decompositionCount`, `contextLinks[]`, `contextNotes`, `adjacentProvinceIds[]`, `frontPressureLevel`, `lastMeaningfulActionAt`, `heroMomentShownAt`, `isHotspot`
+- **Example (valid, fog):** `{ id: "prov-1", regionId: "reg-1", title: "Write API docs", state: "fog", progressStage: "scouted" }`
+- **Example (valid, ready):** `{ id: "prov-1", regionId: "reg-1", title: "Write API docs", desiredOutcome: "Published docs", firstStep: "Open docs folder", estimatedEntryMinutes: 10, state: "ready", progressStage: "scouted" }`
+- **Example (invalid):** `{ id: "prov-1", title: "Docs" }` — missing `regionId`, `state`, `progressStage`
+
+### DailyMove
+**Definition:** A logged action representing a real step taken on a province during a specific day.
+- **Required fields:** `id`, `date`, `provinceId`, `moveType`, `durationMinutes`, `result`
+- **Example (valid):** `{ id: "move-1", date: "2026-03-08", provinceId: "prov-1", moveType: "raid", durationMinutes: 5, result: "started" }`
+
+### PlayerCheckIn
+**Definition:** A brief daily ritual capturing the user's emotional state and available time before receiving recommendations.
+- **Required fields:** `id`, `date`, `energyLevel`, `availableMinutes`, `emotionType`
+- **Optional fields:** `recommendedMoveIds[]`, `selectedMoveId`
+- **Example (valid):** `{ id: "check-1", date: "2026-03-08", energyLevel: "medium", availableMinutes: 15, emotionType: "ambiguity" }`
+
+### SiegeEvent
+**Definition:** A record of when a province entered siege (stalled) and how it was resolved.
+- **Required fields:** `id`, `provinceId`, `triggeredAt`, `reasonType`
+- **Optional fields:** `selectedTactic`, `resolvedAt`
+- **Example (valid):** `{ id: "siege-1", provinceId: "prov-1", triggeredAt: "2026-03-07T10:00:00", reasonType: "no_meaningful_action_3_days", selectedTactic: "scout", resolvedAt: "2026-03-08T09:00:00" }`
+
+### Season
+**Definition:** A 21-day cycle during which the user works on their campaigns. Seasons provide rhythm and reflection points.
+- **Required fields:** `id`, `title`, `startedAt`, `endsAt`, `dayNumber`
+- **Optional fields:** `goals`, `score`, `timezone`
+- **Example (valid):** `{ id: "season-1", title: "Spring 2026", startedAt: "2026-03-01", endsAt: "2026-03-21", dayNumber: 8 }`
+
+### SeasonReview
+**Definition:** A structured reflection completed at the end of a season.
+- **Required fields:** `id`, `seasonId`
+- **Optional fields:** `workedWell[]`, `mainObstacles[]`, `carryForward[]`, `dropList[]`
+- **Example (valid):** `{ id: "review-1", seasonId: "season-1", workedWell: ["Daily Orders"], mainObstacles: ["Unclear outcomes"], carryForward: ["5-minute raids"], dropList: ["Over-planning"] }`
+
+### HeroMoment
+**Definition:** A celebratory feedback event triggered after meaningful milestones.
+- **Required fields:** `id`, `type`, `seasonId`, `triggeredAt`
+- **Optional fields:** `provinceId`, `shownAt`, `shareCardId`
+- **Example (valid):** `{ id: "hero-1", type: "first_fog_cleared", seasonId: "season-1", triggeredAt: "2026-03-08T10:00:00", provinceId: "prov-1" }`
+
+### ChronicleEntry
+**Definition:** A human-readable entry in the campaign's history, written after meaningful actions.
+- **Required fields:** `id`, `campaignId`, `entryType`, `title`, `createdAt`
+- **Optional fields:** `seasonId`, `regionId`, `provinceId`, `body`, `importance`
+- **Example (valid):** `{ id: "chron-1", campaignId: "camp-1", entryType: "fog_cleared", title: "Fog Lifted from API Docs", createdAt: "2026-03-08T10:00:00" }`
+
+### IfThenPlan
+**Definition:** An implementation intention linking a trigger to an action, created during War Council.
+- **Required fields:** `id`, `provinceId`, `triggerText`, `actionText`
+- **Optional fields:** `scheduledFor`
+- **Example (valid):** `{ id: "plan-1", provinceId: "prov-1", triggerText: "After morning coffee", actionText: "Write one paragraph of docs" }`
+
+### ShareCard
+**Definition:** A privacy-safe exportable artifact showing progress or achievements.
+- **Required fields:** `id`, `type`, `generatedAt`, `privacyMode`, `payload`
+- **Optional fields:** `seasonId`, `sourceSurface`
+- **Example (valid):** `{ id: "card-1", type: "weekly_map", generatedAt: "2026-03-08T12:00:00", privacyMode: "public_safe", payload: { progressPercent: 45, capturedCount: 3 } }`
+
+## Z2) Province states
+
+| State | Definition | Entry condition | Exit condition |
+|---|---|---|---|
+| `fog` | Unclear task; missing clarity fields | Created without `desiredOutcome`/`firstStep`/`estimatedEntryMinutes` | User provides required clarity fields (`clarify` action) |
+| `ready` | Clear and available for action | `clarify` action completed | User starts work, retreats, or siege triggers |
+| `siege` | Stalled for N days (MVP: 3) without meaningful action | `system_siege_trigger` based on `lastMeaningfulActionAt` | User applies a tactic (`apply_tactic`) |
+| `in_progress` | Work has started | `start_move` action (first real step) | User completes or retreats |
+| `fortified` | Too large/heavy; high effort with no decomposition | `system_fortify_trigger`: `effortLevel >= 4` AND `decompositionCount == 0` | User decomposes or supplies |
+| `captured` | Completed | `complete` action | None (terminal in MVP) |
+| `retreated` | Consciously deferred or removed | `retreat` action | None (terminal in MVP) |
+
+## Z3) Progress stages
+
+| Stage | Definition | Percent (suggested) |
+|---|---|---|
+| `scouted` | Fog cleared; clarity achieved | 15% |
+| `prepared` | Friction reduced; decomposition or supply applied | 30% |
+| `entered` | First real step recorded | 55% |
+| `held` | Sustained progress; multiple moves logged | 80% |
+| `captured` | Completed | 100% |
+
+## Z4) Key terms
+
+### Meaningful Action
+**Definition:** A user action that represents real progress, clarification, recovery, or action-prep that materially reduces friction. It can unlock feedback/hero moments and counts toward "meaningful days".
+- **Examples (valid):** `clarify`, `start_move`, `log_move`, `complete`, `retreat`, `apply_tactic`, `decompose`, `supply`
+- **Examples (invalid):** opening the app, browsing maps, renaming provinces, changing themes
+
+### Movement
+**Definition:** For MVP, synonymous with "meaningful action" — any action that updates `lastMeaningfulActionAt`.
+
+### Fog of War
+**Definition:** The state of a province that lacks required clarity fields. Visually represented as obscured/hidden on the map.
+
+### Siege
+**Definition:** A game situation triggered when a province has no meaningful action for N days (MVP: 3). Requires a tactic to resolve.
+
+### Tactics
+**Definition:** Five methods to resolve siege:
+1. **Scout:** Clarify what to do (rewrite outcome/next step)
+2. **Supply:** Prepare environment (links/files/context)
+3. **Engineer:** Split into 3-5 parts/micro-steps
+4. **5-minute Raid:** Smallest entry step with strict time cap
+5. **Retreat:** Change expectations, reschedule, or remove
+
+### Commander Check-in
+**Definition:** A 3-5 second daily ritual capturing emotion, energy, and available time before receiving recommendations.
+
+### Daily Orders
+**Definition:** Three recommended moves per day (light ~5min, medium ~15min, main ~25+min).
+
+### War Council
+**Definition:** An evening ritual where the user writes 1-3 if-then plans for the next day.
+
+### Season Debrief
+**Definition:** A 1-2 minute end-of-season reflection covering what worked, obstacles, and what to carry forward/drop.
+
+### 10/90 Heuristic
+**Definition:** A guideline that ~10% of time should be spent on planning/editing and ~90% on meaningful actions. Used to detect over-planning patterns.
 
 ---
 
