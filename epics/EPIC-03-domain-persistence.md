@@ -29,7 +29,7 @@ Implement domain types and reliable local persistence (CRUD + import/export + mi
 - Export/import of full app state.
 
 ## 5) Dependencies
-- EPIC-01 decisions: `updatedAt` semantics, event naming/fields for import/export.
+- EPIC-01 decisions: timestamp semantics (`updatedAt` vs `lastMeaningfulActionAt`), event naming/fields for import/export.
 
 ## 6) Work breakdown
 
@@ -38,7 +38,7 @@ Implement domain types and reliable local persistence (CRUD + import/export + mi
 1) Create entity model files (e.g., `entities/*/model.ts`).
 2) Add minimal runtime validation strategy (library or custom).
 **Acceptance criteria:**
-- Types cover PRD fields, including world shell entities (Capital/Chronicle) and adjacency/role fields.
+- Types cover PRD fields, including map binding (`region.mapTemplateId`, `province.mapSlotId?`), world shell entities (Capital/Chronicle), and role fields.
 **DoD:**
 - All entities are typed and exported.
 **Estimate:** `L`

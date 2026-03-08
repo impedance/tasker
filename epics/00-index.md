@@ -3,6 +3,22 @@
 Template: `PLANS/plan.md`.
 Shared contracts: `epics/EPIC-01-foundation.md` (Appendix A/B).
 Product spec (system of record): `prd.md`.
+Implementation readiness checklist: `epics/IMPLEMENTATION-READINESS.md`.
+
+## Suggested MVP build order (critical path)
+1) `EPIC-01` — lock contracts (state machine, meaningful action, time boundary, event list).
+2) `EPIC-02` — bootstrap app skeleton + tests/CI.
+3) `EPIC-03` — domain + persistence + import/export (unblocks everything).
+4) `EPIC-04` + `EPIC-05` — map surfaces + creation flows (first usable slice).
+5) `EPIC-06` + `EPIC-07` — rule engine + siege/tactics (core mechanics).
+6) `EPIC-11` + `EPIC-15` — feedback + capital/chronicle shell (game-first feel).
+7) `EPIC-08` + `EPIC-10` — daily loop + season/debrief (rhythm).
+8) `EPIC-13` — QA hardening + pilot kit.
+
+## MVP cutline reminder
+- `EPIC-09` adaptation is P1.
+- `EPIC-12` local instrumentation is P1 (recommended for a measured pilot, but not required for the first MVP cut).
+- `EPIC-14` share cards/export artifacts is P1.
 
 - `epics/EPIC-01-foundation.md` — product foundation (terms/rules/flows)
 - `epics/EPIC-02-bootstrap.md` — tech setup + project skeleton

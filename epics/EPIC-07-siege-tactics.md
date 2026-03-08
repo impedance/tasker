@@ -11,7 +11,7 @@ Implement “siege” as a gentle mode for stalled tasks: auto-trigger, tactic s
 
 ## 3) Scope
 **In scope:**
-- siege rule (N=3 days without meaningful update; prefer `lastMeaningfulActionAt`, fallback `updatedAt`);
+- siege rule (N=3 days without meaningful action; prefer `lastMeaningfulActionAt`, fallback `createdAt`);
 - `SiegeEvent` entity;
 - siege screen;
 - 5 tactics with explicit effects;
@@ -21,7 +21,7 @@ Implement “siege” as a gentle mode for stalled tasks: auto-trigger, tactic s
 
 ### T1. Siege detection + SiegeEvent creation
 **Steps:**
-1) Implement a detector at app startup and/or province open to check `updatedAt`.
+1) Implement a detector at app startup and/or province open to check `lastMeaningfulActionAt` (fallback `createdAt`).
 2) If no movement for N days → set `siege` and create a SiegeEvent.
 **Acceptance criteria:**
 - Siege triggers predictably by the rule.
@@ -43,7 +43,7 @@ Implement “siege” as a gentle mode for stalled tasks: auto-trigger, tactic s
 ### T3. Implement 5 tactics as domain actions
 **Steps:**
 1) Scout: drive clarification of outcome/first step/entry time.
-2) Supply: store “resources” (links/context) and update `updatedAt`.
+2) Supply: store context (`contextLinks[]?` / `contextNotes?`) and update timestamps per the meaningful-action contract.
 3) Engineer: split into 3–5 sub-provinces (MVP: create new provinces and link them).
 4) Raid: create a 5-minute DailyMove and update progress.
 5) Retreat: set `retreated` or reschedule.

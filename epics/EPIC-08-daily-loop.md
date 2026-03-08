@@ -35,19 +35,19 @@ Add daily ritual loops: start-of-day “Daily Orders” (3 orders: light/medium/
 
 ### T1. Daily Orders screen
 **Steps:**
-1) UI: 3 cards (raid/supply/scout/assault/retreat) with durations.
+1) UI: 3 cards (light/medium/main) with durations and an explicit move type (e.g., scout/supply/engineer/raid/assault/retreat).
 2) “Do it” creates a DailyMove and applies the corresponding domain action.
 **Acceptance criteria:**
 - User can perform at least one meaningful action from this screen.
 **DoD:**
 - Screen works end-to-end.
 - Events match EPIC-01 Appendix B (`daily_move_viewed`, `daily_move_selected`) including `interventionId`.
-- The applied domain action follows the meaningful/`updatedAt` contract (EPIC-01 Appendix C).
+- The applied domain action follows the meaningful/timestamp contract (EPIC-01 Appendix C).
 **Estimate:** `L`
 
 ### T2. Recommendation algorithm v1 (3 moves)
 **Steps:**
-1) Candidate pool: ready/sieged/in_progress provinces.
+1) Candidate pool: fog/ready/sieged/in_progress provinces.
 2) Rules: one light (5m), one medium (15m), one main (25m+), adjusted by current check-in.
 3) Tie-breakers: recency, dueDate (if any), history.
 **Acceptance criteria:**

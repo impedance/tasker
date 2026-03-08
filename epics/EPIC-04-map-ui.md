@@ -15,7 +15,7 @@ Notes:
 ## 3) Scope
 **In scope:**
 - 1 campaign map SVG template + 1 region map SVG template (fixed assets).
-- binding SVG areas to entities (regions/provinces) with stable data attributes.
+- binding SVG areas to entities via stable **slot IDs** in the SVG (e.g., `data-slot-id="p01"`), mapped from `province.mapSlotId` within `region.mapTemplateId` (default `region_v1`).
 - state-based styling + hover/selected.
 - front pressure highlights (soft, non-punitive).
 - command route drawing (Capital → target province) as visual feedback.
@@ -35,9 +35,15 @@ Notes:
 ### T1. Add SVG templates
 **Steps:**
 1) Add 2 SVG assets (campaign map + project map).
-2) Define a convention: `data-province-id`, `data-region-id`.
+2) Define a convention:
+   - SVG shapes carry stable slot IDs: `data-slot-id="p01"`, `data-slot-id="p02"`, ...
+   - persisted entities store slot IDs: `province.mapSlotId` (optional).
+3) Define overflow behavior (MVP contract):
+   - If a region has more provinces than available slots, extra provinces remain “unplaced” (`mapSlotId` missing).
+   - Unplaced provinces are fully playable via a list panel (open drawer, run actions, appear in recommendations).
 **Acceptance criteria:**
 - SVGs render and click handling works.
+ - Unplaced provinces remain accessible and actionable (no hidden tasks).
 **DoD:**
 - Assets are present and documented.
 **Estimate:** `M`
@@ -111,7 +117,8 @@ Notes:
 **Minimum contents (contract):**
 - fantasy layer: province status, role icon, recommended move, front pressure hint;
 - plain-language layer: desiredOutcome, firstStep, estimatedEntryMinutes, effort, friction;
-- CTA to start an action (scout/supply/assault/raid/retreat) with immediate map feedback.
+- CTA to start an action (scout/supply/engineer/raid/assault/retreat) with immediate map feedback.
+  - `assault` = start/log a real step (`start_move` or `log_move` in domain terms).
 
 **Acceptance criteria:**
 - From map click → real action in <= 2 clicks.

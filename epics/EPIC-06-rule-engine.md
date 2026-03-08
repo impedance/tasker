@@ -30,7 +30,9 @@ Create a single rule engine entry point for all province state transitions, and 
 
 ### T1. Define domain action set
 **Steps:**
-1) Define action types: clarify, decompose, start_move, log_move, apply_tactic, complete, retreat, reschedule.
+1) Define action types:
+   - meaningful: clarify, supply, decompose, start_move, log_move, apply_tactic, complete, retreat, reschedule
+   - non-meaningful: edit_fields (cosmetic/administrative updates)
 2) Define payload schema for each.
 **Acceptance criteria:**
 - Actions cover all transitions from EPIC-01.
@@ -52,6 +54,7 @@ Create a single rule engine entry point for all province state transitions, and 
 **Steps:**
 1) `applyAction(state, action)` returns new province + side effects or error.
 2) Ensure UI does not set `state` directly.
+3) Apply derived state rules where applicable (e.g., `fortified` trigger from EPIC-01 transition table).
 **Acceptance criteria:**
 - Invalid transitions return explicit errors.
 **DoD:**

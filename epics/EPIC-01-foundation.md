@@ -65,11 +65,13 @@ Make the product rules and definitions unambiguous so the team can implement the
 **Estimate:** `L`
 
 ### T3. Define “meaningful move” and “task update”
-**Description:** formalize what increases progress/points and what updates `updatedAt`.  
+**Description:** formalize what increases progress/points, and how timestamps are updated (`updatedAt` vs `lastMeaningfulActionAt`).  
 **Steps:**
 1) List actions that are meaningful.
 2) List actions that must NOT be meaningful (e.g., “just opened a screen”).
-3) Define `updatedAt` update rules (e.g., only on domain actions that change state/progress/clarity).
+3) Define timestamp rules:
+   - `updatedAt` updates on any persisted mutation;
+   - `lastMeaningfulActionAt` updates only on meaningful actions.
 **Acceptance criteria:**
 - Unit tests can be written from this definition.
 **DoD:**
@@ -283,6 +285,15 @@ Minimum viable approach:
 - optional: `createdProvinceCount`
 - optional: `methodType?` (`engineer | manual | template`)
 
+**`province_fortified`**
+- required: `provinceId`, `campaignId`, `seasonId`
+- optional: `reasonType?` (`high_effort_no_decomposition | manual | other`)
+
+**`province_supplied`**
+- required: `provinceId`, `campaignId`, `seasonId`
+- required: `isMeaningfulAction=true`, `meaningfulActionType=prepare`
+- optional (privacy-safe): `contextLinkCount`, `contextNotesLen`
+
 **`province_progressed`**
 - required: `provinceId`, `campaignId`, `seasonId`
 - required: `isMeaningfulAction=true`, `meaningfulActionType=progress`
@@ -385,7 +396,8 @@ Default trigger (MVP): 10+ minutes in a session with 0 meaningful actions.
 ## C1) Definitions
 - **Meaningful action:** a user action that represents real progress, clarification, recovery, or action-prep that materially reduces friction. It can unlock feedback/hero moments and counts toward “meaningful days”.
 - **Movement:** for MVP, treat as the same set as meaningful actions (a “movement event” is any meaningful action event).
-- **`updatedAt` on Province:** the last timestamp of movement for that province. It is used for siege detection.
+- **`updatedAt` on Province:** the last persisted change timestamp for that province (any mutation, including non-meaningful edits).
+- **`lastMeaningfulActionAt` on Province:** the last timestamp of a meaningful action for that province. It is used for siege detection and “meaningful day” computation.
 
 ## C2) What counts as meaningful (MVP)
 Meaningful actions MUST:
@@ -400,6 +412,7 @@ Meaningful actions include:
 - Conscious retreat/reschedule (`province_retreated`).
 - Siege tactics application (`tactic_applied`) including `scout/supply/engineer/raid/retreat`.
 - Decomposition/splitting that creates actionable sub-provinces (`province_decomposed`).
+- Supplying context/resources outside siege (`province_supplied`).
 
 ## C3) What does NOT count as meaningful (MVP)
 These actions must never set `isMeaningfulAction=true` and must not unlock strategic progress:
@@ -410,18 +423,25 @@ These actions must never set `isMeaningfulAction=true` and must not unlock strat
 - export/share actions (`share_card_*`).
 
 ## C4) `updatedAt` rules (MVP)
-Update `province.updatedAt` only when a meaningful action in C2 happens for that province.
+Always update `province.updatedAt` when the province is mutated by a domain action (meaningful or not).
 
-Do NOT update `updatedAt` for:
-- cosmetic edits (title/description), reordering, navigation-only actions;
-- viewing a province/map, generating share cards, writing if-then plans.
+Update `province.lastMeaningfulActionAt` only when a meaningful action in C2 happens for that province.
 
-Rationale: `updatedAt` must reflect “movement”, otherwise siege can be farmed/avoided by low-effort edits.
+Do NOT update `lastMeaningfulActionAt` for:
+- viewing/browsing and navigation-only actions;
+- check-ins and viewing recommendations;
+- cosmetic edits (title/description), ordering, theme changes;
+- generating share cards;
+- writing if-then plans.
+
+Rationale: siege must be based on meaningful action timestamps, otherwise it can be farmed/avoided by low-effort edits.
 
 ## C5) Siege eligibility
 Siege detection should consider provinces in states:
 - eligible: `ready`, `in_progress`, `fortified`
 - ineligible: `fog`, `siege`, `captured`, `retreated`
+
+Siege detection uses `lastMeaningfulActionAt` (fallback `createdAt`).
 
 ---
 
@@ -429,27 +449,31 @@ Siege detection should consider provinces in states:
 
 Notes:
 - UI must never set `province.state` directly. UI dispatches domain actions; rules derive the next state.
-- “Derived” transitions still require an explicit action (e.g., `province_fields_updated`) to re-evaluate rules.
+- “Derived” transitions still require an explicit action (e.g., `edit_fields`) to re-evaluate rules.
 
 | From state | Action/event | To state | Conditions (MVP) | Side effects (MVP) | Event(s) / meaningful |
 |---|---|---|---|---|---|
 | *(new)* | `province_created` | `fog` or `ready` | `fog` if required clarity fields missing | set `createdAt`, `updatedAt=createdAt` | `province_created` (not meaningful) |
-| `fog` | `clarify` | `ready` | required clarity fields present after change | set clarity fields; set `updatedAt` | `province_clarified` (meaningful: `clarify`) |
-| `ready` | `start_move` | `in_progress` | first real step is recorded | set `progressStage>=started`; set `updatedAt` | `province_started` (meaningful: `start`) |
-| `ready` | `decompose/split` | `ready` | creates 3–5 actionable sub-provinces | create new provinces; optionally bump stage to `decomposed`; set `updatedAt` | `province_decomposed` (meaningful: `prepare`) |
-| `ready` | `complete` | `captured` | user marks done | set state; set stage to `captured`; set `updatedAt` | `province_completed` (meaningful: `complete`) |
-| `ready` | `retreat/reschedule` | `retreated` | user chooses to defer/remove | set state; set `updatedAt` | `province_retreated` (meaningful: `retreat`) |
-| `ready` | `system_siege_trigger` | `siege` | `stalledDays >= N` where N=3 and per C5 eligible | create `SiegeEvent`; set state | `siege_triggered` (not meaningful) |
-| `in_progress` | `log_move` | `in_progress` | user logs real progress | update stage if criteria met; set `updatedAt` | `province_progressed` (meaningful: `progress`, if stage changes) |
-| `in_progress` | `complete` | `captured` | user marks done | set state/stage; set `updatedAt` | `province_completed` (meaningful: `complete`) |
-| `in_progress` | `system_siege_trigger` | `siege` | same as `ready` | create `SiegeEvent`; set state | `siege_triggered` (not meaningful) |
-| `fortified` | `decompose/split` | `ready` or `in_progress` | decomposition reduces scope enough to act | create sub-provinces; set `updatedAt` | `province_decomposed` (meaningful: `prepare`) |
-| `fortified` | `system_siege_trigger` | `siege` | same as `ready` | create `SiegeEvent`; set state | `siege_triggered` (not meaningful) |
-| `siege` | `apply_tactic:scout` | `ready` | clarity improved (or plan created) | update clarity fields; set `updatedAt` | `tactic_applied` (meaningful: `siege_resolve`) |
-| `siege` | `apply_tactic:supply` | `ready` | context/resources were added | update resources/context fields; set `updatedAt` | `tactic_applied` (meaningful: `siege_resolve`) |
-| `siege` | `apply_tactic:engineer` | `ready` | split created actionable sub-provinces | create sub-provinces; set `updatedAt` | `tactic_applied` (meaningful: `siege_resolve`), optionally also `province_decomposed` |
-| `siege` | `apply_tactic:raid` | `in_progress` | a 5-minute entry step is started | create a `DailyMove`; set `updatedAt` | `tactic_applied` (meaningful: `siege_resolve`) |
-| `siege` | `apply_tactic:retreat` | `retreated` | user retreats/reschedules | set state; set `updatedAt` | `tactic_applied` + `province_retreated` (meaningful) |
+| `fog` | `clarify` | `ready` | required clarity fields present after change | set clarity fields; set `updatedAt`; set `lastMeaningfulActionAt` | `province_clarified` (meaningful: `clarify`) |
+| `ready` | `start_move` | `in_progress` | first real step is recorded | set `progressStage>=entered`; set `updatedAt`; set `lastMeaningfulActionAt` | `province_started` (meaningful: `start`) |
+| `ready` | `decompose/split` | `ready` | creates 3–5 actionable sub-provinces | create new provinces; bump `decompositionCount`; set `updatedAt`; set `lastMeaningfulActionAt` | `province_decomposed` (meaningful: `prepare`) |
+| `ready` | `supply` | `ready` | context/resources were added | update `contextLinks/contextNotes`; set `updatedAt`; set `lastMeaningfulActionAt` | `province_supplied` (meaningful: `prepare`) |
+| `ready` | `complete` | `captured` | user marks done | set state; set stage to `captured`; set `updatedAt`; set `lastMeaningfulActionAt` | `province_completed` (meaningful: `complete`) |
+| `ready` | `retreat/reschedule` | `retreated` | user chooses to defer/remove | set state; set `updatedAt`; set `lastMeaningfulActionAt` | `province_retreated` (meaningful: `retreat`) |
+| `ready` | `system_fortify_trigger` | `fortified` | `effortLevel >= 4` AND `decompositionCount == 0` AND not started | set state; set `updatedAt` | `province_fortified` (not meaningful) |
+| `ready` | `system_siege_trigger` | `siege` | `stalledDays >= N` where N=3 using `lastMeaningfulActionAt` (fallback `createdAt`) and per C5 eligible | create `SiegeEvent`; set state; set `updatedAt` | `siege_triggered` (not meaningful) |
+| `in_progress` | `log_move` | `in_progress` | user logs real progress | update stage if criteria met; set `updatedAt`; set `lastMeaningfulActionAt` | `province_progressed` (meaningful: `progress`, if stage changes) |
+| `in_progress` | `supply` | `in_progress` | context/resources were added | update `contextLinks/contextNotes`; set `updatedAt`; set `lastMeaningfulActionAt` | `province_supplied` (meaningful: `prepare`) |
+| `in_progress` | `complete` | `captured` | user marks done | set state/stage; set `updatedAt`; set `lastMeaningfulActionAt` | `province_completed` (meaningful: `complete`) |
+| `in_progress` | `system_siege_trigger` | `siege` | same as `ready` | create `SiegeEvent`; set state; set `updatedAt` | `siege_triggered` (not meaningful) |
+| `fortified` | `decompose/split` | `ready` or `in_progress` | decomposition reduces scope enough to act | create sub-provinces; bump `decompositionCount`; set `updatedAt`; set `lastMeaningfulActionAt` | `province_decomposed` (meaningful: `prepare`) |
+| `fortified` | `supply` | `fortified` | context/resources were added | update `contextLinks/contextNotes`; set `updatedAt`; set `lastMeaningfulActionAt` | `province_supplied` (meaningful: `prepare`) |
+| `fortified` | `system_siege_trigger` | `siege` | same as `ready` | create `SiegeEvent`; set state; set `updatedAt` | `siege_triggered` (not meaningful) |
+| `siege` | `apply_tactic:scout` | `ready` | clarity improved | update clarity fields; set `updatedAt`; set `lastMeaningfulActionAt` | `tactic_applied` (meaningful: `siege_resolve`) |
+| `siege` | `apply_tactic:supply` | `ready` | context/resources were added | update `contextLinks/contextNotes`; set `updatedAt`; set `lastMeaningfulActionAt` | `tactic_applied` (meaningful: `siege_resolve`) |
+| `siege` | `apply_tactic:engineer` | `ready` | split created actionable sub-provinces | create sub-provinces; bump `decompositionCount`; set `updatedAt`; set `lastMeaningfulActionAt` | `tactic_applied` (meaningful: `siege_resolve`), optionally also `province_decomposed` |
+| `siege` | `apply_tactic:raid` | `in_progress` | a 5-minute entry step is started | create a `DailyMove`; set `updatedAt`; set `lastMeaningfulActionAt` | `tactic_applied` (meaningful: `siege_resolve`) |
+| `siege` | `apply_tactic:retreat` | `retreated` | user retreats/reschedules | set state; set `updatedAt`; set `lastMeaningfulActionAt` | `tactic_applied` + `province_retreated` (meaningful) |
 | `captured` | *(none in MVP)* | `captured` | no reopen in MVP | — | — |
 | `retreated` | *(none in MVP)* | `retreated` | no restore in MVP | — | — |
 
@@ -488,3 +512,60 @@ Rationale: reduces late-night “double counting” and makes daily rituals stab
 - Avoid childish slang; prefer “minimal strategy UI” tone.
 - Never use guilt/shame framing.
 - Never imply progress without action.
+
+---
+
+# Appendix G — Progress stage contract v1 (MVP)
+
+Goal: make `progressStage` update rules testable and consistent across UI, rules, and analytics.
+
+## G1) Stage enum (stored)
+`progressStage` is stored as an enum (not as free-form percent):
+- `scouted`
+- `prepared`
+- `entered`
+- `held`
+- `captured`
+
+Percentages shown in UI are a display mapping only (MVP suggestion: 15/30/55/80/100).
+
+## G2) Stage update rules (MVP)
+Stage can only change via domain actions (never by UI directly).
+
+Minimum rules:
+- On `province_clarified` → stage becomes at least `scouted`.
+- On `province_supplied` or `province_decomposed` → stage becomes at least `prepared`.
+- On `province_started` → stage becomes at least `entered`.
+- On `province_progressed`:
+  - if current stage is `entered`, bump to `held`;
+  - otherwise keep stage unless a later rule applies.
+- On `province_completed` → stage becomes `captured`.
+
+Stage must never decrease in MVP.
+
+---
+
+# Appendix H — UI move ↔ domain action crosswalk (MVP)
+
+Goal: prevent ambiguity between fantasy UI labels (“assault”, “raid”) and domain actions/events.
+
+Legend:
+- “Meaningful” means it updates `lastMeaningfulActionAt` and can unlock feedback/chronicle/hero moments.
+- “Event” refers to Appendix B event names.
+
+## H1) Move mapping (MVP)
+
+| UI label | Domain action | Allowed province states | Primary data effect | Event | MeaningfulActionType |
+|---|---|---|---|---|---|
+| Scout | `clarify` | `fog` (also allowed in `ready` to refine clarity) | set `desiredOutcome/firstStep/estimatedEntryMinutes` | `province_clarified` | `clarify` |
+| Supply | `supply` | `ready`, `in_progress`, `fortified` | update `contextLinks/contextNotes` | `province_supplied` | `prepare` |
+| Engineer | `decompose` | `ready`, `fortified` (also allowed in `siege` via `apply_tactic`) | create sub-provinces; bump `decompositionCount` | `province_decomposed` | `prepare` |
+| Raid (5m) | `start_move` | `ready` (also via `apply_tactic:raid` in `siege`) | record first real step (time-capped) | `province_started` (or `tactic_applied`) | `start` (or `siege_resolve`) |
+| Assault | `start_move` or `log_move` | `ready` / `in_progress` | record a real step (not time-capped) | `province_started` / `province_progressed` | `start` / `progress` |
+| Retreat | `retreat` / `reschedule` | any except `captured` | set `retreated` or defer | `province_retreated` (or `tactic_applied` in siege) | `retreat` (or `siege_resolve`) |
+
+## H2) Non-meaningful edits (MVP)
+UI actions that change metadata (title/description/order/theme/dueDate/etc.) MUST be implemented as a non-meaningful domain action (e.g., `edit_fields`) that:
+- updates `updatedAt`,
+- does NOT update `lastMeaningfulActionAt`,
+- does NOT unlock feedback/chronicle/hero moments.

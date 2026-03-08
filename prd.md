@@ -230,7 +230,7 @@ Important: stage increases must be tied to real action (or meaningful clarificat
 States:
 - `fog` — unclear (required clarity fields are missing)
 - `ready` — clear and available
-- `siege` — no movement for N days (MVP: 3 days)
+- `siege` — no **meaningful action** for N days (MVP: 3 days)
 - `in_progress` — started
 - `fortified` — too large/heavy (rule: high effort + no decomposition)
 - `captured` — completed
@@ -239,7 +239,7 @@ States:
 Transitions (MVP):
 - fog → ready: outcome/firstStep/estimatedEntryMinutes filled
 - ready → in_progress: first real step is recorded (move)
-- ready → siege: no `updatedAt` changes for N days
+- ready → siege: no meaningful action for N days (use `lastMeaningfulActionAt`, fallback `createdAt`)
 - ready → fortified: high effortLevel + no decomposition
 - siege → ready: a tactic (or clarification/decomposition) is applied and logged
 - in_progress → captured: user marks done
@@ -340,6 +340,7 @@ Campaign:
 
 Region:
 - `id`, `campaignId`, `title`, `description?`, `order`, `provinceIds[]`, `progressPercent`, `status`
+- `mapTemplateId` (default: `region_v1`)
 - `mapRole?` (`core | frontier | archive | supply | neutral`)
 - `pressureLevel?`
 - `adjacentRegionIds[]?`
@@ -347,15 +348,18 @@ Region:
 Province:
 - `id`, `regionId`, `title`, `description?`
 - `desiredOutcome`, `firstStep`, `estimatedEntryMinutes`
+- `mapSlotId?` (binds province to a fixed SVG slot in the region template; if missing, province is still playable via an “unplaced provinces” list)
 - `dueDate?`, `effortLevel(1..5)`, `clarityLevel(1..5)`, `emotionalFrictionType?`
 - `state`, `progressStage`, `resistanceTags[]`
 - `provinceRole?` (`standard | fortress | watchtower | archive | depot`)
+- `decompositionCount` (default `0`)
+- `contextLinks[]?`, `contextNotes?` (used by Supply)
 - `adjacentProvinceIds[]` (for adjacency-driven map logic)
 - `frontPressureLevel?` (`0..3`)
-- `lastMeaningfulActionAt?`
+- `lastMeaningfulActionAt?` (meaningful actions only; used for siege detection)
 - `heroMomentShownAt?`
 - `isHotspot?`
-- `updatedAt`, `createdAt`
+- `updatedAt` (any persisted mutation), `createdAt`
 
 DailyMove:
 - `id`, `date`, `provinceId`, `moveType`, `durationMinutes`, `result`
@@ -480,7 +484,8 @@ Deliverables:
 - EPIC-13 tests/polish/release checklist.
 
 Week 3 exit (DoD):
-- product is ready for a 21-day pilot: daily ritual, season, event export.
+- product is ready for a 21-day pilot: daily ritual + season loop + release checklist.
+- if EPIC-12 ships: event export is available for pilot analysis.
 
 ## 11. Risks and mitigations
 

@@ -71,7 +71,9 @@ Enable fast creation so a user can create the first campaign/regions/provinces i
 **Steps:**
 1) Fields: title (required); optional clarity fields at creation time.
 2) Defaults for effortLevel/clarityLevel.
-3) Auto state: missing clarity fields → `fog`, else `ready`.
+3) Assign `mapSlotId` automatically (first free slot in the region template).
+   - If no free slot exists, leave `mapSlotId` empty (province becomes “unplaced” but still playable via the list panel).
+4) Auto state: missing clarity fields → `fog`, else `ready`.
 **Acceptance criteria:**
 - Province is visible on the map and can be opened.
 **DoD:**
