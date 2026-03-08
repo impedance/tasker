@@ -31,8 +31,12 @@ If any item below is missing, implementation will drift across EPICs and create 
 - [ ] Day boundary/time contract is final (04:00 local time): `epics/EPIC-01-foundation.md` (Appendix E).
 - [ ] Progress stage contract is final (exact stage update rules): `epics/EPIC-01-foundation.md` (Appendix G).
 - [ ] Copy layering contract is final (fantasy-first on map/home, plain-language on action surfaces): `epics/EPIC-01-foundation.md` (Appendix F).
-- [ ] Frontend “primitives layer” decision is locked (shadcn/ui + Radix; temporary system icons via Lucide) to avoid UI drift across EPICs: `prd.md` (Technical architecture).
+- [ ] Frontend “primitives layer” decision is locked for the target MVP (`shadcn/ui` + Radix; temporary system icons via Lucide), but implementation may land later than bootstrap. Do not document it as already installed until the packages and base primitives exist in code: `prd.md` (Technical architecture).
 - [ ] Map interaction runtime decision is locked (DOM/SVG-first + pan/zoom wrapper for MVP) and is kept decoupled from domain logic: `epics/EPIC-04-map-ui.md`.
+
+Bootstrap reality check:
+- As of 2026-03-08, the repo has the storage/domain bootstrap slice, but no dedicated `src/game/**`, `src/map/**`, `src/shared/**`, or `src/features/**` modules yet.
+- Readiness means the contracts are settled before those modules are added, not that they already exist.
 
 ---
 

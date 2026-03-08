@@ -2,6 +2,11 @@
 
 Keep this file short. Prefer links over duplication.
 
+Status note (2026-03-08):
+- `prd.md` and `epics/**` define the target MVP architecture.
+- The current repository implements only the bootstrap slice plus part of EPIC-03 (`src/app`, `src/pages`, `src/entities`, `src/storage`).
+- Treat paths under `src/features`, `src/game`, `src/map`, and `src/shared` as planned boundaries until they land in code.
+
 ## Start Here
 - Product spec (system of record): `prd.md`
 - Epic backlog + build order: `epics/00-index.md`
@@ -18,21 +23,26 @@ Keep this file short. Prefer links over duplication.
 - `npm run lint` — ESLint 80/20 static checks for TS/TSX
 - `npm run typecheck` — TypeScript checks for app + config files
 
-## Code Map (planned after EPIC-02 bootstrap)
-- **Entrypoints (web app):** `src/app/main.tsx`, `src/app/App.tsx`
-- **Pages / routes:** `src/pages/**`
-- **Core domain logic (pure rules):** `src/game/rules/**`
-- **Domain entities + types:** `src/entities/**`
-- **Features (use-case oriented):** `src/features/**`
-- **Map layer (SVG + metadata + graph):** `src/map/**`
-- **Storage + migrations + import/export:** `src/storage/**`
-- **Shared utilities + UI primitives:** `src/shared/**`
+## Code Map (current vs target)
+- Current:
+  - Entrypoints: `src/app/main.tsx`, `src/app/App.tsx`
+  - Route pages: `src/pages/**`
+  - Domain entities + validation: `src/entities/**`
+  - Storage + migrations + import/export: `src/storage/**`
+- Target MVP boundaries:
+  - Core domain rules: `src/game/rules/**`
+  - Features / use-case orchestration: `src/features/**`
+  - Map layer (SVG + metadata + graph): `src/map/**`
+  - Shared UI/theme/utilities: `src/shared/**`
 
-## Typing Surfaces (planned)
-- Rules boundary: `src/game/rules/**` — pure functions over typed inputs/outputs
-- Persistence boundary: `src/storage/**` — storage adapter interfaces + migration contracts
-- Import/export boundary: `src/storage/import_export/**` — exported JSON schema types + versioning
-- Map boundary: `src/map/**` — typed map meta + adjacency graph; SVG stays a view concern
+## Typing Surfaces
+- Current:
+  - Persistence boundary: `src/storage/**` — storage adapter interfaces + migration contracts
+  - Import/export boundary: `src/storage/import-export.ts` — exported JSON schema types + versioning
+  - Entity boundary: `src/entities/**` — domain types + runtime validation
+- Planned:
+  - Rules boundary: `src/game/rules/**` — pure functions over typed inputs/outputs
+  - Map boundary: `src/map/**` — typed map meta + adjacency graph; SVG stays a view concern
 
 ## Test Map (planned)
 - Smoke path: `npm test` (Vitest) via `make smoke`

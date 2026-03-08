@@ -24,6 +24,10 @@ Implementation readiness checklist: `epics/IMPLEMENTATION-READINESS.md`.
 ## Workstreams (Frontend vs Domain/Backend)
 Tasker MVP is a **backend-free** offline SPA. In this repo, “backend” means **in-browser domain logic** (not a server).
 
+Execution note (2026-03-08):
+- The current codebase already contains part of the BE track (`src/entities/**`, `src/storage/**`) and the bootstrap FE shell (`src/app/**`, `src/pages/**`).
+- `src/features/**`, `src/game/**`, `src/map/**`, and `src/shared/**` remain target-state modules for upcoming epics.
+
 - **Frontend (FE):** React UI, routing/navigation, screens, SVG map rendering + interactions, theming tokens, copy wiring, accessibility affordances.
 - **Domain/Backend (BE):** entity schemas + runtime validation, repositories + IndexedDB/localForage storage, import/export + migrations, rule engine transitions, recommendation algorithms, derived signals (pressure/hotspots), event logging.
 - **Shared:** contracts, cross-cutting wiring, tests (unit/integration/E2E), CI, QA checklists.

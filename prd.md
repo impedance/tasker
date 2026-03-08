@@ -416,8 +416,14 @@ IfThenPlan:
 
 ## 8. Technical architecture (MVP)
 
+Status note (2026-03-08):
+- This section defines the target MVP stack and module layout.
+- The current bootstrap repository already uses React, TypeScript, Vite, React Router, localForage, zod, Vitest, and Playwright.
+- Zustand, shadcn/ui, Radix Primitives, Lucide, and `react-zoom-pan-pinch` are planned choices for later epics; they are not yet part of the installed baseline.
+
 Stack:
 - React + TypeScript + Vite
+- React Router
 - Zustand (state management)
 - localForage (IndexedDB)
 - shadcn/ui (base UI components, as open code)

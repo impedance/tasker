@@ -15,6 +15,10 @@ System of record:
 - **Storage is an adapter:** persistence lives in `src/storage/**` behind a small typed interface; no IndexedDB/localForage calls from UI or rules.
 - **Map is layered:** SVG template is view-only; map metadata and adjacency graph are typed data independent from SVG.
 
+Current-repo interpretation:
+- These are target architecture constraints, not a claim that every layer already exists.
+- For the current bootstrap slice, `src/app`, `src/pages`, `src/entities`, and `src/storage` are the only implemented layers.
+
 ### 1.2. Offline-first and data safety
 - The app must be usable offline after initial load (no backend assumptions).
 - Persistence uses IndexedDB (via localForage) and is resilient to refresh/tab restart.
@@ -29,10 +33,27 @@ System of record:
 ### 2.1. Tech stack (recommended defaults)
 Use the PRD MVP stack unless a concrete blocker is found:
 - Vite + React + TypeScript
-- Zustand for state management
+- React Router for routing
 - localForage for IndexedDB
-- shadcn/ui + Radix (UI primitives)
+- zod for runtime validation at import/export and storage boundaries
+- Zustand for client state orchestration once rule-driven flows need it
+- shadcn/ui + Radix for shared UI primitives once `src/shared/**` is introduced
 - Vitest + React Testing Library; Playwright for E2E
+
+Implemented today:
+- Vite + React + TypeScript
+- React Router
+- localForage
+- zod
+- Vitest + React Testing Library
+- Playwright
+
+Planned, not yet present in `package.json`:
+- Zustand
+- shadcn/ui
+- Radix Primitives
+- react-zoom-pan-pinch
+- Lucide
 
 ### 2.2. Type safety
 - TypeScript should run in strict mode.
@@ -64,9 +85,11 @@ Wire these in `package.json` (names are stable to match the harness):
 - `test`
 - `e2e` (recommended)
 
+Current status:
+- All four scripts exist and are wired.
+
 ## 5) “Don’t do this” (anti-patterns)
 - UI components directly mutate persisted storage or call localForage.
 - Rules read from global state, `Date.now()`, or random generators without boundaries.
 - SVG template becomes the source of truth for adjacency/graph logic.
 - Multi-day mega-PRs: break work into junior-sized tickets with verifiable outputs.
-

@@ -12,8 +12,21 @@ System of record:
 - Local persistence (IndexedDB via localForage).
 - Import/export JSON for full state portability.
 
-## 2) Module layout (planned)
-Suggested module layout (from PRD):
+## 1.1) Current implementation status
+Implemented in the repo now:
+- App shell and routing in `src/app/**`
+- Route pages in `src/pages/**`
+- Domain entities and zod validation in `src/entities/**`
+- Storage, repositories, migrations, import/export in `src/storage/**`
+
+Planned but not yet implemented as first-class modules:
+- `src/features/**`
+- `src/game/**`
+- `src/map/**`
+- `src/shared/**`
+
+## 2) Target module layout
+Suggested target layout (from PRD):
 `src/app`, `src/pages`, `src/entities`, `src/features`, `src/game`, `src/map`, `src/storage`, `src/shared`.
 
 ### Responsibilities
@@ -26,7 +39,14 @@ Suggested module layout (from PRD):
 - `src/storage/**`: persistence adapter, repositories, migrations, import/export.
 - `src/shared/**`: shared UI primitives, utilities, formatting, small helpers.
 
-## 3) Data flow (recommended)
+## 3) Data flow
+
+Current bootstrap flow:
+1) Route/page code calls repository helpers in `src/storage/**`.
+2) Storage loads and persists `AppState`.
+3) UI renders directly from repository results.
+
+Target MVP flow after EPIC-04..08:
 
 ### “User action → world change”
 1) UI triggers a feature use-case (e.g., “log meaningful move”, “clarify fog”, “resolve siege”).
@@ -40,6 +60,10 @@ Suggested module layout (from PRD):
 - Storage owns migrations and import/export compatibility.
 - Import must validate unknown JSON and migrate to the latest schema version.
 
+Interim rule until `src/features/**` and `src/game/**` exist:
+- Keep business logic out of route components as much as possible.
+- New mechanics should not be added straight into pages; they should land in dedicated modules even if those modules are still under `src/storage/**` or `src/entities/**` temporarily.
+
 ## 4) Map layering contract
 - **SVG template (view):** contains paths/slots/labels with stable IDs.
 - **Map meta (data):** anchors, label positions, badge slots, etc (typed).
@@ -49,3 +73,5 @@ Suggested module layout (from PRD):
 - Centralize time access behind an injectable clock.
 - Keep “meaningful action time” semantics consistent with EPIC-01 contracts.
 
+Implementation note:
+- Current repositories still use `new Date()` directly. That is acceptable for the bootstrap slice, but any EPIC-06+ mechanics work should introduce a clock boundary before rule logic expands.
