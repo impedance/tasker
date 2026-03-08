@@ -12,6 +12,89 @@ Make maps the primary UX: clickable SVG territories, visible province states, ad
 Notes:
 - Keep the map DOM/SVG-first for MVP (events + CSS styling + tooltips). Avoid Canvas/Phaser complexity unless proven necessary.
 
+## 2) Art direction (MVP)
+Direction: **political/front map readability-first** (think classic grand strategy war maps), but with Shogunate theming expressed via **iconography and copy**, not painterly terrain.
+
+Rules (MVP):
+- Flat fills + bold borders; minimal/no terrain textures.
+- Province status must read at a glance via color/outline/pattern.
+- “Front pressure” and hotspots read as operational overlays (halo/outline), not as decorative effects.
+- Theming elements are limited to:
+  - clan `mon`-style icons/badges;
+  - stamp-like markers for siege/fortified/fog (still flat and minimal);
+  - typography and naming on non-action surfaces.
+
+## 2.1) Map style contract (CSS tokens + state mapping)
+Goal: make province states readable at a glance and implementation-consistent across the SVG, drawer, and any legends.
+
+Implementation constraints (MVP):
+- Prefer CSS variables and classes over inline SVG styling.
+- Do not rely on color only: use pattern/outline differences for at least `fog`, `siege`, and `fortified`.
+- Provide a reduced-motion mode for any map transitions (ties into EPIC-15 accessibility).
+
+### CSS variable tokens (recommended)
+Define tokens once (e.g., `src/shared/theme/map.css`) and consume them in map styles.
+
+**Base:**
+- `--map-bg`
+- `--province-stroke`
+- `--province-stroke-selected`
+- `--province-stroke-hover`
+- `--province-label`
+- `--overlay-hotspot`
+
+**State fills:**
+- `--province-fill-fog`
+- `--province-fill-ready`
+- `--province-fill-in-progress`
+- `--province-fill-siege`
+- `--province-fill-fortified`
+- `--province-fill-captured`
+- `--province-fill-retreated`
+
+**State patterns (SVG/CSS):**
+- `--pattern-fog` (soft hatch or noise)
+- `--pattern-fortified` (diagonal hatch)
+- `--pattern-siege` (ring/outline + stamp marker; pattern optional if marker is strong)
+
+### Default palette (suggested, adjustable)
+These are safe starting values for MVP; exact colors can be tuned later, but token semantics must remain stable.
+
+- Background: `--map-bg: #0f1420`
+- Borders: `--province-stroke: rgba(255,255,255,0.18)`
+- Labels: `--province-label: rgba(255,255,255,0.82)`
+
+- `fog`: `--province-fill-fog: #1b2333` + `--pattern-fog`
+- `ready`: `--province-fill-ready: #2b3a55`
+- `in_progress`: `--province-fill-in-progress: #2f6aa3` (cool “active”)
+- `siege`: `--province-fill-siege: #6b2b2b` (warm “blocked”) + siege stamp marker
+- `fortified`: `--province-fill-fortified: #5a4a2f` + `--pattern-fortified`
+- `captured`: `--province-fill-captured: #2f6b4f`
+- `retreated`: `--province-fill-retreated: #2a2a2a` + low-contrast opacity
+
+Hotspots/front pressure overlay (purely informational):
+- `--overlay-hotspot: rgba(255, 180, 60, 0.28)` for a soft halo/glow.
+
+### Province class mapping (contract)
+Every province SVG shape must receive exactly one of these classes:
+- `.province--fog`
+- `.province--ready`
+- `.province--in-progress`
+- `.province--siege`
+- `.province--fortified`
+- `.province--captured`
+- `.province--retreated`
+
+Interaction classes:
+- `.province--hover`
+- `.province--selected`
+- `.province--hotspot` (front pressure highlight)
+
+### State readability acceptance criteria
+- In a grayscale screenshot, `fog`, `siege`, and `fortified` are still distinguishable (pattern/outline/marker).
+- The user can identify hotspots without opening lists (halo/outline works on mobile sizes).
+- Selected province remains readable regardless of its state (selection stroke wins).
+
 ## 3) Scope
 **In scope:**
 - 1 campaign map SVG template + 1 region map SVG template (fixed assets).
@@ -29,6 +112,8 @@ Notes:
 - `CampaignMapPage` and `RegionMapPage`.
 - SVG assets + a stable ID/data-attribute convention.
 - Styling for each province state.
+- A minimal map style guide (colors/patterns) implemented in CSS tokens.
+- Asset plan (SVG templates, patterns, stamps, mon icons): `epics/ASSET-PLAN.md`.
 
 ## 6) Work breakdown
 

@@ -124,7 +124,7 @@ The user should primarily perceive Tasker as a **single-player strategy campaign
 - CRUD: campaigns/regions/provinces.
 - Province states + transitions via rule engine.
 - Fog-of-war (clarity: outcome/first step/entry time).
-- Siege (trigger: N=3 days without updates) + 5 tactics.
+- Siege (trigger: N=3 days without meaningful action) + 5 tactics.
 - Pressure Layer (ambient non-AI opposition): fog/siege/fortified/front pressure (soft, never punitive).
 - Stage-based province progress (not binary) with world-facing capture naming.
 - Daily Orders (3 orders) + War council (if-then plans).
@@ -169,6 +169,7 @@ Explicitly excluded from MVP:
 - Copy layering rule: map/home surfaces use fantasy-first terms; action screens use plain language for clarity fields (outcome / first step / entry time). Never hide the real-world meaning once the user is inside an action.
 - Rituals must stay short by design (see `epics/EPIC-01-foundation.md`, Appendix A).
 - Prefer “do” over “plan”: apply the 10/90 heuristic to prevent endless planning (see `epics/EPIC-01-foundation.md`, Appendix A).
+- Visual direction (MVP): a clean “political/front map” aesthetic (readability-first) similar to classic grand strategy war maps, with Shogunate theming expressed via iconography/copy rather than painterly terrain.
 
 ### 5.2. Product screens (MVP + P1 IA)
 1. Demo mission (tutorial campaign)
@@ -188,6 +189,7 @@ Explicitly excluded from MVP:
 - Color status by province state (fog/ready/siege/in_progress/fortified/captured/retreated).
 - Soft transitions when status changes.
 - Responsive scaling (desktop-first, mobile-friendly).
+- Front-style overlays: pressure/hotspots should read like “frontline attention” highlights, not like terrain or decorative art.
 
 ### 5.4. Non-functional requirements (MVP)
 - Browser SPA, no backend.
@@ -225,6 +227,7 @@ Provinces have stage-based progress (example scale):
 - captured: 100% (completed)
 
 Important: stage increases must be tied to real action (or meaningful clarification).
+Contract source of truth for stage updates: `epics/EPIC-01-foundation.md` (Appendix G).
 
 ### 6.3. Province states (state machine)
 States:
@@ -267,6 +270,7 @@ Before daily recommendations, the user can optionally complete a 3–5 second ri
 - energy: low / medium / high.
 
 The system should explain why the 3 recommended moves were chosen.
+Contract source of truth for “real step” and move logging: `epics/EPIC-01-foundation.md` (Appendix I).
 
 ### 6.6. Daily Orders (3 orders)
 Every day show 3 suggestions:
@@ -347,10 +351,12 @@ Region:
 
 Province:
 - `id`, `regionId`, `title`, `description?`
-- `desiredOutcome`, `firstStep`, `estimatedEntryMinutes`
+- `desiredOutcome?`, `firstStep?`, `estimatedEntryMinutes?` (required to exit `fog` and become `ready`)
 - `mapSlotId?` (binds province to a fixed SVG slot in the region template; if missing, province is still playable via an “unplaced provinces” list)
 - `dueDate?`, `effortLevel(1..5)`, `clarityLevel(1..5)`, `emotionalFrictionType?`
-- `state`, `progressStage`, `resistanceTags[]`
+- `state` (`fog | ready | siege | in_progress | fortified | captured | retreated`)
+- `progressStage` (`scouted | prepared | entered | held | captured`)
+- `resistanceTags[]`
 - `provinceRole?` (`standard | fortress | watchtower | archive | depot`)
 - `decompositionCount` (default `0`)
 - `contextLinks[]?`, `contextNotes?` (used by Supply)
@@ -363,6 +369,8 @@ Province:
 
 DailyMove:
 - `id`, `date`, `provinceId`, `moveType`, `durationMinutes`, `result`
+  - `moveType` (suggested enum): `scout | supply | engineer | raid | assault | retreat`
+  - `result` (suggested enum): `started | progressed | clarified | prepared | completed | retreated | skipped | blocked`
 
 PlayerCheckIn:
 - `id`, `date`, `energyLevel`, `availableMinutes`, `emotionType`

@@ -79,6 +79,7 @@ Make the MVP feel like a strategy game on first contact: a capital as home, a hu
    - create entries only after meaningful actions;
    - max 1 “high” importance entry per session;
    - entries are short human-readable lines (“chronicle lines”).
+   - avoid spam: do not write a Chronicle entry for every `prepare` action (supply/decompose) unless it crosses a milestone (e.g., first time a province becomes `prepared` or first supply on that province).
 3) Implement `ChroniclePage`: reverse chronological, filter by importance (optional).
 4) Add entry points from Capital and Season Debrief.
 **Acceptance criteria:**

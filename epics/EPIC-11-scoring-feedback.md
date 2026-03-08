@@ -26,8 +26,11 @@ Deliver MVP game feedback without toxicity: progress-first feedback for meaningf
 
 ### T1. Specify feedback model v1 (progress-first)
 **Steps:**
-1) Define which domain actions trigger feedback (clarify, start/move, siege resolved, complete, recover/retreat).
-2) Define what is shown: progressStage changes, short copy, and (optional) a small “meaningful day” marker.
+1) Define which domain actions trigger feedback (clarify, prepare, start, progress move logged, siege resolved, complete, recover/retreat).
+2) Define what is shown:
+   - subtle feedback for `prepare` actions (`province_supplied` / `province_decomposed`);
+   - stronger feedback for `start` and `progress` (`province_started` / `province_move_logged`);
+   - milestone feedback for `siege_resolve`, `complete`, and “meaningful day” marker.
 3) Define caps so celebration never becomes pressure (see EPIC-01 Appendix A prompt budget).
 **Acceptance criteria:**
 - No feedback is shown for passive browsing or app opens without meaningful action.
@@ -87,6 +90,7 @@ Deliver MVP game feedback without toxicity: progress-first feedback for meaningf
 3) Add an accessibility setting to reduce/disable celebratory intensity.
 **Acceptance criteria:**
 - Hero moments never trigger without meaningful action.
+- Hero moments must not reward “prepare loops” (see EPIC-01 Appendix A9).
 - Hero moments amplify progress without adding pressure.
 **DoD:**
 - Trigger rules, UI contract, and tests/spec are in place.

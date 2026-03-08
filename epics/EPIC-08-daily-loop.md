@@ -50,6 +50,7 @@ Add daily ritual loops: start-of-day “Daily Orders” (3 orders: light/medium/
 1) Candidate pool: fog/ready/sieged/in_progress provinces.
 2) Rules: one light (5m), one medium (15m), one main (25m+), adjusted by current check-in.
 3) Tie-breakers: recency, dueDate (if any), history.
+4) Soft anti-exploit (MVP): if a province is in a “prepare loop” (EPIC-01 Appendix A9 / I5), bias toward `raid` or `retreat`.
 **Acceptance criteria:**
 - Recommendations always resolve (no empty state without explanation).
 - Recommendations can explain the influence of current state/history.

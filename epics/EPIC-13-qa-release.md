@@ -17,6 +17,7 @@ Stabilize the MVP for a 21-day pilot: tests for critical rules and flows, a regr
 - README + user guide + known limitations + feedback form template;
 - release checklist.
 - Minimal verification checklist for core MVP scenarios (see `epics/IMPLEMENTATION-READINESS.md`).
+- Mechanics QA checklist (anti-exploit + time boundary + siege correctness): `epics/QA-MECHANICS-CHECKLIST.md`.
 
 ## 6) Work breakdown
 

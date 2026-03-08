@@ -170,6 +170,19 @@ Implications:
 - nudge toward a low-friction action (e.g., 5-minute raid or supply);
 - reduce celebratory intensity when a session has no meaningful action.
 
+## A9) Soft anti-exploit rules (MVP)
+These rules exist to keep the game aligned with real project execution.
+
+1) **No “prepare-only victory”:** repeated `prepare` actions (clarify/supply/decompose) should not feel like “beating the game”.
+   - UI feedback for prepare is allowed but must be subtle.
+   - Strong hero moments must prefer `start/progress/complete/siege_resolve` milestones.
+2) **Prepare loop detection (per province):**
+   - if a province has 3+ `prepare` meaningful actions without any `start/progress/complete/retreat` in the last 7 days:
+     - Daily Orders must bias toward `raid` or `retreat` for that province;
+     - show a non-shaming nudge (“Make the first small hit, or retreat”).
+3) **Decomposition bounds:** `decompose` should create 3–5 sub-provinces (MVP) to avoid infinite splitting.
+4) **No siege avoidance by edits:** siege is based on `lastMeaningfulActionAt`, not `updatedAt` (Appendix C).
+
 ## A6) Privacy-safe sharing rules
 Public-safe exports MUST exclude by default:
 - province/task titles and descriptions;
@@ -294,10 +307,12 @@ Minimum viable approach:
 - required: `isMeaningfulAction=true`, `meaningfulActionType=prepare`
 - optional (privacy-safe): `contextLinkCount`, `contextNotesLen`
 
-**`province_progressed`**
+**`province_move_logged`**
 - required: `provinceId`, `campaignId`, `seasonId`
 - required: `isMeaningfulAction=true`, `meaningfulActionType=progress`
-- required: `fromStage`, `toStage`
+- required: `durationMinutes`
+- optional: `moveType?` (`raid | assault | other`)
+- optional: `fromStage?`, `toStage?` (include only if stage changed)
 
 **`province_completed`**
 - required: `provinceId`, `campaignId`, `seasonId`
@@ -407,7 +422,7 @@ Meaningful actions MUST:
 Meaningful actions include:
 - Clarification that satisfies fog requirements (`province_clarified`).
 - First start of work (`province_started`).
-- Any real progress step that changes stage (`province_progressed`).
+- Any real progress step that logs time/effort (`province_move_logged`) — stage may or may not change.
 - Completing a province (`province_completed`).
 - Conscious retreat/reschedule (`province_retreated`).
 - Siege tactics application (`tactic_applied`) including `scout/supply/engineer/raid/retreat`.
@@ -462,7 +477,7 @@ Notes:
 | `ready` | `retreat/reschedule` | `retreated` | user chooses to defer/remove | set state; set `updatedAt`; set `lastMeaningfulActionAt` | `province_retreated` (meaningful: `retreat`) |
 | `ready` | `system_fortify_trigger` | `fortified` | `effortLevel >= 4` AND `decompositionCount == 0` AND not started | set state; set `updatedAt` | `province_fortified` (not meaningful) |
 | `ready` | `system_siege_trigger` | `siege` | `stalledDays >= N` where N=3 using `lastMeaningfulActionAt` (fallback `createdAt`) and per C5 eligible | create `SiegeEvent`; set state; set `updatedAt` | `siege_triggered` (not meaningful) |
-| `in_progress` | `log_move` | `in_progress` | user logs real progress | update stage if criteria met; set `updatedAt`; set `lastMeaningfulActionAt` | `province_progressed` (meaningful: `progress`, if stage changes) |
+| `in_progress` | `log_move` | `in_progress` | user logs a real step (Appendix I) | optionally update stage; set `updatedAt`; set `lastMeaningfulActionAt` | `province_move_logged` (meaningful: `progress`) |
 | `in_progress` | `supply` | `in_progress` | context/resources were added | update `contextLinks/contextNotes`; set `updatedAt`; set `lastMeaningfulActionAt` | `province_supplied` (meaningful: `prepare`) |
 | `in_progress` | `complete` | `captured` | user marks done | set state/stage; set `updatedAt`; set `lastMeaningfulActionAt` | `province_completed` (meaningful: `complete`) |
 | `in_progress` | `system_siege_trigger` | `siege` | same as `ready` | create `SiegeEvent`; set state; set `updatedAt` | `siege_triggered` (not meaningful) |
@@ -536,7 +551,7 @@ Minimum rules:
 - On `province_clarified` → stage becomes at least `scouted`.
 - On `province_supplied` or `province_decomposed` → stage becomes at least `prepared`.
 - On `province_started` → stage becomes at least `entered`.
-- On `province_progressed`:
+- On `province_move_logged`:
   - if current stage is `entered`, bump to `held`;
   - otherwise keep stage unless a later rule applies.
 - On `province_completed` → stage becomes `captured`.
@@ -561,7 +576,7 @@ Legend:
 | Supply | `supply` | `ready`, `in_progress`, `fortified` | update `contextLinks/contextNotes` | `province_supplied` | `prepare` |
 | Engineer | `decompose` | `ready`, `fortified` (also allowed in `siege` via `apply_tactic`) | create sub-provinces; bump `decompositionCount` | `province_decomposed` | `prepare` |
 | Raid (5m) | `start_move` | `ready` (also via `apply_tactic:raid` in `siege`) | record first real step (time-capped) | `province_started` (or `tactic_applied`) | `start` (or `siege_resolve`) |
-| Assault | `start_move` or `log_move` | `ready` / `in_progress` | record a real step (not time-capped) | `province_started` / `province_progressed` | `start` / `progress` |
+| Assault | `start_move` or `log_move` | `ready` / `in_progress` | record a real step (not time-capped) | `province_started` / `province_move_logged` | `start` / `progress` |
 | Retreat | `retreat` / `reschedule` | any except `captured` | set `retreated` or defer | `province_retreated` (or `tactic_applied` in siege) | `retreat` (or `siege_resolve`) |
 
 ## H2) Non-meaningful edits (MVP)
@@ -569,3 +584,48 @@ UI actions that change metadata (title/description/order/theme/dueDate/etc.) MUS
 - updates `updatedAt`,
 - does NOT update `lastMeaningfulActionAt`,
 - does NOT unlock feedback/chronicle/hero moments.
+
+---
+
+# Appendix I — “Real step” and move logging contract v1 (MVP)
+
+Goal: make `start_move` / `log_move` consistent, non-exploitable, and aligned with real-world project execution.
+
+## I1) Definitions
+- **Real step:** a concrete action taken in the real world toward the province outcome (work, communication, delivery, or unblock). It is not merely thinking about the task or reorganizing the app.
+- **Move logging:** the in-app representation of a real step. Logging is self-attested in MVP, but must follow the rules below.
+
+## I2) What counts as a real step (MVP examples)
+Counts:
+- wrote code / produced a draft / edited a real document;
+- sent an email/message that advances the task;
+- made a call / booked a meeting / requested input;
+- created a deliverable artifact (PR, design snippet, outline);
+- executed a concrete 5-minute entry action (“opened the repo and ran the tests”, “wrote the first paragraph”).
+
+Does NOT count:
+- renaming/reordering provinces, changing theme/banner, browsing maps;
+- “I thought about it” without producing an artifact or taking an external action;
+- excessive decomposition/supply loops without starting.
+
+## I3) `start_move` vs `log_move`
+- `start_move` is used when the province transitions `ready → in_progress` (first entry).
+- `log_move` is used for subsequent real steps in `in_progress`.
+
+Both actions are meaningful:
+- they must update `lastMeaningfulActionAt`;
+- they can count toward “meaningful days”;
+- they can unlock feedback (EPIC-11), chronicle entries (EPIC-15), and hero moments when milestone rules allow.
+
+## I4) Minimum payload contract (MVP)
+For `log_move`:
+- require `durationMinutes` (integer, `>= 1`).
+- optional: `moveType` (`raid | assault | other`).
+- optional: a free-text note MAY be stored in the province for the user, but MUST NOT be logged into analytics events in raw form (see Appendix B privacy).
+
+## I5) Anti-exploit rules (MVP)
+1) **No progress without clarity:** `start_move` is blocked if the province is `fog` (must clarify first).
+2) **No celebration for “fake work”:** non-meaningful edits never unlock feedback/chronicle/hero moments (Appendix H2).
+3) **Prepare loop detection (soft):** if a province receives 3+ `prepare`-type meaningful actions (`province_supplied`/`province_decomposed`) without any `start/progress/complete/retreat` in the last 7 days:
+   - Daily Orders must prefer `raid` or `retreat` for that province;
+   - reduce celebratory intensity for further prepare actions until a real step happens.

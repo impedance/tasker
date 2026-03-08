@@ -40,6 +40,7 @@ If any item below is missing, implementation will drift across EPICs and create 
   - create/clarify requires max 3–5 fields;
   - map click → real action in ≤2 clicks: `prd.md` (UX requirements) + `epics/EPIC-04-map-ui.md` (T8) + `epics/EPIC-05-creation-flows.md` (T5).
 - [ ] No toxic reward loops (no passive rewards, no streak shame): `epics/EPIC-01-foundation.md` (Appendix A).
+- [ ] Map art direction is locked: political/front map readability-first; theme via iconography/copy: `epics/EPIC-04-map-ui.md`.
 
 ---
 
@@ -59,10 +60,10 @@ MVP assumption: maps are fixed SVG templates (no procedural generation).
 ## 4) Action taxonomy (UI → domain)
 - [ ] UI move labels map 1:1 to domain actions/events:
   - `scout` → `clarify` (fog → ready) → `province_clarified`
-  - `supply` → `supply` (context fields) → `tactic_applied` (if in siege) or `province_supplied` (if out of siege, if implemented)
+  - `supply` → `supply` (context fields) → `tactic_applied` (if in siege) or `province_supplied` (if out of siege)
   - `engineer` → `decompose` → `province_decomposed`
   - `raid` → `start_move` with a time cap → `province_started`
-  - `assault` → `start_move` or `log_move` (real step) → `province_started`/`province_progressed`
+  - `assault` → `start_move` or `log_move` (real step) → `province_started`/`province_move_logged`
   - `retreat` → `retreat/reschedule` → `province_retreated`
 
 If a mapping is not implemented in MVP, the UI move must not exist.
@@ -90,4 +91,3 @@ Use these as “Definition of Done” anchors across EPICs:
 7) **Chronicle**: entries appear only after meaningful actions and are human-readable: `epics/EPIC-15-world-shell.md`.
 8) **Season**: day number stable with 04:00 boundary; summary/debrief works: `epics/EPIC-10-season.md`.
 9) **Persistence**: refresh safe; import/export roundtrip stable: `epics/EPIC-03-domain-persistence.md`.
-
