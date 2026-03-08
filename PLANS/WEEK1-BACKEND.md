@@ -18,16 +18,16 @@ Source of truth for ticket text: `PLANS/EPIC-02-05-junior-tickets.md`
 ## Week 1 checklist (execute in order)
 
 ### EPIC-03 (Domain + persistence)
-- [ ] `03-T1` Pick runtime validation strategy + wire into import (PR/commit: )
-- [ ] `03-T2` Define P0 entity types (Campaign/Region/Province) (PR/commit: )
-- [ ] `03-T3` Storage adapter (localForage) + key namespaces (PR/commit: )
-- [ ] `03-T4` Repository: Campaign (CRUD) (PR/commit: )
-- [ ] `03-T5` Repository: Region (CRUD + list by campaign) (PR/commit: )
-- [ ] `03-T6` Repository: Province (CRUD + list by region + mapSlot helper) (PR/commit: )
-- [ ] `03-T7` Schema version + migration pipeline (minimal) (PR/commit: )
-- [ ] `03-T8` JSON export/import (Settings) (PR/commit: )
+- [x] `03-T1` Pick runtime validation strategy + wire into import (PR/commit: implemented)
+- [x] `03-T2` Define P0 entity types (Campaign/Region/Province) (PR/commit: implemented)
+- [x] `03-T3` Storage adapter (localForage) + key namespaces (PR/commit: implemented)
+- [x] `03-T4` Repository: Campaign (CRUD) (PR/commit: implemented)
+- [x] `03-T5` Repository: Region (CRUD + list by campaign) (PR/commit: implemented)
+- [x] `03-T6` Repository: Province (CRUD + list by region + mapSlot helper) (PR/commit: implemented)
+- [x] `03-T7` Schema version + migration pipeline (minimal) (PR/commit: implemented)
+- [x] `03-T8` JSON export/import (Settings) (PR/commit: implemented)
 
 Shared (coordination-heavy):
-- [ ] `05-T5` First-run tutorial seed (BE: seed data + deterministic loader + removal/reset mechanics) (PR/commit: )  
+- [x] `05-T5` First-run tutorial seed (BE: seed data + deterministic loader + removal/reset mechanics) (PR/commit: implemented)  
   - BLOCKED:
 
