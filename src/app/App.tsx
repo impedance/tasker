@@ -1,49 +1,36 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
-
-function Home() {
-  return (
-    <div>
-      <h1>Tasker MVP</h1>
-      <p>A browser-based strategy game for personal project execution.</p>
-      <nav>
-        <ul>
-          <li><Link to="/">Home</Link></li>
-          <li><Link to="/campaigns">Campaigns</Link></li>
-          <li><Link to="/settings">Settings</Link></li>
-        </ul>
-      </nav>
-    </div>
-  )
-}
-
-function Campaigns() {
-  return (
-    <div>
-      <h1>Campaigns</h1>
-      <p>Your campaign map will appear here.</p>
-    </div>
-  )
-}
-
-function Settings() {
-  return (
-    <div>
-      <h1>Settings</h1>
-      <p>Import/Export and configuration.</p>
-    </div>
-  )
-}
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import CapitalPage from '../pages/CapitalPage';
+import MapPage from '../pages/MapPage';
+import ChroniclePage from '../pages/ChroniclePage';
 
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/campaigns" element={<Campaigns />} />
-        <Route path="/settings" element={<Settings />} />
-      </Routes>
+      <div className="min-h-screen bg-gray-50">
+        <nav className="bg-white border-b border-gray-200 p-4">
+          <ul className="flex space-x-6">
+            <li>
+              <Link to="/" className="text-blue-600 hover:underline font-medium">Capital</Link>
+            </li>
+            <li>
+              <Link to="/map" className="text-blue-600 hover:underline font-medium">Region Map</Link>
+            </li>
+            <li>
+              <Link to="/chronicle" className="text-blue-600 hover:underline font-medium">Chronicle</Link>
+            </li>
+          </ul>
+        </nav>
+
+        <main>
+          <Routes>
+            <Route path="/" element={<CapitalPage />} />
+            <Route path="/map" element={<MapPage />} />
+            <Route path="/chronicle" element={<ChroniclePage />} />
+          </Routes>
+        </main>
+      </div>
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;

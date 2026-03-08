@@ -20,14 +20,14 @@ Source of truth for ticket text: `PLANS/EPIC-02-05-junior-tickets.md`
 ## Week 1 checklist (execute in order)
 
 ### EPIC-02 (Bootstrap)
-- [ ] `02-T1` Initialize Vite + React + TypeScript (PR/commit: )
-- [ ] `02-T2` Add routing + 3 stub pages (PR/commit: )
-- [ ] `02-T3` Create `src/` module skeleton (PRD-aligned) (PR/commit: )
+- [x] `02-T1` Initialize Vite + React + TypeScript (PR/commit: initialized)
+- [x] `02-T2` Add routing + 3 stub pages (PR/commit: implemented)
+- [x] `02-T3` Create `src/` module skeleton (PRD-aligned) (PR/commit: implemented)
 
 Shared (can be taken by FE if needed):
-- [ ] `02-T4` Configure Vitest + RTL (one smoke) (PR/commit: )
-- [ ] `02-T5` Configure Playwright E2E (one smoke) (PR/commit: )
-- [ ] `02-T6` Add minimal CI workflow (PR/commit: )
+- [x] `02-T4` Configure Vitest + RTL (one smoke) (PR/commit: implemented)
+- [x] `02-T5` Configure Playwright E2E (one smoke) (PR/commit: implemented)
+- [x] `02-T6` Add minimal CI workflow (PR/commit: implemented)
 
 ### EPIC-04 (Map UI)
 - [ ] `04-T1` Add SVG templates + slot ID convention (PR/commit: )
