@@ -31,6 +31,8 @@ If any item below is missing, implementation will drift across EPICs and create 
 - [ ] Day boundary/time contract is final (04:00 local time): `epics/EPIC-01-foundation.md` (Appendix E).
 - [ ] Progress stage contract is final (exact stage update rules): `epics/EPIC-01-foundation.md` (Appendix G).
 - [ ] Copy layering contract is final (fantasy-first on map/home, plain-language on action surfaces): `epics/EPIC-01-foundation.md` (Appendix F).
+- [ ] Frontend “primitives layer” decision is locked (shadcn/ui + Radix; temporary system icons via Lucide) to avoid UI drift across EPICs: `prd.md` (Technical architecture).
+- [ ] Map interaction runtime decision is locked (DOM/SVG-first + pan/zoom wrapper for MVP) and is kept decoupled from domain logic: `epics/EPIC-04-map-ui.md`.
 
 ---
 
@@ -41,6 +43,7 @@ If any item below is missing, implementation will drift across EPICs and create 
   - map click → real action in ≤2 clicks: `prd.md` (UX requirements) + `epics/EPIC-04-map-ui.md` (T8) + `epics/EPIC-05-creation-flows.md` (T5).
 - [ ] No toxic reward loops (no passive rewards, no streak shame): `epics/EPIC-01-foundation.md` (Appendix A).
 - [ ] Map art direction is locked: political/front map readability-first; theme via iconography/copy: `epics/EPIC-04-map-ui.md`.
+- [ ] Motion policy is locked: only state-change/hero-moment transitions; reduced-motion safe defaults; no ambient loops that delay entry into action: `prd.md` (Technical architecture) + `epics/EPIC-15-world-shell.md`.
 
 ---
 

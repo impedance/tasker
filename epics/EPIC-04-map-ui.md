@@ -11,6 +11,15 @@ Make maps the primary UX: clickable SVG territories, visible province states, ad
 
 Notes:
 - Keep the map DOM/SVG-first for MVP (events + CSS styling + tooltips). Avoid Canvas/Phaser complexity unless proven necessary.
+- For MVP pan/zoom, prefer a lightweight wrapper (recommended: `react-zoom-pan-pinch`) and keep it isolated from domain logic.
+
+## 1.1) Map layering contract (must stay split)
+The map is not a single artifact. Keep these layers separate to avoid rework:
+- **Visual layer:** fixed SVG templates (slots, paths, label layers).
+- **Meta layer:** anchors/label positions/optional icon slots (JSON or TS config).
+- **Graph layer:** adjacency / neighbors (JSON or TS), independent from the SVG.
+
+Rationale: art iteration (SVG) must not break rules/adjacency, and rules iteration must not require editing SVG geometry.
 
 ## 2) Art direction (MVP)
 Direction: **political/front map readability-first** (think classic grand strategy war maps), but with Shogunate theming expressed via **iconography and copy**, not painterly terrain.
@@ -103,6 +112,7 @@ Interaction classes:
 - front pressure highlights (soft, non-punitive).
 - command route drawing (Capital → target province) as visual feedback.
 - responsive scaling.
+- optional pan/zoom for the region map surface (desktop wheel + drag pan; touch pinch/zoom).
 
 **Out of scope:**
 - procedural map generation;
@@ -114,6 +124,7 @@ Interaction classes:
 - Styling for each province state.
 - A minimal map style guide (colors/patterns) implemented in CSS tokens.
 - Asset plan (SVG templates, patterns, stamps, mon icons): `epics/ASSET-PLAN.md`.
+- A thin set of map primitives (component-level contract): ProvincePath, ProvinceLabel, ProvinceStateOverlay, ProvinceRoleBadge, SiegeRing, FogLayer, RouteLine, CapitalMarker.
 
 ## 6) Work breakdown
 
@@ -168,6 +179,7 @@ Interaction classes:
 **Steps:**
 1) Scale SVG to fit container.
 2) Verify on desktop and mobile sizes.
+3) If pan/zoom is enabled, ensure default zoom reads well and never replaces base readability.
 **Acceptance criteria:**
 - Click targets remain accurate.
 **DoD:**

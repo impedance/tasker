@@ -27,6 +27,7 @@ Ship a working SPA skeleton (React+TS+Vite) with tests and basic automation so j
 - Vitest + RTL configured with at least 1–2 smoke tests.
 - Playwright E2E smoke scenario.
 - CI runs checks.
+- Minimal UI primitives layer ready (shadcn/ui + tokens) so feature work is not blocked on basic components.
 
 ## 6) Work breakdown
 
@@ -43,7 +44,7 @@ Ship a working SPA skeleton (React+TS+Vite) with tests and basic automation so j
 
 ### T2. Create `src/` skeleton per PRD
 **Steps:**
-1) Create folders: `app/pages/entities/features/game/storage/shared`.
+1) Create folders: `app/pages/entities/features/game/map/storage/shared` (plus `shared/theme` if used).
 2) Add `App` and 2–3 page stubs.
 3) Optional: configure import aliases.
 **Acceptance criteria:**
@@ -92,4 +93,21 @@ Ship a working SPA skeleton (React+TS+Vite) with tests and basic automation so j
 - PR checks run successfully.
 **DoD:**
 - CI is present and green on main.
+**Estimate:** `M`
+
+### T7. Initialize UI primitives (shadcn/ui) + minimal tokens
+**Goal:** prevent juniors from building ad-hoc UI primitives and drifting into a dashboard-first layout.
+
+**Steps:**
+1) Add shadcn/ui to the repo and configure Tailwind if needed by the chosen setup.
+2) Add minimal CSS variables/tokens (spacing, radius, typography, motion durations).
+3) Add 5–8 base components as “thin foundation”: Button, IconButton, Panel, Drawer/Sheet, Dialog, Tabs, Input, Badge.
+
+**Acceptance criteria:**
+- Feature stubs can render “Capital / Map / Drawer / Chronicle” without custom low-level UI work.
+- Visuals remain game-first (no copy-pasting dashboard layouts from component demos).
+
+**DoD:**
+- UI primitives are available under `src/shared/ui/` (or equivalent) and are used by at least one stub page.
+
 **Estimate:** `M`

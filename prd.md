@@ -420,22 +420,33 @@ Stack:
 - React + TypeScript + Vite
 - Zustand (state management)
 - localForage (IndexedDB)
-- SVG map + CSS animations
+- shadcn/ui (base UI components, as open code)
+- Radix Primitives (interaction/accessibility primitives; used directly or via shadcn)
+- SVG map + CSS tokens/variables (state-driven styling)
+- react-zoom-pan-pinch (map pan/zoom for MVP)
+- Motion (selective animation only: state changes + “hero moments”, reduced-motion safe defaults)
+- Lucide (temporary system icons; world/map identity uses custom SVG assets)
 - Vitest + React Testing Library; Playwright for E2E
 
 Rationale (MVP):
 - SVG keeps the map in the DOM (native hover/click, cheap state coloring).
 - IndexedDB via localForage avoids `localStorage` size limits and blocking writes.
 - Zustand keeps state wiring lightweight while remaining testable/persistable.
+- shadcn/Radix reduce UI “low-level” effort without locking the product into a dashboard look.
+- A lightweight pan/zoom wrapper is enough for MVP; avoid GIS/canvas/WebGL engines until proven necessary.
 
 Architecture principles:
 - domain rules and state transitions live in `game/rules` as pure functions;
 - UI contains no rule business logic;
 - storage adapter is isolated (`storage/...`);
 - recommendation engine is separate.
+- Map implementation is split into layers:
+  - visual SVG template (slots/paths/labels);
+  - map meta (anchors, labels, role badge slots);
+  - adjacency/graph data (neighbors), independent from the SVG.
 
 Suggested module layout:
-`src/app`, `src/pages`, `src/entities`, `src/features`, `src/game`, `src/storage`, `src/shared`.
+`src/app`, `src/pages`, `src/entities`, `src/features`, `src/game`, `src/map`, `src/storage`, `src/shared`.
 
 ## 9. Delivery plan and epic backlog (system of record)
 
@@ -498,6 +509,7 @@ Week 3 exit (DoD):
 ## 11. Risks and mitigations
 
 - SVG map complexity → use 1–2 fixed templates; no procedural generation.
+- UI drifts into a dashboard/to-do app → enforce map-first surfaces + copy layering; use shadcn/Radix only as interaction mechanics, not as a layout/style template.
 - “Gaming the system” → rewards only for meaningful actions; soft anti-abuse rules.
 - Too much manual input → strict limit on required fields.
 - “Too childish” perception → clean, minimal visual language; careful copy.

@@ -68,7 +68,7 @@ Licensing:
 
 ### 1.5. UI icon set (P0)
 Use an existing open-source icon set for general UI controls (settings, back, close, import/export, etc.).
-- Recommendation: Tabler Icons (MIT) as the default UI baseline.
+- Recommendation: Lucide icons (`lucide-react`) as the default UI baseline (temporary system layer).
 
 No need to duplicate the full set in repo; use dependency + only export selected icons if desired.
 
@@ -123,6 +123,10 @@ Rules:
 - Convert strokes to paths only if necessary; keep shapes editable.
 - Ensure `viewBox` is set; avoid hardcoded width/height-only scaling.
 - Avoid embedded raster images in MVP.
+- Keep decorative layers separated from interactive hit areas (slots) wherever possible.
+- Remove hidden junk layers/objects before shipping.
+- Run SVG optimization (e.g., SVGO) before committing runtime assets.
+- Keep a simple asset ledger (source + license + attribution notes if required) for any borrowed icons/textures; never treat preview images as production assets.
 
 ### 3.2. Mon + stamps creation
 Options:
@@ -151,4 +155,3 @@ Icons:
 1) Slot count for `region_v1`: 12, 16, or 20?
 2) Do we want province labels on-map in MVP, or drawer-only?
 3) Do we want roads/connection lines in MVP, or only adjacency logic?
-
