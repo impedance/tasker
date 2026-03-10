@@ -5,7 +5,11 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { KEY_PREFIX, getItem, setItem, removeItem, getKeysByPrefix } from './storage';
-import type { Campaign, Region, Province } from '../entities/types';
+import type {
+  Campaign, Region, Province, DailyMove, PlayerProfile,
+  Season, SiegeEvent, IfThenPlan, SeasonReview, HeroMoment,
+  ChronicleEntry, ShareCard
+} from '../entities/types';
 
 // ============================================================================
 // Campaign Repository
@@ -405,3 +409,261 @@ export const provinceRepository = {
     return province;
   }
 };
+
+// ============================================================================
+// DailyMove Repository
+// ============================================================================
+
+export const dailyMoveRepository = {
+  async getById(id: string): Promise<DailyMove | null> {
+    return getItem<DailyMove>(`${KEY_PREFIX}dailyMove:${id}`);
+  },
+  async list(): Promise<DailyMove[]> {
+    const keys = await getKeysByPrefix(`${KEY_PREFIX}dailyMove:`);
+    const items = await Promise.all(keys.map(k => getItem<DailyMove>(k)));
+    return items.filter((i): i is DailyMove => i !== null);
+  },
+  async listByDate(date: string): Promise<DailyMove[]> {
+    const items = await this.list();
+    return items.filter(i => i.date === date);
+  },
+  async create(data: Omit<DailyMove, 'id' | 'createdAt'>): Promise<DailyMove> {
+    const item: DailyMove = { ...data, id: uuidv4(), createdAt: new Date().toISOString() };
+    await setItem(`${KEY_PREFIX}dailyMove:${item.id}`, item);
+    return item;
+  },
+  async delete(id: string): Promise<boolean> {
+    await removeItem(`${KEY_PREFIX}dailyMove:${id}`);
+    return true;
+  }
+};
+
+// ============================================================================
+// PlayerProfile Repository
+// ============================================================================
+
+export const playerProfileRepository = {
+  async get(): Promise<PlayerProfile | null> {
+    return getItem<PlayerProfile>(`${KEY_PREFIX}playerProfile`);
+  },
+  async update(data: Partial<PlayerProfile>): Promise<PlayerProfile> {
+    const current = await this.get();
+    const updated: PlayerProfile = {
+      ...(current || {
+        id: 'local',
+        totalCaptured: 0,
+        totalClarified: 0,
+        totalStarted: 0,
+        totalCompleted: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }),
+      ...data,
+      id: 'local',
+      updatedAt: new Date().toISOString()
+    };
+    await setItem(`${KEY_PREFIX}playerProfile`, updated);
+    return updated;
+  }
+};
+
+// ============================================================================
+// Season Repository
+// ============================================================================
+
+export const seasonRepository = {
+  async getById(id: string): Promise<Season | null> {
+    return getItem<Season>(`${KEY_PREFIX}season:${id}`);
+  },
+  async list(): Promise<Season[]> {
+    const keys = await getKeysByPrefix(`${KEY_PREFIX}season:`);
+    const items = await Promise.all(keys.map(k => getItem<Season>(k)));
+    return items.filter((i): i is Season => i !== null);
+  },
+  async create(data: Omit<Season, 'id' | 'createdAt' | 'updatedAt'>): Promise<Season> {
+    const item: Season = {
+      ...data,
+      id: uuidv4(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    await setItem(`${KEY_PREFIX}season:${item.id}`, item);
+    return item;
+  },
+  async update(id: string, data: Partial<Season>): Promise<Season | null> {
+    const current = await this.getById(id);
+    if (!current) return null;
+    const updated: Season = { ...current, ...data, updatedAt: new Date().toISOString() };
+    await setItem(`${KEY_PREFIX}season:${id}`, updated);
+    return updated;
+  }
+};
+
+// ============================================================================
+// SiegeEvent Repository
+// ============================================================================
+
+export const siegeEventRepository = {
+  async getById(id: string): Promise<SiegeEvent | null> {
+    return getItem<SiegeEvent>(`${KEY_PREFIX}siegeEvent:${id}`);
+  },
+  async list(): Promise<SiegeEvent[]> {
+    const keys = await getKeysByPrefix(`${KEY_PREFIX}siegeEvent:`);
+    const items = await Promise.all(keys.map(k => getItem<SiegeEvent>(k)));
+    return items.filter((i): i is SiegeEvent => i !== null);
+  },
+  async create(data: Omit<SiegeEvent, 'id' | 'triggeredAt'>): Promise<SiegeEvent> {
+    const item: SiegeEvent = {
+      ...data,
+      id: uuidv4(),
+      triggeredAt: new Date().toISOString()
+    };
+    await setItem(`${KEY_PREFIX}siegeEvent:${item.id}`, item);
+    return item;
+  },
+  async delete(id: string): Promise<boolean> {
+    await removeItem(`${KEY_PREFIX}siegeEvent:${id}`);
+    return true;
+  }
+};
+
+// ============================================================================
+// IfThenPlan Repository
+// ============================================================================
+
+export const ifThenPlanRepository = {
+  async getById(id: string): Promise<IfThenPlan | null> {
+    return getItem<IfThenPlan>(`${KEY_PREFIX}ifThenPlan:${id}`);
+  },
+  async list(): Promise<IfThenPlan[]> {
+    const keys = await getKeysByPrefix(`${KEY_PREFIX}ifThenPlan:`);
+    const items = await Promise.all(keys.map(k => getItem<IfThenPlan>(k)));
+    return items.filter((i): i is IfThenPlan => i !== null);
+  },
+  async create(data: Omit<IfThenPlan, 'id' | 'createdAt'>): Promise<IfThenPlan> {
+    const item: IfThenPlan = {
+      ...data,
+      id: uuidv4(),
+      createdAt: new Date().toISOString()
+    };
+    await setItem(`${KEY_PREFIX}ifThenPlan:${item.id}`, item);
+    return item;
+  },
+  async delete(id: string): Promise<boolean> {
+    await removeItem(`${KEY_PREFIX}ifThenPlan:${id}`);
+    return true;
+  }
+};
+
+// ============================================================================
+// SeasonReview Repository
+// ============================================================================
+
+export const seasonReviewRepository = {
+  async getById(id: string): Promise<SeasonReview | null> {
+    return getItem<SeasonReview>(`${KEY_PREFIX}seasonReview:${id}`);
+  },
+  async list(): Promise<SeasonReview[]> {
+    const keys = await getKeysByPrefix(`${KEY_PREFIX}seasonReview:`);
+    const items = await Promise.all(keys.map(k => getItem<SeasonReview>(k)));
+    return items.filter((i): i is SeasonReview => i !== null);
+  },
+  async create(data: Omit<SeasonReview, 'id' | 'createdAt'>): Promise<SeasonReview> {
+    const item: SeasonReview = {
+      ...data,
+      id: uuidv4(),
+      createdAt: new Date().toISOString()
+    };
+    await setItem(`${KEY_PREFIX}seasonReview:${item.id}`, item);
+    return item;
+  },
+  async delete(id: string): Promise<boolean> {
+    await removeItem(`${KEY_PREFIX}seasonReview:${id}`);
+    return true;
+  }
+};
+
+// ============================================================================
+// HeroMoment Repository
+// ============================================================================
+
+export const heroMomentRepository = {
+  async getById(id: string): Promise<HeroMoment | null> {
+    return getItem<HeroMoment>(`${KEY_PREFIX}heroMoment:${id}`);
+  },
+  async list(): Promise<HeroMoment[]> {
+    const keys = await getKeysByPrefix(`${KEY_PREFIX}heroMoment:`);
+    const items = await Promise.all(keys.map(k => getItem<HeroMoment>(k)));
+    return items.filter((i): i is HeroMoment => i !== null);
+  },
+  async create(data: Omit<HeroMoment, 'id' | 'triggeredAt'>): Promise<HeroMoment> {
+    const item: HeroMoment = {
+      ...data,
+      id: uuidv4(),
+      triggeredAt: new Date().toISOString()
+    };
+    await setItem(`${KEY_PREFIX}heroMoment:${item.id}`, item);
+    return item;
+  },
+  async delete(id: string): Promise<boolean> {
+    await removeItem(`${KEY_PREFIX}heroMoment:${id}`);
+    return true;
+  }
+};
+
+// ============================================================================
+// ChronicleEntry Repository
+// ============================================================================
+
+export const chronicleEntryRepository = {
+  async getById(id: string): Promise<ChronicleEntry | null> {
+    return getItem<ChronicleEntry>(`${KEY_PREFIX}chronicleEntry:${id}`);
+  },
+  async list(): Promise<ChronicleEntry[]> {
+    const keys = await getKeysByPrefix(`${KEY_PREFIX}chronicleEntry:`);
+    const items = await Promise.all(keys.map(k => getItem<ChronicleEntry>(k)));
+    return items.filter((i): i is ChronicleEntry => i !== null);
+  },
+  async create(data: Omit<ChronicleEntry, 'id' | 'createdAt'>): Promise<ChronicleEntry> {
+    const item: ChronicleEntry = {
+      ...data,
+      id: uuidv4(),
+      createdAt: new Date().toISOString()
+    };
+    await setItem(`${KEY_PREFIX}chronicleEntry:${item.id}`, item);
+    return item;
+  },
+  async delete(id: string): Promise<boolean> {
+    await removeItem(`${KEY_PREFIX}chronicleEntry:${id}`);
+    return true;
+  }
+};
+
+// ============================================================================
+// ShareCard Repository
+// ============================================================================
+
+export const shareCardRepository = {
+  async getById(id: string): Promise<ShareCard | null> {
+    return getItem<ShareCard>(`${KEY_PREFIX}shareCard:${id}`);
+  },
+  async list(): Promise<ShareCard[]> {
+    const keys = await getKeysByPrefix(`${KEY_PREFIX}shareCard:`);
+    const items = await Promise.all(keys.map(k => getItem<ShareCard>(k)));
+    return items.filter((i): i is ShareCard => i !== null);
+  },
+  async create(data: Omit<ShareCard, 'id' | 'generatedAt'>): Promise<ShareCard> {
+    const item: ShareCard = {
+      ...data,
+      id: uuidv4(),
+      generatedAt: new Date().toISOString()
+    };
+    await setItem(`${KEY_PREFIX}shareCard:${item.id}`, item);
+    return item;
+  },
+  async delete(id: string): Promise<boolean> {
+    await removeItem(`${KEY_PREFIX}shareCard:${id}`);
+    return true;
+  }
+};
+

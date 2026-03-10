@@ -43,8 +43,7 @@ export async function initStorage(): Promise<void> {
     }
   } catch (error) {
     console.error('[Storage] Failed to initialize storage:', error);
-    // eslint-disable-next-line preserve-caught-error
-    throw new Error('Failed to initialize storage');
+    throw new Error('Failed to initialize storage', { cause: error });
   }
 }
 
@@ -69,8 +68,7 @@ export async function setSchemaVersion(version: number): Promise<void> {
     await db.setItem(KEY_SCHEMA_VERSION, version);
   } catch (error) {
     console.error('[Storage] Failed to set schema version:', error);
-    // eslint-disable-next-line preserve-caught-error
-    throw new Error('Failed to set schema version');
+    throw new Error('Failed to set schema version', { cause: error });
   }
 }
 
@@ -100,8 +98,7 @@ export async function setItem<T>(key: string, value: T): Promise<T> {
     return value;
   } catch (error) {
     console.error(`[Storage] Failed to set item '${key}':`, error);
-    // eslint-disable-next-line preserve-caught-error
-    throw new Error(`Failed to save ${key}`);
+    throw new Error(`Failed to save ${key}`, { cause: error });
   }
 }
 
@@ -113,8 +110,7 @@ export async function removeItem(key: string): Promise<void> {
     await db.removeItem(key);
   } catch (error) {
     console.error(`[Storage] Failed to remove item '${key}':`, error);
-    // eslint-disable-next-line preserve-caught-error
-    throw new Error(`Failed to remove ${key}`);
+    throw new Error(`Failed to remove ${key}`, { cause: error });
   }
 }
 
@@ -144,8 +140,7 @@ export async function clearAll(): Promise<void> {
     await db.clear();
   } catch (error) {
     console.error('[Storage] Failed to clear storage:', error);
-    // eslint-disable-next-line preserve-caught-error
-    throw new Error('Failed to clear storage');
+    throw new Error('Failed to clear storage', { cause: error });
   }
 }
 
@@ -248,8 +243,7 @@ export async function saveAppState(state: AppState): Promise<void> {
 
   } catch (error) {
     console.error('[Storage] Failed to save app state:', error);
-    // eslint-disable-next-line preserve-caught-error
-    throw new Error('Failed to save app state');
+    throw new Error('Failed to save app state', { cause: error });
   }
 }
 

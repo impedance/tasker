@@ -13,6 +13,13 @@ test('can navigate to Campaigns', async ({ page }) => {
   await expect(page.getByRole('heading', { name: /Campaigns/i })).toBeVisible()
 })
 
+test('can navigate to Map', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('link', { name: /Map/i }).click()
+  await expect(page).toHaveURL(/\/map$/)
+  await expect(page.getByRole('heading', { name: /Region Map/i })).toBeVisible()
+})
+
 test('can open Settings directly', async ({ page }) => {
   await page.goto('/settings')
   await expect(page).toHaveURL(/\/settings$/)
