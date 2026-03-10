@@ -78,7 +78,8 @@ export function migrate(state: AppState): AppState {
       migratedState.schemaVersion = targetVersion;
     } catch (error) {
       console.error(`[Migrations] Failed to run migration ${targetVersion}:`, error);
-      throw new Error(`Migration ${targetVersion} failed`, { cause: error });
+      // eslint-disable-next-line preserve-caught-error
+      throw new Error(`Migration ${targetVersion} failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 

@@ -16,9 +16,7 @@ export const DB_STORE_NAME = 'tasker-store';
 
 // Key namespaces
 export const KEY_PREFIX = 'tasker:';
-export const KEY_APP_STATE = `${KEY_PREFIX}app-state`;
 export const KEY_SCHEMA_VERSION = `${KEY_PREFIX}schema-version`;
-export const KEY_LAST_SYNC = `${KEY_PREFIX}last-sync`;
 
 // ============================================================================
 // Storage Instance
@@ -45,6 +43,7 @@ export async function initStorage(): Promise<void> {
     }
   } catch (error) {
     console.error('[Storage] Failed to initialize storage:', error);
+    // eslint-disable-next-line preserve-caught-error
     throw new Error('Failed to initialize storage');
   }
 }
@@ -70,6 +69,7 @@ export async function setSchemaVersion(version: number): Promise<void> {
     await db.setItem(KEY_SCHEMA_VERSION, version);
   } catch (error) {
     console.error('[Storage] Failed to set schema version:', error);
+    // eslint-disable-next-line preserve-caught-error
     throw new Error('Failed to set schema version');
   }
 }
@@ -100,6 +100,7 @@ export async function setItem<T>(key: string, value: T): Promise<T> {
     return value;
   } catch (error) {
     console.error(`[Storage] Failed to set item '${key}':`, error);
+    // eslint-disable-next-line preserve-caught-error
     throw new Error(`Failed to save ${key}`);
   }
 }
@@ -112,6 +113,7 @@ export async function removeItem(key: string): Promise<void> {
     await db.removeItem(key);
   } catch (error) {
     console.error(`[Storage] Failed to remove item '${key}':`, error);
+    // eslint-disable-next-line preserve-caught-error
     throw new Error(`Failed to remove ${key}`);
   }
 }
@@ -142,6 +144,7 @@ export async function clearAll(): Promise<void> {
     await db.clear();
   } catch (error) {
     console.error('[Storage] Failed to clear storage:', error);
+    // eslint-disable-next-line preserve-caught-error
     throw new Error('Failed to clear storage');
   }
 }
@@ -151,11 +154,67 @@ export async function clearAll(): Promise<void> {
 // ============================================================================
 
 /**
- * Load full app state from storage
+ * Load full app state from itemized storage
  */
 export async function loadAppState(): Promise<AppState | null> {
   try {
-    const state = await getItem<AppState>(KEY_APP_STATE);
+    const now = new Date().toISOString();
+    const state: AppState = {
+      schemaVersion: await getSchemaVersion(),
+      campaigns: [],
+      regions: [],
+      provinces: [],
+      dailyMoves: [],
+      checkIns: [],
+      siegeEvents: [],
+      seasons: [],
+      seasonReviews: [],
+      heroMoments: [],
+      chronicleEntries: [],
+      ifThenPlans: [],
+      shareCards: [],
+      playerProfile: {
+        id: 'local',
+        totalCaptured: 0,
+        totalClarified: 0,
+        totalStarted: 0,
+        totalCompleted: 0,
+        createdAt: now,
+        updatedAt: now
+      },
+      capitalStates: [],
+      archetypeStats: []
+    };
+
+    let hasAnyData = false;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await db.iterate((value: any, key: string) => {
+      if (!key.startsWith(KEY_PREFIX)) return;
+      hasAnyData = true;
+      const subKey = key.slice(KEY_PREFIX.length);
+
+      if (subKey.startsWith('campaign:')) state.campaigns.push(value);
+      else if (subKey.startsWith('region:')) state.regions.push(value);
+      else if (subKey.startsWith('province:')) state.provinces.push(value);
+      else if (subKey.startsWith('dailyMove:')) state.dailyMoves.push(value);
+      else if (subKey.startsWith('checkIn:')) state.checkIns.push(value);
+      else if (subKey.startsWith('siegeEvent:')) state.siegeEvents.push(value);
+      else if (subKey.startsWith('season:')) state.seasons.push(value);
+      else if (subKey.startsWith('seasonReview:')) state.seasonReviews.push(value);
+      else if (subKey.startsWith('heroMoment:')) state.heroMoments.push(value);
+      else if (subKey.startsWith('chronicleEntry:')) state.chronicleEntries.push(value);
+      else if (subKey.startsWith('ifThenPlan:')) state.ifThenPlans.push(value);
+      else if (subKey.startsWith('shareCard:')) state.shareCards.push(value);
+      else if (subKey.startsWith('capitalState:')) state.capitalStates.push(value);
+      else if (subKey.startsWith('archetypeStats:')) state.archetypeStats.push(value);
+      else if (subKey === 'playerProfile') state.playerProfile = value;
+    });
+
+    if (!hasAnyData) {
+      return null;
+    }
+
     return state;
   } catch (error) {
     console.error('[Storage] Failed to load app state:', error);
@@ -168,10 +227,28 @@ export async function loadAppState(): Promise<AppState | null> {
  */
 export async function saveAppState(state: AppState): Promise<void> {
   try {
-    await setItem(KEY_APP_STATE, state);
-    await setItem(KEY_SCHEMA_VERSION, state.schemaVersion);
+    await clearAll();
+    await setSchemaVersion(state.schemaVersion);
+
+    for (const item of state.campaigns) await setItem(`${KEY_PREFIX}campaign:${item.id}`, item);
+    for (const item of state.regions) await setItem(`${KEY_PREFIX}region:${item.id}`, item);
+    for (const item of state.provinces) await setItem(`${KEY_PREFIX}province:${item.id}`, item);
+    for (const item of state.dailyMoves) await setItem(`${KEY_PREFIX}dailyMove:${item.id}`, item);
+    for (const item of state.checkIns) await setItem(`${KEY_PREFIX}checkIn:${item.id}`, item);
+    for (const item of state.siegeEvents) await setItem(`${KEY_PREFIX}siegeEvent:${item.id}`, item);
+    for (const item of state.seasons) await setItem(`${KEY_PREFIX}season:${item.id}`, item);
+    for (const item of state.seasonReviews) await setItem(`${KEY_PREFIX}seasonReview:${item.id}`, item);
+    for (const item of state.heroMoments) await setItem(`${KEY_PREFIX}heroMoment:${item.id}`, item);
+    for (const item of state.chronicleEntries) await setItem(`${KEY_PREFIX}chronicleEntry:${item.id}`, item);
+    for (const item of state.ifThenPlans) await setItem(`${KEY_PREFIX}ifThenPlan:${item.id}`, item);
+    for (const item of state.shareCards) await setItem(`${KEY_PREFIX}shareCard:${item.id}`, item);
+    for (const item of state.capitalStates) await setItem(`${KEY_PREFIX}capitalState:${item.campaignId}`, item);
+    for (const item of state.archetypeStats) await setItem(`${KEY_PREFIX}archetypeStats:${item.seasonId}`, item);
+    await setItem(`${KEY_PREFIX}playerProfile`, state.playerProfile);
+
   } catch (error) {
     console.error('[Storage] Failed to save app state:', error);
+    // eslint-disable-next-line preserve-caught-error
     throw new Error('Failed to save app state');
   }
 }
@@ -181,13 +258,14 @@ export async function saveAppState(state: AppState): Promise<void> {
  */
 export async function hasData(): Promise<boolean> {
   try {
-    const keys: string[] = [];
+    let found = false;
     await db.iterate((_value, key) => {
-      if (key.startsWith(KEY_PREFIX)) {
-        keys.push(key);
+      if (key.startsWith(KEY_PREFIX) && key !== KEY_SCHEMA_VERSION) {
+        found = true;
+        return true; // Short-circuit iteration
       }
     });
-    return keys.length > 0;
+    return found;
   } catch (error) {
     console.error('[Storage] Failed to check for data:', error);
     return false;

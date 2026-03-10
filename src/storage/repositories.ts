@@ -4,57 +4,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { KEY_APP_STATE, getItem, setItem } from './storage';
-import { CURRENT_SCHEMA_VERSION } from './migrations';
-import type { Campaign, Region, Province, AppState } from '../entities/types';
-
-// ============================================================================
-// Helper
-// ============================================================================
-
-/**
- * Load app state or return empty state
- */
-async function loadState(): Promise<AppState> {
-  const existing = await getItem<AppState>(KEY_APP_STATE);
-  if (existing) {
-    return existing;
-  }
-  // Return empty state with current schema version
-  return {
-    schemaVersion: CURRENT_SCHEMA_VERSION,
-    campaigns: [],
-    regions: [],
-    provinces: [],
-    dailyMoves: [],
-    checkIns: [],
-    siegeEvents: [],
-    seasons: [],
-    seasonReviews: [],
-    heroMoments: [],
-    chronicleEntries: [],
-    ifThenPlans: [],
-    shareCards: [],
-    playerProfile: {
-      id: 'local',
-      totalCaptured: 0,
-      totalClarified: 0,
-      totalStarted: 0,
-      totalCompleted: 0,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    },
-    capitalStates: [],
-    archetypeStats: []
-  };
-}
-
-/**
- * Save app state
- */
-async function saveState(state: AppState): Promise<void> {
-  await setItem(KEY_APP_STATE, state);
-}
+import { KEY_PREFIX, getItem, setItem, removeItem, getKeysByPrefix } from './storage';
+import type { Campaign, Region, Province } from '../entities/types';
 
 // ============================================================================
 // Campaign Repository
@@ -65,31 +16,30 @@ export const campaignRepository = {
    * Get campaign by ID
    */
   async getById(id: string): Promise<Campaign | null> {
-    const state = await loadState();
-    return state.campaigns.find(c => c.id === id) || null;
+    return getItem<Campaign>(`${KEY_PREFIX}campaign:${id}`);
   },
 
   /**
    * List all campaigns
    */
   async list(): Promise<Campaign[]> {
-    const state = await loadState();
-    return state.campaigns;
+    const keys = await getKeysByPrefix(`${KEY_PREFIX}campaign:`);
+    const items = await Promise.all(keys.map(k => getItem<Campaign>(k)));
+    return items.filter((c): c is Campaign => c !== null);
   },
 
   /**
    * List campaigns by season ID
    */
   async listBySeason(seasonId: string): Promise<Campaign[]> {
-    const state = await loadState();
-    return state.campaigns.filter(c => c.seasonId === seasonId);
+    const campaigns = await this.list();
+    return campaigns.filter(c => c.seasonId === seasonId);
   },
 
   /**
    * Create a new campaign
    */
   async create(data: Omit<Campaign, 'id' | 'createdAt' | 'updatedAt' | 'regionIds'>): Promise<Campaign> {
-    const state = await loadState();
     const campaign: Campaign = {
       ...data,
       id: uuidv4(),
@@ -97,8 +47,7 @@ export const campaignRepository = {
       updatedAt: new Date().toISOString(),
       regionIds: []
     };
-    state.campaigns.push(campaign);
-    await saveState(state);
+    await setItem(`${KEY_PREFIX}campaign:${campaign.id}`, campaign);
     return campaign;
   },
 
@@ -106,43 +55,34 @@ export const campaignRepository = {
    * Update an existing campaign
    */
   async update(id: string, data: Partial<Campaign>): Promise<Campaign | null> {
-    const state = await loadState();
-    const index = state.campaigns.findIndex(c => c.id === id);
-    if (index === -1) {
+    const campaign = await this.getById(id);
+    if (!campaign) {
       return null;
     }
-    state.campaigns[index] = {
-      ...state.campaigns[index],
+    const updated: Campaign = {
+      ...campaign,
       ...data,
       updatedAt: new Date().toISOString()
     };
-    await saveState(state);
-    return state.campaigns[index];
+    await setItem(`${KEY_PREFIX}campaign:${id}`, updated);
+    return updated;
   },
 
   /**
    * Delete a campaign (cascades to regions and provinces)
    */
   async delete(id: string): Promise<boolean> {
-    const state = await loadState();
-    const index = state.campaigns.findIndex(c => c.id === id);
-    if (index === -1) {
+    const campaign = await this.getById(id);
+    if (!campaign) {
       return false;
     }
 
-    // Get region IDs to cascade delete
-    const regionIdsToDelete = state.campaigns[index].regionIds;
-
-    // Remove campaign
-    state.campaigns.splice(index, 1);
-
     // Cascade delete regions
-    state.regions = state.regions.filter(r => !regionIdsToDelete.includes(r.id));
+    for (const regionId of campaign.regionIds) {
+      await regionRepository.delete(regionId);
+    }
 
-    // Cascade delete provinces
-    state.provinces = state.provinces.filter(p => !regionIdsToDelete.some(rid => rid === p.regionId));
-
-    await saveState(state);
+    await removeItem(`${KEY_PREFIX}campaign:${id}`);
     return true;
   },
 
@@ -150,15 +90,14 @@ export const campaignRepository = {
    * Add region ID to campaign's regionIds array
    */
   async addRegionId(campaignId: string, regionId: string): Promise<Campaign | null> {
-    const state = await loadState();
-    const campaign = state.campaigns.find(c => c.id === campaignId);
+    const campaign = await this.getById(campaignId);
     if (!campaign) {
       return null;
     }
     if (!campaign.regionIds.includes(regionId)) {
       campaign.regionIds.push(regionId);
       campaign.updatedAt = new Date().toISOString();
-      await saveState(state);
+      await setItem(`${KEY_PREFIX}campaign:${campaignId}`, campaign);
     }
     return campaign;
   },
@@ -167,8 +106,7 @@ export const campaignRepository = {
    * Remove region ID from campaign's regionIds array
    */
   async removeRegionId(campaignId: string, regionId: string): Promise<Campaign | null> {
-    const state = await loadState();
-    const campaign = state.campaigns.find(c => c.id === campaignId);
+    const campaign = await this.getById(campaignId);
     if (!campaign) {
       return null;
     }
@@ -176,7 +114,7 @@ export const campaignRepository = {
     if (idx !== -1) {
       campaign.regionIds.splice(idx, 1);
       campaign.updatedAt = new Date().toISOString();
-      await saveState(state);
+      await setItem(`${KEY_PREFIX}campaign:${campaignId}`, campaign);
     }
     return campaign;
   }
@@ -191,24 +129,24 @@ export const regionRepository = {
    * Get region by ID
    */
   async getById(id: string): Promise<Region | null> {
-    const state = await loadState();
-    return state.regions.find(r => r.id === id) || null;
+    return getItem<Region>(`${KEY_PREFIX}region:${id}`);
   },
 
   /**
    * List all regions
    */
   async list(): Promise<Region[]> {
-    const state = await loadState();
-    return state.regions;
+    const keys = await getKeysByPrefix(`${KEY_PREFIX}region:`);
+    const items = await Promise.all(keys.map(k => getItem<Region>(k)));
+    return items.filter((r): r is Region => r !== null);
   },
 
   /**
    * List regions by campaign ID
    */
   async listByCampaign(campaignId: string): Promise<Region[]> {
-    const state = await loadState();
-    return state.regions
+    const regions = await this.list();
+    return regions
       .filter(r => r.campaignId === campaignId)
       .sort((a, b) => a.order - b.order);
   },
@@ -217,7 +155,6 @@ export const regionRepository = {
    * Create a new region
    */
   async create(data: Omit<Region, 'id' | 'createdAt' | 'updatedAt' | 'provinceIds'>): Promise<Region> {
-    const state = await loadState();
     const region: Region = {
       ...data,
       id: uuidv4(),
@@ -225,8 +162,7 @@ export const regionRepository = {
       updatedAt: new Date().toISOString(),
       provinceIds: []
     };
-    state.regions.push(region);
-    await saveState(state);
+    await setItem(`${KEY_PREFIX}region:${region.id}`, region);
 
     // Add region to campaign
     await campaignRepository.addRegionId(data.campaignId, region.id);
@@ -238,42 +174,37 @@ export const regionRepository = {
    * Update an existing region
    */
   async update(id: string, data: Partial<Region>): Promise<Region | null> {
-    const state = await loadState();
-    const index = state.regions.findIndex(r => r.id === id);
-    if (index === -1) {
+    const region = await this.getById(id);
+    if (!region) {
       return null;
     }
-    state.regions[index] = {
-      ...state.regions[index],
+    const updated: Region = {
+      ...region,
       ...data,
       updatedAt: new Date().toISOString()
     };
-    await saveState(state);
-    return state.regions[index];
+    await setItem(`${KEY_PREFIX}region:${id}`, updated);
+    return updated;
   },
 
   /**
    * Delete a region (cascades to provinces)
    */
   async delete(id: string): Promise<boolean> {
-    const state = await loadState();
-    const index = state.regions.findIndex(r => r.id === id);
-    if (index === -1) {
+    const region = await this.getById(id);
+    if (!region) {
       return false;
     }
-
-    const region = state.regions[index];
 
     // Remove from campaign's regionIds
     await campaignRepository.removeRegionId(region.campaignId, id);
 
-    // Remove region
-    state.regions.splice(index, 1);
-
     // Cascade delete provinces
-    state.provinces = state.provinces.filter(p => p.regionId !== id);
+    for (const provinceId of region.provinceIds) {
+      await provinceRepository.delete(provinceId, false); // pass false to avoid updating this region's provinceIds while deleting
+    }
 
-    await saveState(state);
+    await removeItem(`${KEY_PREFIX}region:${id}`);
     return true;
   },
 
@@ -281,15 +212,14 @@ export const regionRepository = {
    * Add province ID to region's provinceIds array
    */
   async addProvinceId(regionId: string, provinceId: string): Promise<Region | null> {
-    const state = await loadState();
-    const region = state.regions.find(r => r.id === regionId);
+    const region = await this.getById(regionId);
     if (!region) {
       return null;
     }
     if (!region.provinceIds.includes(provinceId)) {
       region.provinceIds.push(provinceId);
       region.updatedAt = new Date().toISOString();
-      await saveState(state);
+      await setItem(`${KEY_PREFIX}region:${regionId}`, region);
     }
     return region;
   },
@@ -298,8 +228,7 @@ export const regionRepository = {
    * Remove province ID from region's provinceIds array
    */
   async removeProvinceId(regionId: string, provinceId: string): Promise<Region | null> {
-    const state = await loadState();
-    const region = state.regions.find(r => r.id === regionId);
+    const region = await this.getById(regionId);
     if (!region) {
       return null;
     }
@@ -307,7 +236,7 @@ export const regionRepository = {
     if (idx !== -1) {
       region.provinceIds.splice(idx, 1);
       region.updatedAt = new Date().toISOString();
-      await saveState(state);
+      await setItem(`${KEY_PREFIX}region:${regionId}`, region);
     }
     return region;
   }
@@ -322,50 +251,80 @@ export const provinceRepository = {
    * Get province by ID
    */
   async getById(id: string): Promise<Province | null> {
-    const state = await loadState();
-    return state.provinces.find(p => p.id === id) || null;
+    return getItem<Province>(`${KEY_PREFIX}province:${id}`);
   },
 
   /**
    * List all provinces
    */
   async list(): Promise<Province[]> {
-    const state = await loadState();
-    return state.provinces;
+    const keys = await getKeysByPrefix(`${KEY_PREFIX}province:`);
+    const items = await Promise.all(keys.map(k => getItem<Province>(k)));
+    return items.filter((p): p is Province => p !== null);
   },
 
   /**
    * List provinces by region ID
    */
   async listByRegion(regionId: string): Promise<Province[]> {
-    const state = await loadState();
-    return state.provinces.filter(p => p.regionId === regionId);
+    const provinces = await this.list();
+    return provinces.filter(p => p.regionId === regionId);
   },
 
   /**
    * List provinces by campaign ID (through region)
    */
   async listByCampaign(campaignId: string): Promise<Province[]> {
-    const state = await loadState();
-    const regionIds = state.regions
-      .filter(r => r.campaignId === campaignId)
-      .map(r => r.id);
-    return state.provinces.filter(p => regionIds.includes(p.regionId));
+    const regions = await regionRepository.listByCampaign(campaignId);
+    const regionIds = regions.map(r => r.id);
+    const provinces = await this.list();
+    return provinces.filter(p => regionIds.includes(p.regionId));
+  },
+
+  /**
+   * Find first free map slot ID in a region
+   */
+  async findFirstFreeMapSlotId(regionId: string): Promise<string> {
+    const provinces = await this.listByRegion(regionId);
+    const occupiedSlots = new Set(provinces.map(p => p.mapSlotId).filter(Boolean));
+
+    // Simple heuristic for sequential map slots
+    for (let i = 1; i <= 100; i++) {
+      const slotId = `slot-${i}`;
+      if (!occupiedSlots.has(slotId)) {
+        return slotId;
+      }
+    }
+    // Fallback if all 100 slots are taken
+    return `slot-${uuidv4().slice(0, 8)}`;
+  },
+
+  /**
+   * Validate adjacency lists
+   */
+  async validateAdjacencies(adjacentProvinceIds: string[] | undefined): Promise<void> {
+    if (!adjacentProvinceIds || adjacentProvinceIds.length === 0) return;
+    for (const adjId of adjacentProvinceIds) {
+      const exists = await this.getById(adjId);
+      if (!exists) {
+        throw new Error(`Validation Error: Adjacent province ${adjId} does not exist`);
+      }
+    }
   },
 
   /**
    * Create a new province
    */
   async create(data: Omit<Province, 'id' | 'createdAt' | 'updatedAt'>): Promise<Province> {
-    const state = await loadState();
+    await this.validateAdjacencies(data.adjacentProvinceIds);
+
     const province: Province = {
       ...data,
       id: uuidv4(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-    state.provinces.push(province);
-    await saveState(state);
+    await setItem(`${KEY_PREFIX}province:${province.id}`, province);
 
     // Add province to region
     await regionRepository.addProvinceId(data.regionId, province.id);
@@ -377,39 +336,38 @@ export const provinceRepository = {
    * Update an existing province
    */
   async update(id: string, data: Partial<Province>): Promise<Province | null> {
-    const state = await loadState();
-    const index = state.provinces.findIndex(p => p.id === id);
-    if (index === -1) {
+    if (data.adjacentProvinceIds) {
+      await this.validateAdjacencies(data.adjacentProvinceIds);
+    }
+
+    const province = await this.getById(id);
+    if (!province) {
       return null;
     }
-    state.provinces[index] = {
-      ...state.provinces[index],
+    const updated: Province = {
+      ...province,
       ...data,
       updatedAt: new Date().toISOString()
     };
-    await saveState(state);
-    return state.provinces[index];
+    await setItem(`${KEY_PREFIX}province:${id}`, updated);
+    return updated;
   },
 
   /**
    * Delete a province
    */
-  async delete(id: string): Promise<boolean> {
-    const state = await loadState();
-    const index = state.provinces.findIndex(p => p.id === id);
-    if (index === -1) {
+  async delete(id: string, updateRegion: boolean = true): Promise<boolean> {
+    const province = await this.getById(id);
+    if (!province) {
       return false;
     }
 
-    const province = state.provinces[index];
+    if (updateRegion) {
+      // Remove from region's provinceIds
+      await regionRepository.removeProvinceId(province.regionId, id);
+    }
 
-    // Remove from region's provinceIds
-    await regionRepository.removeProvinceId(province.regionId, id);
-
-    // Remove province
-    state.provinces.splice(index, 1);
-
-    await saveState(state);
+    await removeItem(`${KEY_PREFIX}province:${id}`);
     return true;
   },
 
@@ -417,28 +375,23 @@ export const provinceRepository = {
    * Get province by mapSlotId
    */
   async getByMapSlot(regionId: string, mapSlotId: string): Promise<Province | null> {
-    const state = await loadState();
-    return state.provinces.find(
-      p => p.regionId === regionId && p.mapSlotId === mapSlotId
-    ) || null;
+    const provinces = await this.listByRegion(regionId);
+    return provinces.find(p => p.mapSlotId === mapSlotId) || null;
   },
 
   /**
    * List provinces with mapSlotId in a region
    */
   async listWithMapSlots(regionId: string): Promise<Province[]> {
-    const state = await loadState();
-    return state.provinces.filter(
-      p => p.regionId === regionId && p.mapSlotId !== undefined
-    );
+    const provinces = await this.listByRegion(regionId);
+    return provinces.filter(p => p.mapSlotId !== undefined);
   },
 
   /**
    * Update province map slot binding
    */
   async setMapSlot(provinceId: string, mapSlotId: string | null): Promise<Province | null> {
-    const state = await loadState();
-    const province = state.provinces.find(p => p.id === provinceId);
+    const province = await this.getById(provinceId);
     if (!province) {
       return null;
     }
@@ -448,7 +401,7 @@ export const provinceRepository = {
       province.mapSlotId = mapSlotId;
     }
     province.updatedAt = new Date().toISOString();
-    await saveState(state);
+    await setItem(`${KEY_PREFIX}province:${provinceId}`, province);
     return province;
   }
 };
