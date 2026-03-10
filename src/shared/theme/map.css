@@ -85,9 +85,38 @@
   filter: drop-shadow(0 0 8px var(--overlay-hotspot));
 }
 
+/* Strategic Nodes */
+.map-marker--capital {
+  filter: drop-shadow(0 0 10px #f0b35f);
+}
+
+/* Route Drawing */
+.map-route-line {
+  stroke: #f0b35f;
+  stroke-width: 2;
+  stroke-dasharray: 4 2;
+  fill: none;
+  opacity: 0.6;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+/* Pan/Zoom Surface */
+.map-surface-container {
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+.map-surface-container:active {
+  cursor: grabbing;
+}
+
 /* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
-  .province-path {
+
+  .province-path,
+  .map-route-line {
     transition: none;
   }
 }

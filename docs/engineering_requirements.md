@@ -37,23 +37,20 @@ Use the PRD MVP stack unless a concrete blocker is found:
 - localForage for IndexedDB
 - zod for runtime validation at import/export and storage boundaries
 - Zustand for client state orchestration once rule-driven flows need it
-- shadcn/ui + Radix for shared UI primitives once `src/shared/**` is introduced
+- UI primitives: lightweight local wrappers in `src/shared/ui/**` (Radix-based where helpful)
 - Vitest + React Testing Library; Playwright for E2E
 
-Implemented today:
+Implemented today (present in `package.json` and/or in active use):
 - Vite + React + TypeScript
 - React Router
 - localForage
 - zod
+- Zustand (available; adopt when rule-driven orchestration needs it)
+- Radix primitives (used by shared UI wrappers)
+- react-zoom-pan-pinch (used for map pan/zoom)
+- Lucide (icons)
 - Vitest + React Testing Library
 - Playwright
-
-Planned, not yet present in `package.json`:
-- Zustand
-- shadcn/ui
-- Radix Primitives
-- react-zoom-pan-pinch
-- Lucide
 
 ### 2.2. Type safety
 - TypeScript should run in strict mode.

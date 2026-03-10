@@ -29,7 +29,6 @@ doctor:
 	test -f AGENTS.md && echo "AGENTS.md: ok" || echo "AGENTS.md: missing"; \
 	test -f docs/index.md && echo "docs/index.md: ok" || echo "docs/index.md: missing"; \
 	test -f docs/testing.md && echo "docs/testing.md: ok" || echo "docs/testing.md: missing"; \
-	test -f docs/harness_plan.md && echo "docs/harness_plan.md: ok" || echo "docs/harness_plan.md: missing"; \
 	test -f .github/workflows/agent-harness.yml && echo ".github/workflows/agent-harness.yml: ok" || echo ".github/workflows/agent-harness.yml: missing"; \
 	test -x tools/run_silent.sh && echo "tools/run_silent.sh: ok" || echo "tools/run_silent.sh: missing"
 

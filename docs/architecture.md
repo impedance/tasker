@@ -18,11 +18,15 @@ Implemented in the repo now:
 - Route pages in `src/pages/**`
 - Domain entities and zod validation in `src/entities/**`
 - Storage, repositories, migrations, import/export in `src/storage/**`
+- Shared UI primitives + theme tokens in `src/shared/**`
+- Map UI surfaces in `src/pages/MapPage.tsx` and `src/map/**`
 
 Planned but not yet implemented as first-class modules:
 - `src/features/**`
 - `src/game/**`
-- `src/map/**`
+
+Note:
+- `src/map/**` exists and is used for the EPIC-04 slice, but the full “map layering contract” (meta + graph as typed data) is still planned work.
 
 ## 2) Target module layout
 Suggested target layout (from PRD):

@@ -1,5 +1,6 @@
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom'
 import CampaignsPage from '../pages/CampaignsPage'
+import CampaignMapPage from '../pages/CampaignMapPage'
 import HomePage from '../pages/HomePage'
 import MapPage from '../pages/MapPage'
 import SettingsPage from '../pages/SettingsPage'
@@ -34,8 +35,9 @@ function App() {
         <main className="app-main">
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/map/:regionId?" element={<MapPage />} />
             <Route path="/campaigns" element={<CampaignsPage />} />
+            <Route path="/campaign/:campaignId" element={<CampaignMapPage />} />
+            <Route path="/map/:regionId?" element={<MapPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Routes>
         </main>
