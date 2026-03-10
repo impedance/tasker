@@ -1,8 +1,8 @@
+@import "../shared/theme/map.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import "../shared/theme/map.css";
 
 @layer base {
   :root {

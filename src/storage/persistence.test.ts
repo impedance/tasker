@@ -1,10 +1,15 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+// @vitest-environment jsdom
+import { describe, it, expect, beforeEach, afterAll } from 'vitest';
 import { campaignRepository, regionRepository, provinceRepository, seasonRepository } from './repositories';
-import { clearAll, initStorage, loadAppState } from './storage';
+import { clearAll, initStorage, loadAppState, db } from './storage';
 import { exportAppState, importAppState } from './import-export';
 import { CURRENT_SCHEMA_VERSION } from './migrations';
 
 describe('Persistence Integration', () => {
+    afterAll(async () => {
+        await db.dropInstance();
+    });
+
     beforeEach(async () => {
         await clearAll();
         await initStorage();

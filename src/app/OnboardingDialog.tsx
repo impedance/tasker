@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Dialog, DialogContent } from "../shared/ui/dialog"
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "../shared/ui/dialog"
 import { loadTutorialIfFirstRun } from "../storage/tutorial-seed"
 import { hasData } from "../storage/storage"
 import { BookOpen, Circle, Sparkles } from "lucide-react"
@@ -47,10 +47,10 @@ export function OnboardingDialog() {
                         <Sparkles size={14} />
                         Welcome to Tasker
                     </p>
-                    <h2 className="text-3xl font-bold mb-4">Choose Your Starting Point</h2>
-                    <p className="text-muted-foreground text-sm mb-8">
+                    <DialogTitle className="text-3xl font-bold mb-4">Choose Your Starting Point</DialogTitle>
+                    <DialogDescription className="text-muted-foreground text-sm mb-8">
                         It looks like this is your first time here. Would you like to start with a tutorial campaign or begin with a clean slate?
-                    </p>
+                    </DialogDescription>
                 </div>
 
                 <div className="p-4 bg-white/5 space-y-3">

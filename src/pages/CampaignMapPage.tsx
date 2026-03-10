@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { campaignRepository, regionRepository } from '../storage/repositories'
 import { Campaign, Region, RegionMapRole } from '../entities/types'
-import { Dialog, DialogContent, DialogTrigger } from '../shared/ui/dialog'
+import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from '../shared/ui/dialog'
 import { Plus } from 'lucide-react'
 
 export default function CampaignMapPage() {
@@ -126,7 +126,8 @@ export default function CampaignMapPage() {
                                     </button>
                                 </DialogTrigger>
                                 <DialogContent className="max-w-md bg-[#0b1218] border border-white/10 text-white p-8">
-                                    <h2 className="text-2xl font-bold mb-4">Add Strategic Region</h2>
+                                    <DialogTitle className="text-2xl font-bold mb-4">Add Strategic Region</DialogTitle>
+                                    <DialogDescription className="sr-only">Form to add a strategic region to the campaign.</DialogDescription>
                                     <form onSubmit={handleSubmit} className="space-y-4">
                                         <div>
                                             <label className="block text-sm font-medium text-muted-foreground mb-1">Region Title</label>

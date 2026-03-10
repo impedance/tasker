@@ -5,7 +5,7 @@ import { provinceRepository, regionRepository } from "../storage/repositories"
 import { Province, Region } from "../entities/types"
 import { ProvinceDrawer } from "../map/ProvinceDrawer"
 import { UnplacedProvincesList } from "../map/UnplacedProvincesList"
-import { Dialog, DialogContent, DialogTrigger } from "../shared/ui/dialog"
+import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "../shared/ui/dialog"
 import { Plus, ListPlus, Wand2 } from "lucide-react"
 
 export default function MapPage() {
@@ -250,7 +250,8 @@ export default function MapPage() {
                                 </button>
                             </DialogTrigger>
                             <DialogContent className="max-w-md bg-[#0b1218] border border-white/10 text-white p-8">
-                                <h2 className="text-2xl font-bold mb-4">Acknowledge Province</h2>
+                                <DialogTitle className="text-2xl font-bold mb-4">Acknowledge Province</DialogTitle>
+                                <DialogDescription className="sr-only">Form to add a new province to the map.</DialogDescription>
                                 <form onSubmit={handleAddProvince} className="space-y-4">
                                     <div>
                                         <label className="block text-sm font-medium text-muted-foreground mb-1">Province Title</label>
@@ -289,7 +290,8 @@ export default function MapPage() {
                                 </button>
                             </DialogTrigger>
                             <DialogContent className="max-w-md bg-[#0b1218] border border-white/10 text-white p-8">
-                                <h2 className="text-2xl font-bold mb-4">Mass Mobilization</h2>
+                                <DialogTitle className="text-2xl font-bold mb-4">Mass Mobilization</DialogTitle>
+                                <DialogDescription className="sr-only">Form to bulk add multiple provinces at once.</DialogDescription>
                                 <form onSubmit={handleBulkAdd} className="space-y-4">
                                     <div>
                                         <label className="block text-sm font-medium text-muted-foreground mb-1">Province Names (one per line)</label>
