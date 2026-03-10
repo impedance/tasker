@@ -30,13 +30,12 @@ Shared (can be taken by FE if needed):
 - [x] `02-T6` Add minimal CI workflow (PR/commit: lint + typecheck + unit + build + e2e)
 
 ### EPIC-04 (Map UI)
-- [ ] `04-T1` Add SVG templates + slot ID convention (PR/commit: )
-- [ ] `04-T2` Map CSS tokens file + province class mapping (PR/commit: )
-- [ ] `04-T5` Province Drawer skeleton (map click → drawer) (PR/commit: )
-- [ ] `04-T4` Unplaced provinces list panel (PR/commit: )
-- [ ] `04-T3` Region map page: bind provinces to SVG slots (PR/commit: )  
-  - BLOCKED:
-- [ ] `04-T6` Hover/selected styles + reduced motion (PR/commit: )
+- [x] `04-T1` Add SVG templates + slot ID convention (PR/commit: implemented)
+- [x] `04-T2` Map CSS tokens file + province class mapping (PR/commit: implemented)
+- [x] `04-T5` Province Drawer skeleton (map click → drawer) (PR/commit: implemented)
+- [x] `04-T4` Unplaced provinces list panel (PR/commit: implemented)
+- [x] `04-T3` Region map page: bind provinces to SVG slots (PR/commit: implemented)  
+- [x] `04-T6` Hover/selected styles + reduced motion (PR/commit: implemented)
 
 ### EPIC-05 (Creation flows)
 - [ ] `05-T1` Campaign create flow (minimal form) (PR/commit: )

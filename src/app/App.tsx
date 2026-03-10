@@ -34,7 +34,7 @@ function App() {
         <main className="app-main">
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/map" element={<MapPage />} />
+            <Route path="/map/:regionId?" element={<MapPage />} />
             <Route path="/campaigns" element={<CampaignsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Routes>

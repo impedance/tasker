@@ -1,0 +1,21 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#0f1420" />
+  <!-- Region Slots -->
+  <circle data-region-slot-id="r01" cx="200" cy="150" r="40" fill="#2b3a55" stroke="rgba(255,255,255,0.18)" />
+  <circle data-region-slot-id="r02" cx="400" cy="150" r="40" fill="#2b3a55" stroke="rgba(255,255,255,0.18)" />
+  <circle data-region-slot-id="r03" cx="600" cy="150" r="40" fill="#2b3a55" stroke="rgba(255,255,255,0.18)" />
+  <circle data-region-slot-id="r04" cx="200" cy="300" r="40" fill="#2b3a55" stroke="rgba(255,255,255,0.18)" />
+  <circle data-region-slot-id="r05" cx="400" cy="300" r="40" fill="#2b3a55" stroke="rgba(255,255,255,0.18)" />
+  <circle data-region-slot-id="r06" cx="600" cy="300" r="40" fill="#2b3a55" stroke="rgba(255,255,255,0.18)" />
+  <circle data-region-slot-id="r07" cx="200" cy="450" r="40" fill="#2b3a55" stroke="rgba(255,255,255,0.18)" />
+  <circle data-region-slot-id="r08" cx="400" cy="450" r="40" fill="#2b3a55" stroke="rgba(255,255,255,0.18)" />
+  <!-- Labels -->
+  <text x="200" y="150" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="12">R1</text>
+  <text x="400" y="150" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="12">R2</text>
+  <text x="600" y="150" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="12">R3</text>
+  <text x="200" y="300" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="12">R4</text>
+  <text x="400" y="300" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="12">R5</text>
+  <text x="600" y="300" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="12">R6</text>
+  <text x="200" y="450" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="12">R7</text>
+  <text x="400" y="450" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="12">R8</text>
+</svg>

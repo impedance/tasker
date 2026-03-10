@@ -2,7 +2,7 @@
 
 **ID:** `EPIC-01`  
 **Priority:** `P0`  
-**Status:** `draft`  
+**Status:** `done`  
 **Owner:** `<TBD>`  
 **PRD reference:** `prd.md`
 
@@ -354,7 +354,7 @@ See Appendix B for payloads:
 
 # Appendix B — Event schema v1 (local-only analytics)
 
-Status: draft  
+Status: done  
 Owner: `<TBD>`
 
 ## B1) Goals

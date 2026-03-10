@@ -2,7 +2,7 @@
 
 **ID:** `EPIC-03`  
 **Priority:** `P0`  
-**Status:** `in-progress`  
+**Status:** `done`  
 **Owner:** `<TBD>`  
 **PRD reference:** `prd.md` (Data & storage)
 

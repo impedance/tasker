@@ -14,7 +14,7 @@ Implementation update (2026-03-10, later pass):
 - `parseImportData()` now follows the same contract as `importAppState()` (validate -> migrate -> strict validate).
 - Migration-path persistence test was added (`legacy snapshot -> migrate -> validate -> save`) via public import flow.
 - Repository coverage was expanded with explicit repositories for `PlayerCheckIn`, `CapitalState`, and `CampaignArchetypeStats`, and missing `update/delete` operations were added on previously partial repositories.
-- Status docs were aligned to avoid overstating `EPIC-03 Done` while epic status is still `in-progress`.
+- Epic status markers were aligned with the implemented slice: `EPIC-03` is now marked `done` in `epics/EPIC-03-domain-persistence.md`, and status hubs reflect that.
 
 ## Current status summary (2026-03-10)
 
@@ -507,7 +507,7 @@ Expected fix:
 Follow-up note (2026-03-10):
 - Status docs have already been updated to reflect the fixed bootstrap/persistence path.
 - Verification evidence now includes a passing local E2E run in addition to smoke/preflight.
-- Wording remains intentionally conservative (`EPIC-03` is still marked `in-progress` in epic docs).
+- Wording remains intentionally conservative about E2E reproducibility (Playwright depends on host environment), but `EPIC-03` is marked `done` in epic docs.
 
 ## Required verification for final EPIC-03 closeout
 
@@ -545,7 +545,7 @@ npm run test -- --run
 1. Keep migration-path import test coverage green (`old snapshot -> migrate -> validate -> save`)
 2. Keep repository coverage and EPIC-03 wording aligned as code evolves
 3. Re-run verification after each persistence/doc change
-4. Keep status docs conservative while epic status remains `in-progress`
+4. Keep status docs conservative even after marking EPICs `done` (avoid over-claiming verification scope)
 
 ## Junior completion guide (detailed)
 
@@ -719,7 +719,7 @@ What to do:
    - repository scope aligned with docs.
 3. If any claim is broader than the evidence, weaken the wording.
 4. Ensure the EPIC-03 status marker is consistent:
-   - if `epics/EPIC-03-domain-persistence.md` is still `Status: draft`, do not claim “Done” elsewhere unless you update the epic doc too.
+   - if `epics/EPIC-03-domain-persistence.md` is `done`, keep hubs/checklists consistent; if it is changed back to `in-progress`, weaken any “Done” wording elsewhere.
 
 Examples:
 - Good: `EPIC-03 persistence bootstrap is complete and verified.`

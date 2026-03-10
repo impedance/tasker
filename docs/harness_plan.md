@@ -12,4 +12,4 @@
 ## Open placeholders
 - Code map paths: resolved in `docs/index.md`
 - Typing surfaces: resolved in `docs/index.md`
-- Test map wiring: `make smoke` runs structural + `npm run lint` + `npm test`; `make preflight` adds `npm run typecheck`
+- Test map wiring: `make smoke` runs structural + `npm run lint` + `npm test`; `make preflight` adds `npm run typecheck` (and can include `make e2e` via `E2E=1`)

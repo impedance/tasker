@@ -2,7 +2,7 @@
 
 **ID:** `EPIC-02`  
 **Priority:** `P0`  
-**Status:** `draft`  
+**Status:** `done`  
 **Owner:** `<TBD>`  
 **PRD reference:** `prd.md` (Architecture, weekly plan)
 

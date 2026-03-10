@@ -3,13 +3,18 @@ ARTIFACTS_DIR ?= artifacts
 STRICT ?= 0
 QUIET ?= 0
 FAIL_FAST ?= 0
+E2E ?= 0
 PYTHON ?= python3
 BLACKBOX_CMD ?=
 
-.PHONY: smoke preflight lint typecheck test structural agent-smoke doctor
+.PHONY: smoke preflight e2e lint typecheck test structural agent-smoke doctor
 smoke: structural lint test
 
 preflight: structural lint typecheck test
+
+ifeq ($(E2E),1)
+preflight: e2e
+endif
 
 structural:
 	@STRICT="$(STRICT)" bash tools/structural_check.sh
@@ -158,6 +163,21 @@ test:
 			go test -json ./... > "$(ARTIFACTS_DIR)/go-test.json"; \
 		else \
 			echo "Remediation: Go tooling is missing; wire the existing Go test command."; \
+			[ "$(STRICT)" = "1" ] && exit 2 || true; \
+		fi; \
+	fi
+
+e2e:
+	@set -eu; \
+	if [ -f package.json ]; then \
+		if command -v npm >/dev/null 2>&1; then \
+			if [ "$(QUIET)" = "1" ] && [ -x tools/run_silent.sh ]; then \
+				tools/run_silent.sh "npm e2e" npm run -s e2e --if-present; \
+			else \
+				npm run -s e2e --if-present; \
+			fi; \
+		else \
+			echo "Remediation: npm is missing; wire the existing Node e2e command."; \
 			[ "$(STRICT)" = "1" ] && exit 2 || true; \
 		fi; \
 	fi

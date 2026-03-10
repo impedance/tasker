@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import "../shared/theme/map.css";
+
 @layer base {
   :root {
     --background: 224 71% 4%;

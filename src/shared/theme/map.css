@@ -1,0 +1,93 @@
+/* Map CSS tokens and province classes (EPIC-04 contract) */
+
+:root {
+  /* Base Colors */
+  --map-bg: #0f1420;
+  --province-stroke: rgba(255, 255, 255, 0.18);
+  --province-stroke-selected: #ffffff;
+  --province-stroke-hover: rgba(255, 255, 255, 0.5);
+  --province-label: rgba(255, 255, 255, 0.82);
+  --overlay-hotspot: rgba(255, 180, 60, 0.28);
+
+  /* State Fills */
+  --province-fill-fog: #1b2333;
+  --province-fill-ready: #2b3a55;
+  --province-fill-in-progress: #2f6aa3;
+  --province-fill-siege: #6b2b2b;
+  --province-fill-fortified: #5a4a2f;
+  --province-fill-captured: #2f6b4f;
+  --province-fill-retreated: #2a2a2a;
+}
+
+/* Base Province Style */
+.province-path {
+  fill: var(--province-fill-ready);
+  stroke: var(--province-stroke);
+  stroke-width: 1.5;
+  transition: fill 0.2s ease, stroke 0.2s ease;
+  cursor: pointer;
+}
+
+.province-path:hover {
+  stroke: var(--province-stroke-hover);
+}
+
+.province-path.province--selected {
+  stroke: var(--province-stroke-selected);
+  stroke-width: 2.5;
+}
+
+/* Province States */
+.province--fog {
+  fill: var(--province-fill-fog);
+  /* Pattern for fog: dotted or hatch */
+  fill-opacity: 0.8;
+}
+
+.province--ready {
+  fill: var(--province-fill-ready);
+}
+
+.province--in-progress {
+  fill: var(--province-fill-in-progress);
+}
+
+.province--siege {
+  fill: var(--province-fill-siege);
+  stroke: #ff4444;
+}
+
+.province--fortified {
+  fill: var(--province-fill-fortified);
+  stroke-dasharray: 4;
+}
+
+.province--captured {
+  fill: var(--province-fill-captured);
+}
+
+.province--retreated {
+  fill: var(--province-fill-retreated);
+  fill-opacity: 0.5;
+}
+
+/* Interaction Classes */
+.province--hover {
+  stroke: var(--province-stroke-hover);
+}
+
+.province--selected {
+  stroke: var(--province-stroke-selected);
+  stroke-width: 2.5;
+}
+
+.province--hotspot {
+  filter: drop-shadow(0 0 8px var(--overlay-hotspot));
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .province-path {
+    transition: none;
+  }
+}

@@ -1,0 +1,23 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#0f1420" />
+  <!-- Province Slots p01-p16 -->
+  <circle data-slot-id="p01" cx="100" cy="100" r="30" fill="#2b3a55" stroke="rgba(255,255,255,0.18)" />
+  <circle data-slot-id="p02" cx="250" cy="100" r="30" fill="#2b3a55" stroke="rgba(255,255,255,0.18)" />
+  <circle data-slot-id="p03" cx="400" cy="100" r="30" fill="#2b3a55" stroke="rgba(255,255,255,0.18)" />
+  <circle data-slot-id="p04" cx="550" cy="100" r="30" fill="#2b3a55" stroke="rgba(255,255,255,0.18)" />
+  <circle data-slot-id="p05" cx="700" cy="100" r="30" fill="#2b3a55" stroke="rgba(255,255,255,0.18)" />
+  
+  <circle data-slot-id="p06" cx="100" cy="250" r="30" fill="#2b3a55" stroke="rgba(255,255,255,0.18)" />
+  <circle data-slot-id="p07" cx="250" cy="250" r="30" fill="#2b3a55" stroke="rgba(255,255,255,0.18)" />
+  <circle data-slot-id="p08" cx="400" cy="250" r="30" fill="#2b3a55" stroke="rgba(255,255,255,0.18)" />
+  <circle data-slot-id="p09" cx="550" cy="250" r="30" fill="#2b3a55" stroke="rgba(255,255,255,0.18)" />
+  <circle data-slot-id="p10" cx="700" cy="250" r="30" fill="#2b3a55" stroke="rgba(255,255,255,0.18)" />
+  
+  <circle data-slot-id="p11" cx="100" cy="400" r="30" fill="#2b3a55" stroke="rgba(255,255,255,0.18)" />
+  <circle data-slot-id="p12" cx="250" cy="400" r="30" fill="#2b3a55" stroke="rgba(255,255,255,0.18)" />
+  <circle data-slot-id="p13" cx="400" cy="400" r="30" fill="#2b3a55" stroke="rgba(255,255,255,0.18)" />
+  <circle data-slot-id="p14" cx="550" cy="400" r="30" fill="#2b3a55" stroke="rgba(255,255,255,0.18)" />
+  <circle data-slot-id="p15" cx="700" cy="400" r="30" fill="#2b3a55" stroke="rgba(255,255,255,0.18)" />
+  
+  <circle data-slot-id="p16" cx="400" cy="520" r="30" fill="#2b3a55" stroke="rgba(255,255,255,0.18)" />
+</svg>
