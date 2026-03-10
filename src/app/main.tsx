@@ -5,7 +5,6 @@ import './index.css'
 
 import { initStorage, loadAppState, saveAppState } from '../storage/storage'
 import { migrate } from '../storage/migrations'
-import { loadTutorialIfFirstRun } from '../storage/tutorial-seed'
 
 async function bootstrap() {
   try {
@@ -23,7 +22,8 @@ async function bootstrap() {
     }
 
     // 4. Seed tutorial if it's the first run
-    await loadTutorialIfFirstRun();
+    // Removed automatic loading; now handled by OnboardingDialog in App.tsx
+    // await loadTutorialIfFirstRun();
 
     // 5. Render App
     ReactDOM.createRoot(document.getElementById('root')!).render(

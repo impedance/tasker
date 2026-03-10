@@ -4,6 +4,7 @@ import CampaignMapPage from '../pages/CampaignMapPage'
 import HomePage from '../pages/HomePage'
 import MapPage from '../pages/MapPage'
 import SettingsPage from '../pages/SettingsPage'
+import { OnboardingDialog } from './OnboardingDialog'
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
           </Routes>
         </main>
       </div>
+      <OnboardingDialog />
     </BrowserRouter>
   )
 }

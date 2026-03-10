@@ -5,6 +5,8 @@ import { provinceRepository, regionRepository } from "../storage/repositories"
 import { Province, Region } from "../entities/types"
 import { ProvinceDrawer } from "../map/ProvinceDrawer"
 import { UnplacedProvincesList } from "../map/UnplacedProvincesList"
+import { Dialog, DialogContent, DialogTrigger } from "../shared/ui/dialog"
+import { Plus, ListPlus, Wand2 } from "lucide-react"
 
 export default function MapPage() {
     const { regionId } = useParams<{ regionId: string }>()
@@ -14,36 +16,45 @@ export default function MapPage() {
     const [mapSvg, setMapSvg] = React.useState<string>("")
     const [loading, setLoading] = React.useState(true)
 
+    // Form state
+    const [isAddDialogOpen, setIsAddDialogOpen] = React.useState(false)
+    const [isBulkDialogOpen, setIsBulkDialogOpen] = React.useState(false)
+    const [title, setTitle] = React.useState('')
+    const [bulkText, setBulkText] = React.useState('')
+    const [isSubmitting, setIsSubmitting] = React.useState(false)
+
     // Load data
-    React.useEffect(() => {
-        const loadData = async () => {
-            if (!regionId) return
+    const loadData = React.useCallback(async () => {
+        if (!regionId) return
 
-            try {
-                const [r, p] = await Promise.all([
-                    regionRepository.getById(regionId),
-                    provinceRepository.listByRegion(regionId)
-                ])
+        try {
+            const [r, p] = await Promise.all([
+                regionRepository.getById(regionId),
+                provinceRepository.listByRegion(regionId)
+            ])
 
-                setRegion(r)
-                setProvinces(p)
+            setRegion(r)
+            setProvinces(p)
 
-                // Load SVG template
+            // Load SVG template if not already loaded
+            if (!mapSvg) {
                 const templateId = r?.mapTemplateId || "region_v1"
                 const response = await fetch(`/assets/maps/${templateId}.svg`)
                 if (response.ok) {
                     const svgText = await response.text()
                     setMapSvg(svgText)
                 }
-            } catch (error) {
-                console.error("Failed to load map data:", error)
-            } finally {
-                setLoading(false)
             }
+        } catch (error) {
+            console.error("Failed to load map data:", error)
+        } finally {
+            setLoading(false)
         }
+    }, [regionId, mapSvg])
 
+    React.useEffect(() => {
         loadData()
-    }, [regionId])
+    }, [loadData])
 
     const mapRef = React.useRef<HTMLDivElement>(null)
     const [capitalPos, setCapitalPos] = React.useState<{ x: number, y: number } | null>(null)
@@ -110,6 +121,61 @@ export default function MapPage() {
         })
     }, [mapSvg, provinces, selectedProvince])
 
+    const handleAddProvince = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!regionId || !title.trim()) return
+
+        setIsSubmitting(true)
+        try {
+            const mapSlotId = await provinceRepository.findFirstFreeMapSlotId(regionId)
+            await provinceRepository.create({
+                regionId,
+                title,
+                state: 'fog', // Default to fog for minimal creation
+                progressStage: 'scouted',
+                decompositionCount: 0,
+                mapSlotId: mapSlotId || undefined
+            })
+            setTitle('')
+            setIsAddDialogOpen(false)
+            loadData()
+        } catch (error) {
+            console.error('Failed to create province:', error)
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
+
+    const handleBulkAdd = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!regionId || !bulkText.trim()) return
+
+        const lines = bulkText.split('\n').map(l => l.trim()).filter(Boolean)
+        if (lines.length === 0) return
+
+        setIsSubmitting(true)
+        try {
+            for (const line of lines) {
+                const mapSlotId = await provinceRepository.findFirstFreeMapSlotId(regionId)
+                await provinceRepository.create({
+                    regionId,
+                    title: line,
+                    state: 'fog',
+                    progressStage: 'scouted',
+                    decompositionCount: 0,
+                    mapSlotId: mapSlotId || undefined
+                })
+            }
+            setBulkText('')
+            setIsBulkDialogOpen(false)
+            loadData()
+        } catch (error) {
+            console.error('Failed to bulk create provinces:', error)
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
+
     if (loading) return <div className="page-shell flex items-center justify-center min-h-[400px]">Loading Strategic Map...</div>
     if (!region) return <div className="page-shell">Region not found.</div>
 
@@ -175,6 +241,80 @@ export default function MapPage() {
                 </div>
 
                 <div className="space-y-6">
+                    <div className="flex gap-2">
+                        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                            <DialogTrigger asChild>
+                                <button className="flex-1 flex items-center justify-center gap-2 py-3 bg-[#f0b35f] text-[#0b1218] font-bold rounded-xl hover:bg-[#f0c38f] transition-colors shadow-lg">
+                                    <Plus size={18} />
+                                    Add
+                                </button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-md bg-[#0b1218] border border-white/10 text-white p-8">
+                                <h2 className="text-2xl font-bold mb-4">Acknowledge Province</h2>
+                                <form onSubmit={handleAddProvince} className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-muted-foreground mb-1">Province Title</label>
+                                        <input
+                                            type="text"
+                                            value={title}
+                                            onChange={(e) => setTitle(e.target.value)}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 focus:outline-none focus:border-[#f0b35f]/50 transition-colors"
+                                            placeholder="e.g. Gather Intel"
+                                            autoFocus
+                                            required
+                                        />
+                                    </div>
+                                    <p className="text-xs text-muted-foreground italic">
+                                        Provinces added here are automatically assigned to the first free tactical slot.
+                                    </p>
+                                    <div className="pt-4">
+                                        <button
+                                            type="submit"
+                                            disabled={isSubmitting || !title.trim()}
+                                            className="w-full bg-[#f0b35f] text-[#0b1218] font-bold py-3 rounded-xl hover:bg-[#f0c38f] disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+                                        >
+                                            <Wand2 size={18} />
+                                            {isSubmitting ? 'Summoning...' : 'Deploy Province'}
+                                        </button>
+                                    </div>
+                                </form>
+                            </DialogContent>
+                        </Dialog>
+
+                        <Dialog open={isBulkDialogOpen} onOpenChange={setIsBulkDialogOpen}>
+                            <DialogTrigger asChild>
+                                <button className="flex-1 flex items-center justify-center gap-2 py-3 bg-white/5 border border-white/10 text-white font-bold rounded-xl hover:bg-white/10 transition-colors shadow-lg">
+                                    <ListPlus size={18} />
+                                    Bulk
+                                </button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-md bg-[#0b1218] border border-white/10 text-white p-8">
+                                <h2 className="text-2xl font-bold mb-4">Mass Mobilization</h2>
+                                <form onSubmit={handleBulkAdd} className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-muted-foreground mb-1">Province Names (one per line)</label>
+                                        <textarea
+                                            value={bulkText}
+                                            onChange={(e) => setBulkText(e.target.value)}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 focus:outline-none focus:border-[#f0b35f]/50 transition-colors min-h-[200px] font-mono text-sm"
+                                            placeholder="Province Alpha&#10;Province Beta&#10;Province Gamma"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="pt-4">
+                                        <button
+                                            type="submit"
+                                            disabled={isSubmitting || !bulkText.trim()}
+                                            className="w-full bg-[#f0b35f] text-[#0b1218] font-bold py-3 rounded-xl hover:bg-[#f0c38f] disabled:opacity-50 transition-colors"
+                                        >
+                                            {isSubmitting ? 'Mobilizing...' : 'Create All'}
+                                        </button>
+                                    </div>
+                                </form>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
+
                     <UnplacedProvincesList
                         provinces={unplacedProvinces}
                         onSelect={setSelectedProvince}

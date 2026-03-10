@@ -38,11 +38,11 @@ Shared (can be taken by FE if needed):
 - [x] `04-T6` Hover/selected styles + reduced motion (PR/commit: implemented)
 
 ### EPIC-05 (Creation flows)
-- [ ] `05-T1` Campaign create flow (minimal form) (PR/commit: )
-- [ ] `05-T2` Region create flow (scoped to campaign) (PR/commit: )
-- [ ] `05-T3` Province create flow (auto mapSlot + fog/ready) (PR/commit: )
-- [ ] `05-T4` Quick-add multiple provinces (bulk) (PR/commit: )
+- [x] `05-T1` Campaign create flow (minimal form) (PR/commit: implemented)
+- [x] `05-T2` Region create flow (scoped to campaign) (PR/commit: implemented)
+- [x] `05-T3` Province create flow (auto mapSlot + fog/ready) (PR/commit: implemented)
+- [x] `05-T4` Quick-add multiple provinces (bulk) (PR/commit: implemented)
 
 Shared (coordination-heavy):
-- [ ] `05-T5` First-run tutorial seed (FE: onboarding UI + “remove tutorial”) (PR/commit: )  
+- [x] `05-T5` First-run tutorial seed (FE: onboarding UI + “remove tutorial”) (PR/commit: implemented)  
   - BLOCKED:
