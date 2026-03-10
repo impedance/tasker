@@ -7,9 +7,14 @@ Scope reviewed:
 - `EPIC-03` domain + persistence
 
 Outcome:
-- As of 2026-03-10, most of the original blocking EPIC-02/03 findings have been addressed.
-- The repo is in a much better state than on 2026-03-08, but there are still a few follow-up items before claiming a fully clean `EPIC-03` closeout.
-- Remaining work is now concentrated in repository coverage consistency, explicit migration test coverage, and keeping status docs narrowly aligned with proven verification.
+- As of 2026-03-10, all originally blocking EPIC-02/03 findings have been addressed in code.
+- Closeout verification evidence is now present in a host environment (`make smoke`, `make preflight`, `npm run e2e` are green after `npx playwright install`).
+
+Implementation update (2026-03-10, later pass):
+- `parseImportData()` now follows the same contract as `importAppState()` (validate -> migrate -> strict validate).
+- Migration-path persistence test was added (`legacy snapshot -> migrate -> validate -> save`) via public import flow.
+- Repository coverage was expanded with explicit repositories for `PlayerCheckIn`, `CapitalState`, and `CampaignArchetypeStats`, and missing `update/delete` operations were added on previously partial repositories.
+- Status docs were aligned to avoid overstating `EPIC-03 Done` while epic status is still `in-progress`.
 
 ## Current status summary (2026-03-10)
 
@@ -25,18 +30,14 @@ Resolved:
 - 11. UI primitives layer from EPIC-02 is not present
 - 12. E2E smoke does not cover the map-oriented stub path described in EPIC-02
 
-Partially resolved / still requires follow-up:
-- 8. EPIC-03 repositories are incomplete
-- 9. No persistence integration tests for CRUD, migrations, and roundtrip import/export
+Resolved:
 - 13. Keep implementation status notes aligned with code changes
 
 ## Priority order
 
-1. Restore green verification (`make smoke`, `make preflight`)
-2. Fix broken EPIC-03 persistence boot flow
-3. Fix import/migration order so old snapshots can be imported
-4. Complete missing EPIC-03 deliverables
-5. Reconcile docs with actual implementation state
+1. Keep green verification (`make smoke`, `make preflight`)
+2. Ensure E2E evidence is reproducible in host/CI (`npx playwright install` prerequisites + passing run)
+3. Keep docs/status wording constrained to proven verification scope
 
 ## Blocking findings
 
@@ -209,6 +210,36 @@ Done when:
 - Older schema snapshots can be migrated and imported.
 - Current-version snapshots still validate strictly.
 
+### 14. `parseImportData()` still validates strict schema pre-migration (regression risk)
+
+Severity: Medium
+Status (2026-03-10): Resolved
+
+Problem:
+- The main import path now follows the correct order (basic validation -> migrate -> strict validation).
+- However, the helper `parseImportData()` still does strict `AppStateSchema.safeParse(parsed)` before migration.
+- This creates an easy future regression path if UI/other code starts using `parseImportData()` (or if `importAppState()` is refactored to reuse it).
+
+Where to fix:
+- `src/storage/import-export.ts`
+
+What is wrong:
+- `parseImportData()` currently implements the old ordering that EPIC-03 explicitly rejected.
+
+Expected fix:
+- Ensure all exported/public import helpers follow the same contract:
+  - pre-migration validation: `validateAppState(...)` only
+  - migration
+  - post-migration strict schema validation
+
+Suggested approach (pick one):
+- Option A (preferred): rewrite `parseImportData()` to return the migrated, strictly validated `AppState` and (optionally) `migratedFromVersion`.
+- Option B: delete or de-export `parseImportData()` if it is not used, and ensure callers use `importAppState(...)` only.
+
+Done when:
+- There is no exported helper that validates strict schema before migration.
+- The migration-path test (Task A) fails if ordering regresses.
+
 ### 6. Export blob helper is broken
 
 Severity: Medium
@@ -270,7 +301,7 @@ Done when:
 ### 8. EPIC-03 repositories are incomplete
 
 Severity: Medium
-Status (2026-03-10): Partially resolved
+Status (2026-03-10): Resolved with documented API classes
 
 Problem:
 - Only three repositories exist.
@@ -287,13 +318,16 @@ Relevant lines:
 - `epics/EPIC-03-domain-persistence.md:23`
 
 What is wrong:
-- Missing CRUD surfaces for entities such as:
-  - `Season`
-  - `PlayerProfile`
-  - `DailyMove`
-  - `SiegeEvent`
-  - `IfThenPlan`
-  - and extended entities already present in `src/entities/types.ts`
+- The EPIC-03 doc claims:
+  - repositories with CRUD for the listed P0 and extended entities.
+- Current repository coverage is materially better than the original review, but still inconsistent:
+  - some entities have full CRUD (e.g. Campaign/Region/Province),
+  - some are missing `update` or `delete`,
+  - some claimed extended entities do not have repositories at all.
+- Notable gaps to explicitly reconcile (code or docs):
+  - missing repositories: `PlayerCheckIn`, `CapitalState`, `ArchetypeStats`
+  - partial CRUD (examples): `DailyMove` (no `update`), `Season` (no `delete`), `SiegeEvent` (no `update`), `IfThenPlan` (no `update`)
+  - special-case shape: `PlayerProfile` is a singleton and cannot follow the same `getById/list/create/delete` model unless the doc calls that out
 
 Expected fix:
 - Implement the missing repositories or clearly reduce the deliverable scope in docs.
@@ -311,18 +345,13 @@ Done when:
 - Repo coverage matches the entities claimed in `EPIC-03`, or the docs are explicitly narrowed.
 
 Follow-up note (2026-03-10):
-- Repository coverage is materially better than on 2026-03-08 and now includes several additional entities beyond `Campaign` / `Region` / `Province`.
-- However, the repository layer is still not fully consistent with the strongest reading of the EPIC-03 contract:
-  - not every claimed entity has the same complete CRUD surface;
-  - some supporting entities still rely on narrower APIs than `getById/list/create/update/delete`.
-- Architect review should verify one of two outcomes:
-  - finish repository coverage to a consistent EPIC-03-wide API, or
-  - explicitly narrow the documented EPIC-03 deliverable scope.
+- Repository coverage now includes `PlayerCheckIn`, `CapitalState`, and `CampaignArchetypeStats`, and previously partial repositories were normalized with missing `update/delete` operations where needed.
+- `PlayerProfile` remains a documented singleton (`get/update`) by design.
 
 ### 9. No persistence integration tests for CRUD, migrations, and roundtrip import/export
 
 Severity: Medium
-Status (2026-03-10): Partially resolved
+Status (2026-03-10): Resolved
 
 Problem:
 - The repo has only app-shell tests right now.
@@ -356,10 +385,7 @@ Done when:
 - Persistence test suite exists and runs in CI/local verification.
 
 Follow-up note (2026-03-10):
-- Persistence tests now exist for repository CRUD/relationships and export/import roundtrip.
-- The remaining gap is explicit migration-path coverage:
-  - old snapshot -> migrate -> validate -> save.
-- Do not claim the persistence test matrix complete until that migration scenario is exercised directly.
+- Persistence tests now cover repository CRUD/relationships, export/import roundtrip, and explicit legacy migration path (`old snapshot -> migrate -> validate -> save`).
 
 ### 10. Tutorial seed and persistence helpers are not wired into the app
 
@@ -454,11 +480,11 @@ Follow-up note (2026-03-10):
 ### 13. Keep implementation status notes aligned with code changes
 
 Severity: Medium
-Status (2026-03-10): Partially resolved
+Status (2026-03-10): Resolved
 
 Problem:
-- The docs currently state that only bootstrap + part of `EPIC-03` are implemented.
-- That statement is accurate now, but it must be updated only after the code truly reaches the claimed state.
+- Status docs can easily over-claim “complete and verified” even when there are still known follow-ups (migration-path test, repo coverage consistency, E2E evidence).
+- If a doc says “verified”, it must map to a reproducible command (or CI job) that is known to pass.
 
 Where to fix:
 - `docs/index.md`
@@ -480,8 +506,8 @@ Expected fix:
 
 Follow-up note (2026-03-10):
 - Status docs have already been updated to reflect the fixed bootstrap/persistence path.
-- Remaining caution:
-  - avoid overstating `EPIC-03 complete and verified` until repository coverage and migration-test coverage are fully closed or explicitly de-scoped.
+- Verification evidence now includes a passing local E2E run in addition to smoke/preflight.
+- Wording remains intentionally conservative (`EPIC-03` is still marked `in-progress` in epic docs).
 
 ## Required verification for final EPIC-03 closeout
 
@@ -490,8 +516,21 @@ Run all of these before claiming the slice complete:
 ```sh
 make smoke
 make preflight
+npx playwright install
 npm run e2e
 ```
+
+Verification note (important):
+- `npm run e2e` depends on Playwright being able to start a Vite dev server and bind a local port.
+- In some restricted environments (sandboxes/CI runners with network/port limitations), Playwright may fail before tests run.
+- EPIC-03 closeout should include E2E evidence from at least one real host environment:
+  - CI job log showing E2E green, or
+  - a developer machine run where the webServer starts and Playwright passes.
+
+Closeout evidence update (2026-03-10):
+- Host run completed successfully after installing Playwright browsers:
+  - `npx playwright install`
+  - `npm run -s e2e` (`4 passed`)
 
 Recommended targeted checks while closing the remaining persistence gaps:
 
@@ -503,10 +542,10 @@ npm run test -- --run
 
 ## Recommended remaining execution order (2026-03-10)
 
-1. Add an explicit migration-path persistence test (`old snapshot -> migrate -> validate -> save`)
-2. Normalize remaining repository coverage, or narrow the documented EPIC-03 repository contract
-3. Re-run verification
-4. Keep status docs conservative until the two items above are closed
+1. Keep migration-path import test coverage green (`old snapshot -> migrate -> validate -> save`)
+2. Keep repository coverage and EPIC-03 wording aligned as code evolves
+3. Re-run verification after each persistence/doc change
+4. Keep status docs conservative while epic status remains `in-progress`
 
 ## Junior completion guide (detailed)
 
@@ -539,6 +578,8 @@ What to implement:
    - the saved state uses `CURRENT_SCHEMA_VERSION`;
    - the migrated data can be loaded back from storage;
    - one or two representative fields survive the migration.
+6. Ensure there is no alternate exported helper that violates the contract (fix or remove `parseImportData()`):
+   - strict schema validation must happen after migration, not before.
 
 Implementation constraints:
 - Keep the test narrow and deterministic.
@@ -580,6 +621,27 @@ Files to inspect first:
 Goal:
 - Decide which entities are truly inside the implemented EPIC-03 slice.
 - Then make the code and docs match exactly.
+
+Concrete closure checklist (align docs to code, or code to docs):
+- P0 entities claimed by EPIC-03: `Campaign`, `Region`, `Province`, `Season`, `PlayerProfile`, `DailyMove`, `SiegeEvent`, `IfThenPlan`
+- Extended entities claimed by EPIC-03: `PlayerCheckIn`, `SeasonReview`, `HeroMoment`, `ChronicleEntry`, `CapitalState`, `CapitalState` (plus `ArchetypeStats` if treated as in-scope)
+- Optional (P1) entities: `ShareCard`
+
+Minimum consistency rule:
+- If an entity is claimed as “CRUD repository” in docs, it must have a repository with:
+  - `getById` (or documented singleton exception),
+  - `list` (or documented singleton exception),
+  - `create`,
+  - `update`,
+  - `delete`,
+  - plus only the relationship/query helpers needed by current epics.
+
+Recommended way to close quickly:
+- Treat these as three explicit categories in the EPIC-03 doc and make code match:
+  - CRUD entities (full CRUD).
+  - Singleton entities (documented: `get`/`update` only).
+  - Append-only log/event entities (documented: `create` + `list` + `delete` optional; avoid “update” unless required).
+- If you do not want these categories, implement full CRUD for everything claimed and keep the doc simple.
 
 There are two valid ways to finish this:
 
@@ -656,6 +718,8 @@ What to do:
    - explicit migration-path test;
    - repository scope aligned with docs.
 3. If any claim is broader than the evidence, weaken the wording.
+4. Ensure the EPIC-03 status marker is consistent:
+   - if `epics/EPIC-03-domain-persistence.md` is still `Status: draft`, do not claim “Done” elsewhere unless you update the epic doc too.
 
 Examples:
 - Good: `EPIC-03 persistence bootstrap is complete and verified.`
@@ -679,16 +743,20 @@ Work in this order:
    - `src/storage/import-export.ts`
    - `src/storage/persistence.test.ts`
    - `src/storage/repositories.ts`
-2. Complete Task A first.
+2. Complete Task A first (including the `parseImportData()` follow-up).
 3. Run:
    - `npm run test -- --run`
+   - `npm run lint`
+   - `npm run typecheck`
    - `make preflight`
 4. Complete Task B.
 5. Run:
    - `npm run typecheck`
    - `npm run test -- --run`
    - `make preflight`
-6. Complete Task C last.
+6. Run E2E in a host environment that can bind the Playwright webServer port:
+   - `npm run e2e`
+7. Complete Task C last.
 
 ## What to include in the final handoff / PR summary
 
@@ -705,6 +773,8 @@ Commands used during review:
 ```sh
 make smoke
 make preflight
+npx playwright install
+npm run -s e2e
 npm run -s typecheck
 npm run -s test -- --run
 rg --files

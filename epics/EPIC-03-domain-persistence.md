@@ -2,7 +2,7 @@
 
 **ID:** `EPIC-03`  
 **Priority:** `P0`  
-**Status:** `draft`  
+**Status:** `in-progress`  
 **Owner:** `<TBD>`  
 **PRD reference:** `prd.md` (Data & storage)
 
@@ -24,7 +24,11 @@ Implement domain types and reliable local persistence (CRUD + import/export + mi
 - Entities: Campaign/Region/Province/Season/PlayerProfile/DailyMove/SiegeEvent/IfThenPlan.
 - Extended entities: PlayerCheckIn/SeasonReview/HeroMoment/ChronicleEntry/CapitalState.
 - Optional (P1) entities: ShareCard.
-- Repositories with CRUD and basic relationship queries.
+- Repositories with relationship queries and the following API classes:
+  - standard entities: `getById/list/create/update/delete`;
+  - singleton entities (`PlayerProfile`): `get/update` only;
+  - natural-key entities (`CapitalState` by `campaignId`, `CampaignArchetypeStats` by `seasonId`):
+    key-based `get/list/create/update/delete`.
 - Stored `schemaVersion` and migration pipeline.
 - Export/import of full app state.
 

@@ -51,12 +51,16 @@ export interface ImportResult {
 }
 
 /**
- * Validate and parse JSON string to AppState
+ * Parse import JSON, validate minimal shape, migrate, and strictly validate.
  */
-export function parseImportData(jsonString: string): { state?: AppState; errors: string[] } {
+export function parseImportData(jsonString: string): {
+  state?: AppState;
+  errors: string[];
+  migratedFromVersion?: number;
+} {
   const errors: string[] = [];
 
-  // Parse JSON
+  // 1) Parse JSON
   let parsed: unknown;
   try {
     parsed = JSON.parse(jsonString);
@@ -65,15 +69,26 @@ export function parseImportData(jsonString: string): { state?: AppState; errors:
     return { errors };
   }
 
-  // Basic structure validation
+  // 2) Basic pre-migration validation
   const validation = validateAppState(parsed);
   if (!validation.valid) {
     errors.push(...validation.errors);
     return { errors };
   }
 
-  // Zod schema validation
-  const zodResult = AppStateSchema.safeParse(parsed);
+  const migratedFromVersion = (parsed as { schemaVersion?: number }).schemaVersion || 0;
+
+  // 3) Migration to current schema
+  let migratedState: AppState;
+  try {
+    migratedState = migrate(parsed as AppState);
+  } catch (error) {
+    errors.push(`Migration failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    return { errors };
+  }
+
+  // 4) Strict post-migration validation
+  const zodResult = AppStateSchema.safeParse(migratedState);
   if (!zodResult.success) {
     errors.push(
       ...zodResult.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`)
@@ -81,7 +96,16 @@ export function parseImportData(jsonString: string): { state?: AppState; errors:
     return { errors };
   }
 
-  return { state: zodResult.data, errors };
+  const validatedState = {
+    ...zodResult.data,
+    schemaVersion: CURRENT_SCHEMA_VERSION
+  };
+
+  return {
+    state: validatedState,
+    errors,
+    migratedFromVersion
+  };
 }
 
 /**
@@ -89,47 +113,14 @@ export function parseImportData(jsonString: string): { state?: AppState; errors:
  * Validates basic structure, migrates, then strictly validates and saves
  */
 export async function importAppState(jsonString: string): Promise<ImportResult> {
-  // 1. Parse JSON
-  let parsed: unknown;
+  const parsed = parseImportData(jsonString);
+  if (!parsed.state) {
+    return { success: false, errors: parsed.errors };
+  }
+
+  // Save migrated + validated state
   try {
-    parsed = JSON.parse(jsonString);
-  } catch (error) {
-    return { success: false, errors: [`Invalid JSON: ${error instanceof Error ? error.message : 'Unknown error'}`] };
-  }
-
-  // 2. Pre-migration validation (basic structure)
-  const basicValidation = validateAppState(parsed);
-  if (!basicValidation.valid) {
-    return { success: false, errors: basicValidation.errors };
-  }
-
-  const fromVersion = (parsed as { schemaVersion?: number }).schemaVersion || 0;
-
-  // 3. Migrate to current version
-  let migratedState: AppState;
-  try {
-    // Note: migrate() takes AppState but validateAppState ensures it has the minimum required fields
-    // so we can safely cast for migration purposes
-    migratedState = migrate(parsed as AppState);
-  } catch (error) {
-    return { success: false, errors: [`Migration failed: ${error instanceof Error ? error.message : 'Unknown error'}`] };
-  }
-
-  // 4. Post-migration strict validation (Zod)
-  const zodResult = AppStateSchema.safeParse(migratedState);
-  if (!zodResult.success) {
-    const zodErrors = zodResult.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`);
-    return { success: false, errors: zodErrors };
-  }
-
-  const validatedState = zodResult.data;
-
-  // 5. Ensure schema version is set correctly (migration should have handled it, but double check)
-  validatedState.schemaVersion = CURRENT_SCHEMA_VERSION;
-
-  // 6. Save to storage
-  try {
-    await saveAppState(validatedState);
+    await saveAppState(parsed.state);
   } catch (error) {
     return { success: false, errors: [`Failed to save imported state: ${error instanceof Error ? error.message : 'Unknown error'}`] };
   }
@@ -137,7 +128,7 @@ export async function importAppState(jsonString: string): Promise<ImportResult> 
   return {
     success: true,
     errors: [],
-    migratedFromVersion: fromVersion
+    migratedFromVersion: parsed.migratedFromVersion
   };
 }
 

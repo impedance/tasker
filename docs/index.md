@@ -4,7 +4,8 @@ Keep this file short. Prefer links over duplication.
 
 Status note (2026-03-08):
 - `prd.md` and `epics/**` define the target MVP architecture.
-- Status: Current implementation reaches `EPIC-03` completion. Persistence is handled via a repository pattern on top of standardized localForage storage, with startup migration and import/export verified.
+- Status: Current implementation covers the EPIC-03 persistence slice in code (repositories, startup migration, import/export).
+- Verification: `make smoke` and `make preflight` are green locally; `npm run e2e` additionally requires Playwright browser binaries (`npx playwright install`) and a host that allows local webServer startup.
 - Treat paths under `src/features`, `src/game`, `src/map`, and `src/shared` as planned boundaries until they land in code.
 
 ## Start Here
@@ -29,7 +30,7 @@ Status note (2026-03-08):
   - Route pages: `src/pages/**`
   - Domain entities + validation: `src/entities/**`
   - Storage + migrations + import/export: `src/storage/**`
-- Status: `EPIC-03` implementation complete and verified against audit findings (2026-03-10).
+- Status: `EPIC-03` implementation is in progress (`epics/EPIC-03-domain-persistence.md`) with core persistence paths implemented and verified by smoke/preflight.
 Next: `EPIC-04` Strategic Navigation.
 - Target MVP boundaries:
   - Core domain rules: `src/game/rules/**`
@@ -45,7 +46,7 @@ Next: `EPIC-04` Strategic Navigation.
 - Planned:
   - [x] **EPIC-01: Foundation Contracts** (Done)
   - [x] **EPIC-02: Bootstrap Shell** (Done)
-  - [x] **EPIC-03: Domain & Persistence** (Done)
+  - [ ] **EPIC-03: Domain & Persistence** (In Progress)
   - [ ] **EPIC-04: Strategic Navigation** (Planned):
   - Rules boundary: `src/game/rules/**` — pure functions over typed inputs/outputs
   - Map boundary: `src/map/**` — typed map meta + adjacency graph; SVG stays a view concern

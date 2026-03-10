@@ -23,16 +23,46 @@ interface Migration {
 
 /**
  * Migration 1: Initial schema version
- * No-op migration for bootstrapping
+ * Backfills missing optional slices from legacy snapshots
  */
 const migrationV1: Migration = {
   version: 1,
   name: 'Initial schema version',
   migrate: (state: AppState): AppState => {
-    // Ensure all required fields exist with defaults
+    // Backfill missing fields for legacy snapshots while setting schema version.
+    const now = new Date().toISOString();
+    const legacy = state as Partial<AppState>;
+    const profile = (legacy.playerProfile ?? {}) as Partial<AppState['playerProfile']>;
+
     return {
-      ...state,
-      schemaVersion: 1
+      schemaVersion: 1,
+      campaigns: Array.isArray(legacy.campaigns) ? legacy.campaigns : [],
+      regions: Array.isArray(legacy.regions) ? legacy.regions : [],
+      provinces: Array.isArray(legacy.provinces) ? legacy.provinces : [],
+      dailyMoves: Array.isArray(legacy.dailyMoves) ? legacy.dailyMoves : [],
+      checkIns: Array.isArray(legacy.checkIns) ? legacy.checkIns : [],
+      siegeEvents: Array.isArray(legacy.siegeEvents) ? legacy.siegeEvents : [],
+      seasons: Array.isArray(legacy.seasons) ? legacy.seasons : [],
+      seasonReviews: Array.isArray(legacy.seasonReviews) ? legacy.seasonReviews : [],
+      heroMoments: Array.isArray(legacy.heroMoments) ? legacy.heroMoments : [],
+      chronicleEntries: Array.isArray(legacy.chronicleEntries) ? legacy.chronicleEntries : [],
+      ifThenPlans: Array.isArray(legacy.ifThenPlans) ? legacy.ifThenPlans : [],
+      shareCards: Array.isArray(legacy.shareCards) ? legacy.shareCards : [],
+      capitalStates: Array.isArray(legacy.capitalStates) ? legacy.capitalStates : [],
+      archetypeStats: Array.isArray(legacy.archetypeStats) ? legacy.archetypeStats : [],
+      playerProfile: {
+        id: 'local',
+        totalCaptured: profile.totalCaptured ?? 0,
+        totalClarified: profile.totalClarified ?? 0,
+        totalStarted: profile.totalStarted ?? 0,
+        totalCompleted: profile.totalCompleted ?? 0,
+        preferredWorkWindow: profile.preferredWorkWindow,
+        frictionStats: profile.frictionStats,
+        streaks: profile.streaks,
+        currentSeasonId: profile.currentSeasonId,
+        createdAt: profile.createdAt ?? now,
+        updatedAt: profile.updatedAt ?? now
+      }
     };
   }
 };

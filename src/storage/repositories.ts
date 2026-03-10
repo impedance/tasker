@@ -6,7 +6,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import { KEY_PREFIX, getItem, setItem, removeItem, getKeysByPrefix } from './storage';
 import type {
-  Campaign, Region, Province, DailyMove, PlayerProfile,
+  Campaign, Region, Province, DailyMove, PlayerProfile, PlayerCheckIn,
+  CapitalState, CampaignArchetypeStats,
   Season, SiegeEvent, IfThenPlan, SeasonReview, HeroMoment,
   ChronicleEntry, ShareCard
 } from '../entities/types';
@@ -432,8 +433,50 @@ export const dailyMoveRepository = {
     await setItem(`${KEY_PREFIX}dailyMove:${item.id}`, item);
     return item;
   },
+  async update(id: string, data: Partial<DailyMove>): Promise<DailyMove | null> {
+    const current = await this.getById(id);
+    if (!current) return null;
+    const updated: DailyMove = { ...current, ...data, id };
+    await setItem(`${KEY_PREFIX}dailyMove:${id}`, updated);
+    return updated;
+  },
   async delete(id: string): Promise<boolean> {
     await removeItem(`${KEY_PREFIX}dailyMove:${id}`);
+    return true;
+  }
+};
+
+// ============================================================================
+// PlayerCheckIn Repository
+// ============================================================================
+
+export const playerCheckInRepository = {
+  async getById(id: string): Promise<PlayerCheckIn | null> {
+    return getItem<PlayerCheckIn>(`${KEY_PREFIX}checkIn:${id}`);
+  },
+  async list(): Promise<PlayerCheckIn[]> {
+    const keys = await getKeysByPrefix(`${KEY_PREFIX}checkIn:`);
+    const items = await Promise.all(keys.map(k => getItem<PlayerCheckIn>(k)));
+    return items.filter((i): i is PlayerCheckIn => i !== null);
+  },
+  async listByDate(date: string): Promise<PlayerCheckIn[]> {
+    const items = await this.list();
+    return items.filter(i => i.date === date);
+  },
+  async create(data: Omit<PlayerCheckIn, 'id' | 'createdAt'>): Promise<PlayerCheckIn> {
+    const item: PlayerCheckIn = { ...data, id: uuidv4(), createdAt: new Date().toISOString() };
+    await setItem(`${KEY_PREFIX}checkIn:${item.id}`, item);
+    return item;
+  },
+  async update(id: string, data: Partial<PlayerCheckIn>): Promise<PlayerCheckIn | null> {
+    const current = await this.getById(id);
+    if (!current) return null;
+    const updated: PlayerCheckIn = { ...current, ...data, id };
+    await setItem(`${KEY_PREFIX}checkIn:${id}`, updated);
+    return updated;
+  },
+  async delete(id: string): Promise<boolean> {
+    await removeItem(`${KEY_PREFIX}checkIn:${id}`);
     return true;
   }
 };
@@ -496,6 +539,10 @@ export const seasonRepository = {
     const updated: Season = { ...current, ...data, updatedAt: new Date().toISOString() };
     await setItem(`${KEY_PREFIX}season:${id}`, updated);
     return updated;
+  },
+  async delete(id: string): Promise<boolean> {
+    await removeItem(`${KEY_PREFIX}season:${id}`);
+    return true;
   }
 };
 
@@ -520,6 +567,13 @@ export const siegeEventRepository = {
     };
     await setItem(`${KEY_PREFIX}siegeEvent:${item.id}`, item);
     return item;
+  },
+  async update(id: string, data: Partial<SiegeEvent>): Promise<SiegeEvent | null> {
+    const current = await this.getById(id);
+    if (!current) return null;
+    const updated: SiegeEvent = { ...current, ...data, id };
+    await setItem(`${KEY_PREFIX}siegeEvent:${id}`, updated);
+    return updated;
   },
   async delete(id: string): Promise<boolean> {
     await removeItem(`${KEY_PREFIX}siegeEvent:${id}`);
@@ -549,6 +603,13 @@ export const ifThenPlanRepository = {
     await setItem(`${KEY_PREFIX}ifThenPlan:${item.id}`, item);
     return item;
   },
+  async update(id: string, data: Partial<IfThenPlan>): Promise<IfThenPlan | null> {
+    const current = await this.getById(id);
+    if (!current) return null;
+    const updated: IfThenPlan = { ...current, ...data, id };
+    await setItem(`${KEY_PREFIX}ifThenPlan:${id}`, updated);
+    return updated;
+  },
   async delete(id: string): Promise<boolean> {
     await removeItem(`${KEY_PREFIX}ifThenPlan:${id}`);
     return true;
@@ -576,6 +637,13 @@ export const seasonReviewRepository = {
     };
     await setItem(`${KEY_PREFIX}seasonReview:${item.id}`, item);
     return item;
+  },
+  async update(id: string, data: Partial<SeasonReview>): Promise<SeasonReview | null> {
+    const current = await this.getById(id);
+    if (!current) return null;
+    const updated: SeasonReview = { ...current, ...data, id };
+    await setItem(`${KEY_PREFIX}seasonReview:${id}`, updated);
+    return updated;
   },
   async delete(id: string): Promise<boolean> {
     await removeItem(`${KEY_PREFIX}seasonReview:${id}`);
@@ -605,6 +673,13 @@ export const heroMomentRepository = {
     await setItem(`${KEY_PREFIX}heroMoment:${item.id}`, item);
     return item;
   },
+  async update(id: string, data: Partial<HeroMoment>): Promise<HeroMoment | null> {
+    const current = await this.getById(id);
+    if (!current) return null;
+    const updated: HeroMoment = { ...current, ...data, id };
+    await setItem(`${KEY_PREFIX}heroMoment:${id}`, updated);
+    return updated;
+  },
   async delete(id: string): Promise<boolean> {
     await removeItem(`${KEY_PREFIX}heroMoment:${id}`);
     return true;
@@ -632,6 +707,13 @@ export const chronicleEntryRepository = {
     };
     await setItem(`${KEY_PREFIX}chronicleEntry:${item.id}`, item);
     return item;
+  },
+  async update(id: string, data: Partial<ChronicleEntry>): Promise<ChronicleEntry | null> {
+    const current = await this.getById(id);
+    if (!current) return null;
+    const updated: ChronicleEntry = { ...current, ...data, id };
+    await setItem(`${KEY_PREFIX}chronicleEntry:${id}`, updated);
+    return updated;
   },
   async delete(id: string): Promise<boolean> {
     await removeItem(`${KEY_PREFIX}chronicleEntry:${id}`);
@@ -661,9 +743,75 @@ export const shareCardRepository = {
     await setItem(`${KEY_PREFIX}shareCard:${item.id}`, item);
     return item;
   },
+  async update(id: string, data: Partial<ShareCard>): Promise<ShareCard | null> {
+    const current = await this.getById(id);
+    if (!current) return null;
+    const updated: ShareCard = { ...current, ...data, id };
+    await setItem(`${KEY_PREFIX}shareCard:${id}`, updated);
+    return updated;
+  },
   async delete(id: string): Promise<boolean> {
     await removeItem(`${KEY_PREFIX}shareCard:${id}`);
     return true;
   }
 };
 
+// ============================================================================
+// CapitalState Repository
+// ============================================================================
+
+export const capitalStateRepository = {
+  async getByCampaignId(campaignId: string): Promise<CapitalState | null> {
+    return getItem<CapitalState>(`${KEY_PREFIX}capitalState:${campaignId}`);
+  },
+  async list(): Promise<CapitalState[]> {
+    const keys = await getKeysByPrefix(`${KEY_PREFIX}capitalState:`);
+    const items = await Promise.all(keys.map(k => getItem<CapitalState>(k)));
+    return items.filter((i): i is CapitalState => i !== null);
+  },
+  async create(data: CapitalState): Promise<CapitalState> {
+    await setItem(`${KEY_PREFIX}capitalState:${data.campaignId}`, data);
+    return data;
+  },
+  async update(campaignId: string, data: Partial<CapitalState>): Promise<CapitalState | null> {
+    const current = await this.getByCampaignId(campaignId);
+    if (!current) return null;
+    const updated: CapitalState = { ...current, ...data, campaignId };
+    await setItem(`${KEY_PREFIX}capitalState:${campaignId}`, updated);
+    return updated;
+  },
+  async delete(campaignId: string): Promise<boolean> {
+    await removeItem(`${KEY_PREFIX}capitalState:${campaignId}`);
+    return true;
+  }
+};
+
+// ============================================================================
+// CampaignArchetypeStats Repository
+// ============================================================================
+
+export const campaignArchetypeStatsRepository = {
+  async getBySeasonId(seasonId: string): Promise<CampaignArchetypeStats | null> {
+    return getItem<CampaignArchetypeStats>(`${KEY_PREFIX}archetypeStats:${seasonId}`);
+  },
+  async list(): Promise<CampaignArchetypeStats[]> {
+    const keys = await getKeysByPrefix(`${KEY_PREFIX}archetypeStats:`);
+    const items = await Promise.all(keys.map(k => getItem<CampaignArchetypeStats>(k)));
+    return items.filter((i): i is CampaignArchetypeStats => i !== null);
+  },
+  async create(data: CampaignArchetypeStats): Promise<CampaignArchetypeStats> {
+    await setItem(`${KEY_PREFIX}archetypeStats:${data.seasonId}`, data);
+    return data;
+  },
+  async update(seasonId: string, data: Partial<CampaignArchetypeStats>): Promise<CampaignArchetypeStats | null> {
+    const current = await this.getBySeasonId(seasonId);
+    if (!current) return null;
+    const updated: CampaignArchetypeStats = { ...current, ...data, seasonId };
+    await setItem(`${KEY_PREFIX}archetypeStats:${seasonId}`, updated);
+    return updated;
+  },
+  async delete(seasonId: string): Promise<boolean> {
+    await removeItem(`${KEY_PREFIX}archetypeStats:${seasonId}`);
+    return true;
+  }
+};

@@ -23,7 +23,6 @@ Planned but not yet implemented as first-class modules:
 - `src/features/**`
 - `src/game/**`
 - `src/map/**`
-- `src/shared/**`
 
 ## 2) Target module layout
 Suggested target layout (from PRD):
