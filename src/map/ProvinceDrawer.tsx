@@ -1,7 +1,8 @@
+import { useNavigate } from "react-router-dom"
 import { Drawer, DrawerContent } from "../shared/ui/drawer"
 import { Province } from "../entities/types"
 import { Badge } from "../shared/ui/badge"
-import { Search, Info } from "lucide-react"
+import { Search, Info, ShieldAlert } from "lucide-react"
 
 interface ProvinceDrawerProps {
     province: Province | null
@@ -9,6 +10,7 @@ interface ProvinceDrawerProps {
 }
 
 export function ProvinceDrawer({ province, onClose }: ProvinceDrawerProps) {
+    const navigate = useNavigate()
     if (!province) return null
 
     return (
@@ -42,6 +44,27 @@ export function ProvinceDrawer({ province, onClose }: ProvinceDrawerProps) {
                         <div>
                             <p className="text-sm text-muted-foreground mb-1">Description</p>
                             <p className="text-[#f8f4ea]/80 text-sm leading-relaxed">{province.description}</p>
+                        </div>
+                    )}
+
+                    {province.state === 'siege' && (
+                        <div className="p-4 rounded-xl bg-[#ff4444]/10 border border-[#ff4444]/20">
+                            <div className="flex items-center gap-3 mb-2 text-[#ff4444]">
+                                <ShieldAlert size={20} />
+                                <p className="font-bold">Province Under Siege</p>
+                            </div>
+                            <p className="text-sm text-white/70 mb-4">
+                                Strategic momentum has stalled. Resolve the siege to resume progress.
+                            </p>
+                            <button
+                                onClick={() => {
+                                    onClose()
+                                    navigate(`/province/${province.id}/siege`)
+                                }}
+                                className="w-full py-3 bg-[#ff4444] text-white font-bold rounded-xl hover:bg-[#ff5555] transition-colors"
+                            >
+                                Break Siege
+                            </button>
                         </div>
                     )}
 

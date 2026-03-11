@@ -82,14 +82,19 @@ export default function MapPage() {
                 'province--captured',
                 'province--retreated',
                 'province--selected',
-                'province--hotspot'
+                'province--hotspot',
+                'province--pressure-1',
+                'province--pressure-2',
+                'province--pressure-3'
             )
 
             if (province) {
                 slot.classList.add('province-path', `province--${province.state}`)
 
-                // Hotspot highlight (T6)
-                if ((province.frontPressureLevel || 0) > 0) {
+                // Pressure level highlights (06-T9)
+                const pressure = province.frontPressureLevel || 0
+                if (pressure > 0) {
+                    slot.classList.add(`province--pressure-${Math.min(pressure, 3)}`)
                     slot.classList.add('province--hotspot')
                 }
 
