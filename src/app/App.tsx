@@ -11,6 +11,7 @@ import DailyOrdersHistory from '../pages/daily-orders/DailyOrdersHistory'
 import WarCouncilPage from '../pages/war-council/WarCouncilPage'
 import SeasonDashboard from '../pages/season/SeasonDashboard'
 import SeasonSummaryPage from '../pages/season/SeasonSummaryPage'
+import SeasonDebriefPage from '../pages/season/SeasonDebriefPage'
 import EventViewerPage from '../pages/dev/EventViewerPage'
 import CapitalPage from '../pages/capital/CapitalPage'
 import ChroniclePage from '../pages/chronicle/ChroniclePage'
@@ -36,6 +37,7 @@ function App() {
             <Route path="/war-council" element={<WarCouncilPage />} />
             <Route path="/season" element={<SeasonDashboard />} />
             <Route path="/season-summary" element={<SeasonSummaryPage />} />
+            <Route path="/season-debrief" element={<SeasonDebriefPage />} />
             <Route path="/capital" element={<CapitalPage />} />
             <Route path="/chronicle" element={<ChroniclePage />} />
             <Route path="/settings" element={<SettingsPage />} />

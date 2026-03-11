@@ -1,19 +1,24 @@
+import { useEffect, useState } from 'react';
 import { Panel } from '../../shared/ui/panel';
 import { BookOpen, Calendar } from 'lucide-react';
+import { chronicleEntryRepository } from '../../storage/repositories';
+import { ChronicleEntry } from '../../entities/types';
 
 export default function ChroniclePage() {
+    const [entries, setEntries] = useState<ChronicleEntry[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    // Placeholder entries
-    const entries = [
-        {
-            id: '1',
-            type: 'campaign_created',
-            title: 'Campaign Drafted',
-            body: 'The first lines of the campaign have been drawn. Fog of war covers the horizon.',
-            importance: 'medium',
-            date: new Date().toISOString()
+    useEffect(() => {
+        async function load() {
+            const data = await chronicleEntryRepository.list();
+            // Sort by date newest first
+            setEntries(data.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+            setLoading(false);
         }
-    ];
+        load();
+    }, []);
+
+    if (loading) return <div className="page-shell">Unrolling the ancient scrolls...</div>;
 
     return (
         <section className="page-shell">
@@ -41,17 +46,17 @@ export default function ChroniclePage() {
                                 <div className="flex justify-between items-start mb-2">
                                     <div className="flex items-center gap-2">
                                         <div className="bg-[#f0b35f]/10 text-[#f0b35f] text-[10px] px-2 py-0.5 rounded font-bold uppercase">
-                                            {entry.type.replace('_', ' ')}
+                                            {entry.entryType.replace('_', ' ')}
                                         </div>
                                         <span className="text-xs text-muted-foreground flex items-center gap-1">
                                             <Calendar size={12} />
-                                            {new Date(entry.date).toLocaleDateString()}
+                                            {new Date(entry.createdAt).toLocaleDateString()}
                                         </span>
                                     </div>
                                 </div>
 
                                 <h3 className="text-lg font-bold mb-1">{entry.title}</h3>
-                                <p className="text-sm text-muted-foreground">{entry.body}</p>
+                                {entry.body && <p className="text-sm text-muted-foreground">{entry.body}</p>}
                             </Panel>
                         </div>
                     ))
