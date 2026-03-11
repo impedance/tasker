@@ -86,18 +86,37 @@
 }
 
 /* Pressure Levels (06-T9) */
-.province--pressure-1 { stroke: #fbbf24; stroke-width: 2px; }
-.province--pressure-2 { stroke: #f59e0b; stroke-width: 3px; }
+.province--pressure-1 {
+  stroke: #fbbf24;
+  stroke-width: 2px;
+  stroke-dasharray: 2, 2;
+}
+
+.province--pressure-2 {
+  stroke: #f59e0b;
+  stroke-width: 3px;
+  stroke-dasharray: 6, 2;
+}
+
 .province--pressure-3 {
   stroke: #ef4444;
   stroke-width: 4px;
+  stroke-dasharray: 10, 2;
   animation: pulse 2s infinite;
 }
 
 @keyframes pulse {
-  0% { stroke-opacity: 1; }
-  50% { stroke-opacity: 0.4; }
-  100% { stroke-opacity: 1; }
+  0% {
+    stroke-opacity: 1;
+  }
+
+  50% {
+    stroke-opacity: 0.4;
+  }
+
+  100% {
+    stroke-opacity: 1;
+  }
 }
 
 /* Strategic Nodes */

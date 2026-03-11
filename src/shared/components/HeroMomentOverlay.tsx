@@ -7,6 +7,15 @@ export function HeroMomentOverlay() {
     const { heroSignal, clearSignals } = useFeedbackStore();
     const [visible, setVisible] = useState(false);
     const [shouldRender, setShouldRender] = useState(false);
+    const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+    useEffect(() => {
+        const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+        setPrefersReducedMotion(mq.matches);
+        const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+        mq.addEventListener('change', handler);
+        return () => mq.removeEventListener('change', handler);
+    }, []);
 
     useEffect(() => {
         if (heroSignal) {
@@ -53,18 +62,18 @@ export function HeroMomentOverlay() {
             )}>
                 {/* Visual Flair */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-64 h-64 bg-[#f0b35f]/20 rounded-full blur-[100px] animate-pulse" />
+                    <div className={cn("w-64 h-64 bg-[#f0b35f]/20 rounded-full blur-[100px]", !prefersReducedMotion && "animate-pulse")} />
                 </div>
 
                 <div className="relative">
-                    <div className="w-24 h-24 rounded-full bg-[#f0b35f] text-[#0b1218] flex items-center justify-center mb-8 shadow-[0_0_50px_rgba(240,179,95,0.5)] animate-bounce">
+                    <div className={cn("w-24 h-24 rounded-full bg-[#f0b35f] text-[#0b1218] flex items-center justify-center mb-8 shadow-[0_0_50px_rgba(240,179,95,0.5)]", !prefersReducedMotion && "animate-bounce")}>
                         <Trophy size={48} />
                     </div>
 
-                    <div className="absolute -top-4 -left-4 text-[#f0b35f] animate-spin-slow">
+                    <div className={cn("absolute -top-4 -left-4 text-[#f0b35f]", !prefersReducedMotion && "animate-spin-slow")}>
                         <Sparkles size={32} />
                     </div>
-                    <div className="absolute -bottom-4 -right-4 text-[#f0b35f] animate-spin-slow-reverse">
+                    <div className={cn("absolute -bottom-4 -right-4 text-[#f0b35f]", !prefersReducedMotion && "animate-spin-slow-reverse")}>
                         <Sparkles size={24} />
                     </div>
                 </div>

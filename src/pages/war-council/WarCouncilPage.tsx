@@ -48,6 +48,14 @@ export default function WarCouncilPage() {
 
         setIsSubmitting(true);
         try {
+            const today = new Date().toISOString().split('T')[0];
+            const plansToday = plans.filter(p => p.createdAt.startsWith(today));
+
+            if (plansToday.length >= 3) {
+                alert('The War Council allows only 3 plans per day to prevent over-planning.');
+                return;
+            }
+
             await ifThenPlanRepository.create({
                 provinceId: selectedProvinceId,
                 triggerText,
@@ -132,9 +140,15 @@ export default function WarCouncilPage() {
                                 />
                             </div>
 
+                            {plans.filter(p => p.createdAt.startsWith(new Date().toISOString().split('T')[0])).length >= 3 && (
+                                <div className="p-3 bg-amber-400/10 border border-amber-400/20 rounded-lg text-[10px] text-amber-400">
+                                    Strategic limit reached. You have recorded 3 plans for today. Action is now required.
+                                </div>
+                            )}
+
                             <button
                                 type="submit"
-                                disabled={isSubmitting || !selectedProvinceId}
+                                disabled={isSubmitting || !selectedProvinceId || plans.filter(p => p.createdAt.startsWith(new Date().toISOString().split('T')[0])).length >= 3}
                                 className="w-full bg-[#f0b35f] text-[#0b1218] font-bold py-3 rounded-xl hover:bg-[#f0c38f] disabled:opacity-50 transition-colors mt-4"
                             >
                                 {isSubmitting ? 'Recording...' : 'Record Plan'}

@@ -10,6 +10,8 @@ export default function CampaignsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
+  const [factionName, setFactionName] = useState('')
+  const [bannerStyle, setBannerStyle] = useState('classic')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const loadCampaigns = () => {
@@ -33,10 +35,14 @@ export default function CampaignsPage() {
         seasonId: 'season-tutorial', // Default for now
         colorTheme: 'blue',
         archetype: 'foundation',
+        factionName: factionName || 'The Unnamed Clan',
+        bannerStyle: bannerStyle,
         chronicleEnabled: true
       })
       setTitle('')
       setDescription('')
+      setFactionName('')
+      setBannerStyle('classic')
       setIsDialogOpen(false)
       loadCampaigns()
     } catch (error) {
@@ -81,9 +87,34 @@ export default function CampaignsPage() {
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 focus:outline-none focus:border-[#f0b35f]/50 transition-colors min-h-[100px]"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 focus:outline-none focus:border-[#f0b35f]/50 transition-colors min-h-[80px]"
                   placeholder="What is the objective of this campaign?"
                 />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Faction Name</label>
+                  <input
+                    type="text"
+                    value={factionName}
+                    onChange={(e) => setFactionName(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 focus:outline-none focus:border-[#f0b35f]/50 transition-colors"
+                    placeholder="e.g. Iron Guard"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Banner Style</label>
+                  <select
+                    value={bannerStyle}
+                    onChange={(e) => setBannerStyle(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 focus:outline-none focus:border-[#f0b35f]/50 transition-colors"
+                  >
+                    <option value="classic">Classic</option>
+                    <option value="royal">Royal</option>
+                    <option value="vanguard">Vanguard</option>
+                    <option value="mystic">Mystic</option>
+                  </select>
+                </div>
               </div>
               <div className="pt-4">
                 <button

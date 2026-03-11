@@ -12,6 +12,8 @@ import {
     ShieldAlert,
     Undo2
 } from 'lucide-react';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '../../shared/ui/dialog';
+import { Button } from '../../shared/ui/button';
 
 export default function SiegePage() {
     const { provinceId } = useParams<{ provinceId: string }>();
@@ -19,6 +21,8 @@ export default function SiegePage() {
     const [province, setProvince] = useState<Province | null>(null);
     const [siegeEvent, setSiegeEvent] = useState<SiegeEvent | null>(null);
     const [loading, setLoading] = useState(true);
+    const [selectedTactic, setSelectedTactic] = useState<TacticType | null>(null);
+    const [tacticData, setTacticData] = useState<any>({});
     const { execute } = useApplyAction();
 
     useEffect(() => {
@@ -40,25 +44,43 @@ export default function SiegePage() {
     const handleTactic = async (tacticType: TacticType) => {
         if (!province || !siegeEvent) return;
 
-        try {
-            // For MVP, we use default tactic data. Real implementation would show modal for data entry.
-            // E.g. for 'raid', it defaults to 5 minutes.
-            const tacticData: any = { tacticType };
-            if (tacticType === 'raid') tacticData.durationMinutes = 5;
-            if (tacticType === 'engineer') tacticData.subProvinceIds = ['temp-id']; // Placeholder
+        // For tactics that need entry, show dialog
+        if (['scout', 'supply', 'engineer', 'raid'].includes(tacticType)) {
+            setSelectedTactic(tacticType);
+            if (tacticType === 'scout') {
+                setTacticData({
+                    tacticType: 'scout',
+                    desiredOutcome: province.desiredOutcome || '',
+                    firstStep: province.firstStep || '',
+                    estimatedEntryMinutes: province.estimatedEntryMinutes || 15
+                });
+            } else if (tacticType === 'raid') {
+                setTacticData({ tacticType: 'raid', durationMinutes: 5 });
+            } else if (tacticType === 'engineer') {
+                setTacticData({ tacticType: 'engineer', subSteps: ['', '', ''] });
+            } else {
+                setTacticData({ tacticType });
+            }
+            return;
+        }
 
+        await executeTactic(tacticType, { tacticType });
+    };
+
+    const executeTactic = async (type: TacticType, data: any) => {
+        if (!province || !siegeEvent) return;
+        try {
             await execute(province, {
                 type: 'apply_tactic',
                 payload: {
-                    tacticType,
+                    tacticType: type,
                     siegeEventId: siegeEvent.id,
-                    data: tacticData
+                    data
                 }
             });
             navigate(-1);
         } catch (error) {
             console.error('Failed to resolve siege:', error);
-            alert('Failed to resolve siege. See console.');
         }
     };
 
@@ -116,6 +138,81 @@ export default function SiegePage() {
                     onClick={() => handleTactic('retreat')}
                 />
             </div>
+
+            <Dialog open={!!selectedTactic} onOpenChange={(open) => !open && setSelectedTactic(null)}>
+                <DialogContent className="max-w-md bg-[#0b1218] border border-white/10 text-white p-8">
+                    <DialogTitle className="text-2xl font-bold mb-2 capitalize">{selectedTactic} Tactic</DialogTitle>
+                    <DialogDescription className="text-muted-foreground mb-6">
+                        Provide the necessary intel to break the siege.
+                    </DialogDescription>
+
+                    <div className="space-y-4">
+                        {selectedTactic === 'scout' && (
+                            <>
+                                <div>
+                                    <label className="block text-xs font-bold text-muted-foreground uppercase mb-1">Outcome</label>
+                                    <input
+                                        type="text"
+                                        value={tacticData.desiredOutcome}
+                                        onChange={e => setTacticData({ ...tacticData, desiredOutcome: e.target.value })}
+                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-muted-foreground uppercase mb-1">First Step</label>
+                                    <input
+                                        type="text"
+                                        value={tacticData.firstStep}
+                                        onChange={e => setTacticData({ ...tacticData, firstStep: e.target.value })}
+                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm"
+                                    />
+                                </div>
+                            </>
+                        )}
+
+                        {selectedTactic === 'raid' && (
+                            <div>
+                                <label className="block text-xs font-bold text-muted-foreground uppercase mb-1">Duration (min)</label>
+                                <input
+                                    type="number"
+                                    value={tacticData.durationMinutes}
+                                    onChange={e => setTacticData({ ...tacticData, durationMinutes: parseInt(e.target.value) })}
+                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm"
+                                />
+                            </div>
+                        )}
+
+                        {selectedTactic === 'engineer' && (
+                            <div className="space-y-2">
+                                <label className="block text-xs font-bold text-muted-foreground uppercase mb-1">Micro-steps</label>
+                                {tacticData.subSteps?.map((step: string, i: number) => (
+                                    <input
+                                        key={i}
+                                        type="text"
+                                        value={step}
+                                        placeholder={`Step ${i + 1}`}
+                                        onChange={e => {
+                                            const newSteps = [...tacticData.subSteps];
+                                            newSteps[i] = e.target.value;
+                                            setTacticData({ ...tacticData, subSteps: newSteps });
+                                        }}
+                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm"
+                                    />
+                                ))}
+                            </div>
+                        )}
+
+                        <div className="pt-4 flex gap-3">
+                            <Button variant="outline" onClick={() => setSelectedTactic(null)} className="flex-1">
+                                Cancel
+                            </Button>
+                            <Button onClick={() => executeTactic(selectedTactic!, tacticData)} className="flex-1 bg-[#f0b35f] text-[#0b1218]">
+                                Execute
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </section>
     );
 }
