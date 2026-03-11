@@ -4,20 +4,22 @@ import {
     Map as MapIcon,
     ShieldCheck,
     Sword,
-    History,
     Settings,
     LayoutDashboard,
-    Trophy
+    Trophy,
+    History as HistoryIcon,
+    BookOpen
 } from 'lucide-react';
 
 export function Sidebar() {
     const links = [
-        { to: '/', icon: <Home size={20} />, label: 'Strategy Room' },
-        { to: '/season', icon: <Trophy size={20} />, label: 'Season' },
+        { to: '/', icon: <Home size={20} />, label: 'Home' },
+        { to: '/capital', icon: <Trophy size={20} />, label: 'Capital' },
         { to: '/map', icon: <MapIcon size={20} />, label: 'Campaign Map' },
         { to: '/daily-orders', icon: <LayoutDashboard size={20} />, label: 'Daily Orders' },
         { to: '/war-council', icon: <Sword size={20} />, label: 'War Council' },
-        { to: '/daily-history', icon: <History size={20} />, label: 'Logs' },
+        { to: '/chronicle', icon: <BookOpen size={20} />, label: 'Chronicle' },
+        { to: '/daily-history', icon: <HistoryIcon size={20} />, label: 'Logs' },
         { to: '/settings', icon: <Settings size={20} />, label: 'Settings' },
     ];
 

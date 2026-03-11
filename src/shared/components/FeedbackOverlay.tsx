@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useFeedbackStore } from '../store/useFeedbackStore';
 import { Trophy, Sparkles, Zap, ShieldCheck } from 'lucide-react';
+import { WarningToast } from '../ui/WarningToast';
 
 export function FeedbackOverlay() {
-    const { currentSignal, heroSignal, clearSignals } = useFeedbackStore();
+    const { currentSignal, heroSignal, warningSignal, clearSignals, clearWarning } = useFeedbackStore();
     const [visible, setVisible] = useState(false);
 
     useEffect(() => {
@@ -38,7 +39,7 @@ export function FeedbackOverlay() {
                     </h2>
 
                     <p className="text-2xl font-bold text-[#f8f4ea] leading-tight mb-2">
-                        {(heroSignal || currentSignal)!.message}
+                        {heroSignal ? heroSignal.message : currentSignal?.message}
                     </p>
 
                     {heroSignal && (
@@ -49,6 +50,10 @@ export function FeedbackOverlay() {
                         </div>
                     )}
                 </div>
+            )}
+
+            {warningSignal && (
+                <WarningToast message={warningSignal} onClose={clearWarning} />
             )}
         </div>
     );

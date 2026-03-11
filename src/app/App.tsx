@@ -11,6 +11,9 @@ import DailyOrdersHistory from '../pages/daily-orders/DailyOrdersHistory'
 import WarCouncilPage from '../pages/war-council/WarCouncilPage'
 import SeasonDashboard from '../pages/season/SeasonDashboard'
 import SeasonSummaryPage from '../pages/season/SeasonSummaryPage'
+import EventViewerPage from '../pages/dev/EventViewerPage'
+import CapitalPage from '../pages/capital/CapitalPage'
+import ChroniclePage from '../pages/chronicle/ChroniclePage'
 import { Sidebar } from '../shared/components/Sidebar'
 import { FeedbackOverlay } from '../shared/components/FeedbackOverlay'
 import { OnboardingDialog } from './OnboardingDialog'
@@ -33,7 +36,10 @@ function App() {
             <Route path="/war-council" element={<WarCouncilPage />} />
             <Route path="/season" element={<SeasonDashboard />} />
             <Route path="/season-summary" element={<SeasonSummaryPage />} />
+            <Route path="/capital" element={<CapitalPage />} />
+            <Route path="/chronicle" element={<ChroniclePage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/dev/events" element={<EventViewerPage />} />
           </Routes>
         </main>
       </div>

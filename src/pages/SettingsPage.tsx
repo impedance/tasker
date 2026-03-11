@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { exportAppStateAsBlob, getExportFilename, importAppStateFromFile, resetAppState } from '../storage/import-export';
 import { Button } from '../shared/ui/button';
 import { Panel } from '../shared/ui/panel';
+import { exportEventsJSON, exportEventsCSV } from '../shared/events/event-logger';
 
 export default function SettingsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -26,6 +27,31 @@ export default function SettingsPage() {
       setStatus({ type: 'success', message: 'Export completed successfully.' });
     } catch (error) {
       setStatus({ type: 'error', message: `Export failed: ${error instanceof Error ? error.message : String(error)}` });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleExportEvents = async (format: 'json' | 'csv') => {
+    try {
+      setIsProcessing(true);
+      setStatus({ type: 'info', message: `Preparing ${format.toUpperCase()} export...` });
+
+      const content = format === 'json' ? await exportEventsJSON() : await exportEventsCSV();
+      const blob = new Blob([content], { type: format === 'json' ? 'application/json' : 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+      a.download = `tasker-events-${timestamp}.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      setStatus({ type: 'success', message: `Events export (${format.toUpperCase()}) completed.` });
+    } catch (error) {
+      setStatus({ type: 'error', message: `Events export failed: ${error instanceof Error ? error.message : String(error)}` });
     } finally {
       setIsProcessing(false);
     }
@@ -111,6 +137,21 @@ export default function SettingsPage() {
               {status.message}
             </div>
           )}
+        </Panel>
+
+        <Panel title="Events Instrumentation">
+          <p className="text-sm text-muted-foreground mb-4">
+            Download your activity event stream for analysis or support.
+          </p>
+
+          <div className="flex gap-4 mb-4">
+            <Button variant="outline" onClick={() => handleExportEvents('json')} className="flex-1" disabled={isProcessing}>
+              Export Events (JSON)
+            </Button>
+            <Button variant="outline" onClick={() => handleExportEvents('csv')} className="flex-1" disabled={isProcessing}>
+              Export Events (CSV)
+            </Button>
+          </div>
         </Panel>
 
         <Panel title="Danger Zone">
