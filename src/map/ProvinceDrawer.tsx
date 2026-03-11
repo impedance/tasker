@@ -3,6 +3,7 @@ import { Drawer, DrawerContent } from "../shared/ui/drawer"
 import { Province } from "../entities/types"
 import { Badge } from "../shared/ui/badge"
 import { Search, Info, ShieldAlert } from "lucide-react"
+import { useApplyAction } from "../shared/hooks/useApplyAction"
 
 interface ProvinceDrawerProps {
     province: Province | null
@@ -11,7 +12,37 @@ interface ProvinceDrawerProps {
 
 export function ProvinceDrawer({ province, onClose }: ProvinceDrawerProps) {
     const navigate = useNavigate()
+    const { execute } = useApplyAction()
+
     if (!province) return null
+
+    const handleScout = async () => {
+        if (!province) return
+
+        try {
+            if (province.state === 'fog') {
+                // Navigate to clarify form
+                navigate(`/province/${province.id}/clarify`)
+            } else if (province.state === 'ready' || province.state === 'in_progress') {
+                // Log a scout move
+                await execute(province, {
+                    type: 'log_move',
+                    payload: {
+                        durationMinutes: 15,
+                        moveType: 'scout'
+                    }
+                })
+            }
+        } catch (error) {
+            console.error('Failed to scout:', error)
+        }
+    }
+
+    const handleDetails = async () => {
+        if (!province) return
+        // Navigate to province details page (if exists) or show info
+        navigate(`/province/${province.id}`)
+    }
 
     return (
         <Drawer open={!!province} onOpenChange={(open) => !open && onClose()}>
@@ -69,11 +100,17 @@ export function ProvinceDrawer({ province, onClose }: ProvinceDrawerProps) {
                     )}
 
                     <div className="pt-4 flex gap-3">
-                        <button className="flex-1 min-h-[48px] bg-[#f0b35f] text-[#0b1218] font-bold rounded-xl hover:bg-[#f0c38f] transition-colors flex items-center justify-center gap-2">
+                        <button
+                            onClick={handleScout}
+                            className="flex-1 min-h-[48px] bg-[#f0b35f] text-[#0b1218] font-bold rounded-xl hover:bg-[#f0c38f] transition-colors flex items-center justify-center gap-2"
+                        >
                             <Search size={18} />
                             Scout
                         </button>
-                        <button className="flex-1 min-h-[48px] bg-white/10 text-white font-bold rounded-xl border border-white/10 hover:bg-white/20 transition-colors flex items-center justify-center gap-2">
+                        <button
+                            onClick={handleDetails}
+                            className="flex-1 min-h-[48px] bg-white/10 text-white font-bold rounded-xl border border-white/10 hover:bg-white/20 transition-colors flex items-center justify-center gap-2"
+                        >
                             <Info size={18} />
                             Details
                         </button>

@@ -146,11 +146,19 @@ test:
 		fi; \
 	fi; \
 	if [ -f package.json ]; then \
-		if command -v npm >/dev/null 2>&1; then \
+			if command -v npm >/dev/null 2>&1; then \
+				NODE_TEST_CMD="npm run -s test --if-present"; \
+				if command -v node >/dev/null 2>&1; then \
+					if node -e 'const p=require("./package.json");process.exit(p.scripts&&p.scripts["test:run"]?0:1)'; then \
+						NODE_TEST_CMD="npm run -s test:run --if-present"; \
+					elif node -e 'const p=require("./package.json");const t=((p.scripts&&p.scripts.test)||"").trim();process.exit(/^vitest(\\s|$)/.test(t)?0:1)'; then \
+					NODE_TEST_CMD="npm run -s test --if-present -- --run"; \
+				fi; \
+			fi; \
 			if [ "$(QUIET)" = "1" ] && [ -x tools/run_silent.sh ]; then \
-				tools/run_silent.sh "npm test" npm run -s test --if-present; \
+				tools/run_silent.sh "npm test" bash -lc "$$NODE_TEST_CMD"; \
 			else \
-				npm run -s test --if-present; \
+				bash -lc "$$NODE_TEST_CMD"; \
 			fi; \
 		else \
 			echo "Remediation: npm is missing; wire the existing Node test command."; \

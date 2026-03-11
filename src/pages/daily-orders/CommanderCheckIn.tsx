@@ -31,8 +31,15 @@ const TIMES = [
     { value: 25, label: '25+ min' },
 ];
 
-export default function CommanderCheckIn() {
+interface CommanderCheckInProps {
+    onComplete?: () => void;
+    onSkip?: () => void;
+}
+
+export default function CommanderCheckIn({ onComplete, onSkip }: CommanderCheckInProps) {
     const navigate = useNavigate();
+    const handleComplete = onComplete ?? (() => navigate('/daily-orders'));
+    const handleSkip = onSkip ?? (() => navigate('/daily-orders'));
     const [emotion, setEmotion] = useState<EmotionType>('ambiguity');
     const [energy, setEnergy] = useState<EnergyLevel>('medium');
     const [time, setTime] = useState<number>(15);
@@ -48,7 +55,7 @@ export default function CommanderCheckIn() {
                 energyLevel: energy,
                 availableMinutes: time,
             });
-            navigate('/daily-orders');
+            handleComplete();
         } catch (error) {
             console.error('Check-in failed:', error);
             setIsSubmitting(false);
@@ -147,7 +154,7 @@ export default function CommanderCheckIn() {
                     </button>
                     <button
                         type="button"
-                        onClick={() => navigate('/daily-orders')}
+                        onClick={handleSkip}
                         className="w-full mt-4 text-xs text-muted-foreground hover:text-white transition-colors"
                     >
                         Skip and go to orders (defaults will be used)

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import CampaignsPage from '../pages/CampaignsPage'
 import CampaignMapPage from '../pages/CampaignMapPage'
@@ -19,8 +20,47 @@ import { Sidebar } from '../shared/components/Sidebar'
 import { FeedbackOverlay } from '../shared/components/FeedbackOverlay'
 import { HeroMomentOverlay } from '../shared/components/HeroMomentOverlay'
 import { OnboardingDialog } from './OnboardingDialog'
+import { checkAndCreateSieges } from '../game/services/siege-service'
+import { checkAndStartNewSeason } from '../game/services/season-service'
 
 function App() {
+  const [initialized, setInitialized] = useState(false)
+
+  useEffect(() => {
+    async function initialize() {
+      try {
+        // Auto-trigger siege detection for all provinces
+        const siegeCount = await checkAndCreateSieges(new Date())
+        if (siegeCount > 0) {
+          console.log(`[App] Created ${siegeCount} siege event(s)`)
+        }
+
+        // Auto-start new season if current season ended
+        const newSeason = await checkAndStartNewSeason(new Date())
+        if (newSeason) {
+          console.log(`[App] Started new season: ${newSeason.title}`)
+        }
+      } catch (error) {
+        console.error('[App] Initialization error:', error)
+      } finally {
+        setInitialized(true)
+      }
+    }
+
+    void initialize()
+  }, [])
+
+  if (!initialized) {
+    return (
+      <div className="flex h-screen bg-[#060a0d] text-[#f8f4ea] items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg font-bold mb-2">Loading...</p>
+          <p className="text-sm text-muted-foreground">Preparing your campaign</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <BrowserRouter>
       <div className="flex h-screen bg-[#060a0d] text-[#f8f4ea] overflow-hidden selection:bg-[#f0b35f]/30">

@@ -98,3 +98,108 @@ Use these as “Definition of Done” anchors across EPICs:
 7) **Chronicle**: entries appear only after meaningful actions and are human-readable: `epics/EPIC-15-world-shell.md`.
 8) **Season**: day number stable with 04:00 boundary; summary/debrief works: `epics/EPIC-10-season.md`.
 9) **Persistence**: refresh safe; import/export roundtrip stable: `epics/EPIC-03-domain-persistence.md`.
+
+---
+
+## 7) Week 2 Integration Status (WEEK2-INTEGRATION-PLAN)
+
+**Status:** ✅ Complete  
+**Date:** 2026-03-11  
+
+### P0 Critical Tasks
+- [x] **T0.1** Siege auto-trigger on app load (`src/game/services/siege-service.ts`)
+- [x] **T0.2** Event logger with IndexedDB persistence (`src/shared/events/event-logger.ts`)
+- [x] **T0.3** Event export (JSON/CSV) with `downloadFile` utility
+- [x] **T0.4** ProvinceDrawer wired to applyAction (`src/map/ProvinceDrawer.tsx`)
+- [x] **T0.5** Feedback consumer hook (`src/shared/hooks/useFeedbackConsumer.ts`)
+
+### P1 Pilot Readiness Tasks
+- [x] **T1.1** Season auto-start on day 21 (`src/game/services/season-service.ts`)
+- [x] **T1.2** CommanderCheckIn integrated with DailyOrdersPage
+- [x] **T1.3** Hero moments wired to feedback signals
+- [x] **T1.4** Event export buttons in Settings UI
+- [x] **T1.5** Integration tests created (`tests/integration/`)
+- [x] **T1.6** IMPLEMENTATION-READINESS.md updated
+- [x] **T1.7** E2E checklist created (`docs/E2E-CHECKLIST.md`)
+
+### Files Created/Modified
+**New Services:**
+- `src/game/services/siege-service.ts`
+- `src/game/services/season-service.ts`
+
+**New Hooks:**
+- `src/shared/hooks/useFeedbackConsumer.ts`
+
+**Updated Components:**
+- `src/app/App.tsx` - siege/season auto-trigger on mount
+- `src/map/ProvinceDrawer.tsx` - Scout/Details buttons wired
+- `src/pages/daily-orders/DailyOrdersPage.tsx` - check-in integration
+- `src/pages/daily-orders/CommanderCheckIn.tsx` - onComplete/onSkip props
+- `src/shared/events/event-logger.ts` - downloadFile utility
+
+**New Tests:**
+- `tests/integration/siege-integration.test.ts`
+- `tests/integration/event-logger-integration.test.ts`
+- `tests/integration/feedback-integration.test.ts`
+- `tests/integration/season-service-integration.test.ts`
+
+**Documentation:**
+- `docs/E2E-CHECKLIST.md`
+
+---
+
+## 8) Pilot Readiness Checklist
+
+Use this checklist before pilot deployment:
+
+### Core Mechanics
+- [ ] Siege auto-trigger works (modify `lastMeaningfulActionAt` to 4 days ago, reload)
+- [ ] Siege resolution works (Break Siege → select tactic → resolve)
+- [ ] Province completion triggers hero moment
+- [ ] Hero moment cooldown works (1 hour, session-based)
+- [ ] Season auto-starts on day 21
+- [ ] Active provinces migrate to `ready` on season transition
+
+### Daily Loop
+- [ ] Check-in modal shows when no check-in today
+- [ ] Check-in data influences daily orders
+- [ ] Skip option provides default recommendations
+- [ ] Daily orders produce actionable recommendations
+
+### Instrumentation
+- [ ] Events persist across page reload
+- [ ] Events visible in `/dev/events` viewer
+- [ ] JSON export downloads valid file
+- [ ] CSV export downloads parseable file
+- [ ] Event rotation works (max 1000 events)
+
+### UI/UX
+- [ ] ProvinceDrawer Scout button works for fog provinces (navigates to clarify)
+- [ ] ProvinceDrawer Scout button logs move for ready provinces
+- [ ] Feedback overlay appears after actions
+- [ ] Copy layering correct (fantasy-first on map, plain on action surfaces)
+
+### Data Integrity
+- [ ] Import/export roundtrip stable
+- [ ] No data loss on season transition
+- [ ] IndexedDB storage works reliably
+- [ ] Schema migrations work (if applicable)
+
+### Testing
+- [ ] All integration tests pass (`npm test -- tests/integration/`)
+- [ ] Smoke tests pass (`make smoke`)
+- [ ] Preflight checks pass (`make preflight`)
+- [ ] Manual E2E checklist completed (`docs/E2E-CHECKLIST.md`)
+
+---
+
+## 9) Known Limitations (Post-Pilot)
+
+These are explicitly deferred until after pilot:
+
+1. **Multiplayer sync** - Single-player only for MVP
+2. **Cloud backup** - Local IndexedDB only
+3. **AI decomposition** - Manual decomposition only
+4. **Mobile responsive** - Desktop-first for MVP
+5. **Performance optimization** - Code splitting deferred
+6. **Visual polish** - Functional UI only, no animations beyond essentials

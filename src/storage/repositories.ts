@@ -293,15 +293,15 @@ export const provinceRepository = {
     const provinces = await this.listByRegion(regionId);
     const occupiedSlots = new Set(provinces.map(p => p.mapSlotId).filter(Boolean));
 
-    // Simple heuristic for sequential map slots
-    for (let i = 1; i <= 100; i++) {
-      const slotId = `slot-${i}`;
+    // Map template uses p01-p16
+    for (let i = 1; i <= 16; i++) {
+      const slotId = `p${i.toString().padStart(2, '0')}`;
       if (!occupiedSlots.has(slotId)) {
         return slotId;
       }
     }
-    // Fallback if all 100 slots are taken
-    return `slot-${uuidv4().slice(0, 8)}`;
+    // Fallback if all 16 slots are taken
+    return `p${uuidv4().slice(0, 8)}`;
   },
 
   /**

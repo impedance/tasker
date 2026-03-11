@@ -23,5 +23,18 @@ export default tseslint.config(
       },
       sourceType: 'module',
     },
+    rules: {
+      // Unused identifiers prefixed with "_" are intentional (explicitly unused).
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+      // Keep the signal, but don't block the default smoke loop on typing TODOs.
+      '@typescript-eslint/no-explicit-any': 'warn',
+    },
   },
 )

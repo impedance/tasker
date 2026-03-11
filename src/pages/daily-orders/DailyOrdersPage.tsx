@@ -12,6 +12,7 @@ import { seasonHints, SeasonPhase } from '../../shared/copy/season-hints';
 import { Season } from '../../entities/types';
 import { getDailyOrders, DailyOrder } from '../../game/rules/recommendations';
 import { useApplyAction } from '../../shared/hooks/useApplyAction';
+import CommanderCheckIn from './CommanderCheckIn';
 import {
     Search,
     Package,
@@ -28,6 +29,7 @@ export default function DailyOrdersPage() {
     const [orders, setOrders] = useState<DailyOrder[]>([]);
     const [season, setSeason] = useState<Season | null>(null);
     const [loading, setLoading] = useState(true);
+    const [showCheckIn, setShowCheckIn] = useState(false);
     const { execute } = useApplyAction();
 
     async function loadOrders() {
@@ -48,6 +50,11 @@ export default function DailyOrdersPage() {
 
             const checkIn = checkIns.length > 0 ? checkIns[checkIns.length - 1] : null;
 
+            // Check if check-in is needed
+            if (checkIns.length === 0) {
+                setShowCheckIn(true);
+            }
+
             const generated = getDailyOrders({
                 provinces,
                 checkIn,
@@ -66,6 +73,16 @@ export default function DailyOrdersPage() {
     useEffect(() => {
         loadOrders();
     }, []);
+
+    const handleCheckInComplete = async () => {
+        setShowCheckIn(false);
+        await loadOrders();
+    };
+
+    const handleCheckInSkip = async () => {
+        setShowCheckIn(false);
+        await loadOrders();
+    };
 
     const handleExecute = async (order: DailyOrder) => {
         const province = await provinceRepository.getById(order.provinceId);
@@ -105,6 +122,15 @@ export default function DailyOrdersPage() {
     };
 
     if (loading) return <div className="page-shell flex items-center justify-center min-h-[400px]">Consulting with generals...</div>;
+
+    // Show check-in modal if no check-in today
+    if (showCheckIn) {
+        return (
+            <section className="page-shell max-w-2xl mx-auto flex items-center justify-center min-h-[600px]">
+                <CommanderCheckIn onComplete={handleCheckInComplete} onSkip={handleCheckInSkip} />
+            </section>
+        );
+    }
 
     return (
         <section className="page-shell max-w-5xl mx-auto">
