@@ -77,6 +77,12 @@ export default function DailyOrdersPage() {
             let actionType: any = order.moveType;
             let payload: any = {};
 
+            if (order.moveType === 'scout') {
+                // Scout moves require player input for clarification
+                navigate(`/province/${order.provinceId}/siege`);
+                return;
+            }
+
             if (order.moveType === 'raid' || order.moveType === 'assault') {
                 actionType = order.moveType === 'raid' ? 'start_move' : 'log_move';
                 payload = { durationMinutes: order.durationMinutes, moveType: order.moveType };

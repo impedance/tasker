@@ -14,6 +14,7 @@
  */
 
 import type { Province } from '../../entities/types';
+import type { DomainAction } from './actions';
 import { isFog } from './fog';
 
 export interface GuardrailWarning {
@@ -46,8 +47,16 @@ export interface SessionState {
 /**
  * Checks if a province can be started (not in fog).
  * Returns blocker if fog fields are missing.
+ *
+ * Exempts certain actions that are intended to resolve the fog.
  */
-export function checkFogGuard(province: Province): GuardrailWarning | null {
+export function checkFogGuard(province: Province, action?: DomainAction): GuardrailWarning | null {
+    // Exempt actions that resolve fog
+    if (action?.type === 'clarify' ||
+        (action?.type === 'apply_tactic' && action.payload.tacticType === 'scout')) {
+        return null;
+    }
+
     if (province.state === 'fog' && isFog(province)) {
         return {
             type: 'fog_block',
@@ -139,12 +148,13 @@ export function runGuardrails(
     provinces: Province[],
     history: Array<{ moveType: string; provinceId: string }>,
     session: SessionState,
+    action?: DomainAction,
     now: Date = new Date()
 ): GuardrailWarning[] {
     const warnings: GuardrailWarning[] = [];
 
     // Per-province guards
-    const fogWarning = checkFogGuard(province);
+    const fogWarning = checkFogGuard(province, action);
     if (fogWarning) warnings.push(fogWarning);
 
     const overPlanningWarning = checkOverPlanningGuard(province, history);

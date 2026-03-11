@@ -1,7 +1,7 @@
 import * as React from "react"
-import { useParams } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch"
-import { provinceRepository, regionRepository } from "../storage/repositories"
+import { provinceRepository, regionRepository, campaignRepository } from "../storage/repositories"
 import { Province, Region } from "../entities/types"
 import { ProvinceDrawer } from "../map/ProvinceDrawer"
 import { UnplacedProvincesList } from "../map/UnplacedProvincesList"
@@ -10,6 +10,7 @@ import { Plus, ListPlus, Wand2 } from "lucide-react"
 
 export default function MapPage() {
     const { regionId } = useParams<{ regionId: string }>()
+    const navigate = useNavigate()
     const [region, setRegion] = React.useState<Region | null>(null)
     const [provinces, setProvinces] = React.useState<Province[]>([])
     const [selectedProvince, setSelectedProvince] = React.useState<Province | null>(null)
@@ -25,23 +26,42 @@ export default function MapPage() {
 
     // Load data
     const loadData = React.useCallback(async () => {
-        if (!regionId) {
+        let activeRegionId = regionId
+
+        if (!activeRegionId) {
+            try {
+                const campaigns = await campaignRepository.list()
+                const activeCampaign = campaigns.find(c => c.status === 'active') || campaigns[0]
+
+                if (activeCampaign) {
+                    const regions = await regionRepository.listByCampaign(activeCampaign.id)
+                    if (regions.length > 0) {
+                        activeRegionId = regions[0].id
+                        navigate(`/map/${activeRegionId}`, { replace: true })
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to find default region:", err)
+            }
+        }
+
+        if (!activeRegionId) {
             setLoading(false)
             return
         }
 
         try {
             const [r, p] = await Promise.all([
-                regionRepository.getById(regionId),
-                provinceRepository.listByRegion(regionId)
+                regionRepository.getById(activeRegionId),
+                provinceRepository.listByRegion(activeRegionId)
             ])
 
-            setRegion(r)
-            setProvinces(p)
+            if (r) {
+                setRegion(r)
+                setProvinces(p)
 
-            // Load SVG template if not already loaded
-            if (!mapSvg) {
-                const templateId = r?.mapTemplateId || "region_v1"
+                // Load SVG template if not already loaded
+                const templateId = r.mapTemplateId || "region_v1"
                 const response = await fetch(`/assets/maps/${templateId}.svg`)
                 if (response.ok) {
                     const svgText = await response.text()
@@ -53,7 +73,7 @@ export default function MapPage() {
         } finally {
             setLoading(false)
         }
-    }, [regionId, mapSvg])
+    }, [regionId, navigate])
 
     React.useEffect(() => {
         loadData()

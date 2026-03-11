@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { applyAction } from '../../game/rules/apply-action';
-import { domainService } from '../services/domainService';
+import { domainService } from '@/shared/services/domainService';
 import { generateFeedbackSignal, shouldTriggerHeroMoment } from '../../game/rules/feedback';
 import { runGuardrails, hasBlockerWarning, getBlockerWarnings, getNonBlockerWarnings } from '../../game/rules/guardrails';
 import { useFeedbackStore } from '../store/useFeedbackStore';
@@ -25,7 +25,7 @@ export function useApplyAction() {
             startedAt: new Date(sessionStorage.getItem('session_start') || new Date().toISOString()),
             meaningfulActionCount: parseInt(sessionStorage.getItem('meaningful_actions') || '0'),
             promptCount: 0 // Mock for now
-        });
+        }, action);
 
         if (hasBlockerWarning(warnings)) {
             throw new Error(getBlockerWarnings(warnings)[0].message);
