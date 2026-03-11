@@ -21,10 +21,9 @@ export function ProvinceDrawer({ province, onClose }: ProvinceDrawerProps) {
 
         try {
             if (province.state === 'fog') {
-                // Navigate to clarify form
+                onClose()
                 navigate(`/province/${province.id}/clarify`)
             } else if (province.state === 'ready' || province.state === 'in_progress') {
-                // Log a scout move
                 await execute(province, {
                     type: 'log_move',
                     payload: {
@@ -32,6 +31,7 @@ export function ProvinceDrawer({ province, onClose }: ProvinceDrawerProps) {
                         moveType: 'scout'
                     }
                 })
+                onClose()
             }
         } catch (error) {
             console.error('Failed to scout:', error)
@@ -40,9 +40,10 @@ export function ProvinceDrawer({ province, onClose }: ProvinceDrawerProps) {
 
     const handleDetails = async () => {
         if (!province) return
-        // Navigate to province details page (if exists) or show info
+        onClose()
         navigate(`/province/${province.id}`)
     }
+
 
     return (
         <Drawer open={!!province} onOpenChange={(open) => !open && onClose()}>
@@ -104,8 +105,17 @@ export function ProvinceDrawer({ province, onClose }: ProvinceDrawerProps) {
                             onClick={handleScout}
                             className="flex-1 min-h-[48px] bg-[#f0b35f] text-[#0b1218] font-bold rounded-xl hover:bg-[#f0c38f] transition-colors flex items-center justify-center gap-2"
                         >
-                            <Search size={18} />
-                            Scout
+                            {province.state === 'fog' ? (
+                                <>
+                                    <Search size={18} />
+                                    Scout
+                                </>
+                            ) : (
+                                <>
+                                    <Search size={18} />
+                                    Log progress
+                                </>
+                            )}
                         </button>
                         <button
                             onClick={handleDetails}

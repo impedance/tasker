@@ -16,6 +16,9 @@ import SeasonDebriefPage from '../pages/season/SeasonDebriefPage'
 import EventViewerPage from '../pages/dev/EventViewerPage'
 import CapitalPage from '../pages/capital/CapitalPage'
 import ChroniclePage from '../pages/chronicle/ChroniclePage'
+import ClarifyProvincePage from '../pages/province/ClarifyProvincePage'
+import ProvinceDetailsPage from '../pages/province/ProvinceDetailsPage'
+
 import { Sidebar } from '../shared/components/Sidebar'
 import { FeedbackOverlay } from '../shared/components/FeedbackOverlay'
 import { HeroMomentOverlay } from '../shared/components/HeroMomentOverlay'
@@ -71,6 +74,8 @@ function App() {
             <Route path="/campaigns" element={<CampaignsPage />} />
             <Route path="/campaign/:campaignId" element={<CampaignMapPage />} />
             <Route path="/map/:regionId?" element={<MapPage />} />
+            <Route path="/province/:provinceId" element={<ProvinceDetailsPage />} />
+            <Route path="/province/:provinceId/clarify" element={<ClarifyProvincePage />} />
             <Route path="/province/:provinceId/siege" element={<SiegePage />} />
             <Route path="/check-in" element={<CommanderCheckIn />} />
             <Route path="/daily-orders" element={<DailyOrdersPage />} />

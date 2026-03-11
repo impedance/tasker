@@ -112,10 +112,13 @@
 6. **Expected:** Check-in modal closes
 7. **Expected:** Daily orders page loads with recommendations
 8. **Expected:** 3 orders visible (light/medium/main)
-9. Click **"Do it"** on one order
+9. Click **"Do it"** on a non-scout order
 10. **Expected:** Action applied to province
 11. **Expected:** Feedback shown
 12. **Expected:** Orders refresh
+
+(Optional) Click "Do it" on a scout order for a fog province
+- **Expected:** Navigates to clarify form
 
 **Test Skip Option:**
 1. Clear check-ins again
@@ -196,7 +199,7 @@
 3. Click **"Scout"**
 4. **Expected:** Navigate to clarify form
 5. Open province drawer for `ready` province
-6. Click **"Scout"**
+6. Click **"Log progress"**
 7. **Expected:** Scout move logged (15 min)
 8. **Expected:** Feedback shown
 9. Click **"Details"**
