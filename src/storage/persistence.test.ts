@@ -74,6 +74,26 @@ describe('Persistence Integration', () => {
             expect(await regionRepository.getById(region.id)).toBeNull();
             expect(await provinceRepository.getById(province.id)).toBeNull();
         });
+
+        it('should return undefined when 16 map slots are occupied', async () => {
+            const campaign = await campaignRepository.create({ title: 'Test', seasonId: 's1', status: 'active', chronicleEnabled: true });
+            const region = await regionRepository.create({ campaignId: campaign.id, title: 'R', order: 1, progressPercent: 0, status: 'active', mapTemplateId: 'm' });
+
+            // Fill all 16 slots
+            for (let i = 1; i <= 16; i++) {
+                await provinceRepository.create({
+                    regionId: region.id,
+                    title: `P${i}`,
+                    state: 'ready',
+                    progressStage: 'scouted',
+                    decompositionCount: 0,
+                    mapSlotId: `p${i.toString().padStart(2, '0')}`
+                });
+            }
+
+            const freeSlotId = await provinceRepository.findFirstFreeMapSlotId(region.id);
+            expect(freeSlotId).toBeUndefined();
+        });
     });
 
     describe('Import/Export Roundtrip', () => {

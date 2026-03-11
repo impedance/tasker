@@ -289,7 +289,7 @@ export const provinceRepository = {
   /**
    * Find first free map slot ID in a region
    */
-  async findFirstFreeMapSlotId(regionId: string): Promise<string> {
+  async findFirstFreeMapSlotId(regionId: string): Promise<string | undefined> {
     const provinces = await this.listByRegion(regionId);
     const occupiedSlots = new Set(provinces.map(p => p.mapSlotId).filter(Boolean));
 
@@ -300,8 +300,8 @@ export const provinceRepository = {
         return slotId;
       }
     }
-    // Fallback if all 16 slots are taken
-    return `p${uuidv4().slice(0, 8)}`;
+    // Return undefined if all 16 slots are taken
+    return undefined;
   },
 
   /**

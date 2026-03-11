@@ -15,6 +15,7 @@ export default function MapPage() {
     const [provinces, setProvinces] = React.useState<Province[]>([])
     const [selectedProvince, setSelectedProvince] = React.useState<Province | null>(null)
     const [mapSvg, setMapSvg] = React.useState<string>("")
+    const [validSlots, setValidSlots] = React.useState<Set<string>>(new Set())
     const [loading, setLoading] = React.useState(true)
 
     // Form state
@@ -66,6 +67,16 @@ export default function MapPage() {
                 if (response.ok) {
                     const svgText = await response.text()
                     setMapSvg(svgText)
+
+                    const parser = new DOMParser()
+                    const doc = parser.parseFromString(svgText, "image/svg+xml")
+                    const mapSlots = doc.querySelectorAll('[data-slot-id]')
+                    const slotSet = new Set<string>()
+                    mapSlots.forEach(s => {
+                        const id = s.getAttribute('data-slot-id')
+                        if (id) slotSet.add(id)
+                    })
+                    setValidSlots(slotSet)
                 }
             }
         } catch (error) {
@@ -207,7 +218,19 @@ export default function MapPage() {
     if (loading) return <div className="page-shell flex items-center justify-center min-h-[400px]">Loading Strategic Map...</div>
     if (!region) return <div className="page-shell">Region not found.</div>
 
-    const unplacedProvinces = provinces.filter(p => !p.mapSlotId)
+    // Unplaced if it has no mapSlotId or if its mapSlotId is invalid for the current SVG
+    const unplacedProvinces = provinces.filter(p => !p.mapSlotId || !validSlots.has(p.mapSlotId))
+    const occupiedSlots = new Set(provinces.map(p => p.mapSlotId).filter(Boolean))
+    const freeSlots = Array.from(validSlots).filter(id => !occupiedSlots.has(id)).sort()
+
+    const handleAssignSlot = async (provinceId: string, slotId: string) => {
+        try {
+            await provinceRepository.setMapSlot(provinceId, slotId)
+            loadData()
+        } catch (err) {
+            console.error('Failed to assign slot:', err)
+        }
+    }
 
     return (
         <section className="page-shell">
@@ -347,7 +370,9 @@ export default function MapPage() {
 
                     <UnplacedProvincesList
                         provinces={unplacedProvinces}
+                        freeSlots={freeSlots}
                         onSelect={setSelectedProvince}
+                        onAssignSlot={handleAssignSlot}
                     />
 
                     <div className="p-4 bg-white/5 border border-white/10 rounded-xl">
