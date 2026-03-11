@@ -25,7 +25,10 @@ export default function MapPage() {
 
     // Load data
     const loadData = React.useCallback(async () => {
-        if (!regionId) return
+        if (!regionId) {
+            setLoading(false)
+            return
+        }
 
         try {
             const [r, p] = await Promise.all([

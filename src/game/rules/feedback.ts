@@ -1,0 +1,255 @@
+/**
+ * Feedback model v1 — EPIC-11-T1, T2
+ * Defines which actions trigger feedback and what is shown.
+ *
+ * Feedback rules (EPIC-01 Appendix A):
+ *   - clarify → subtle feedback
+ *   - supply / decompose → subtle feedback
+ *   - start_move / log_move → strong feedback
+ *   - siege_resolve / complete → milestone feedback
+ *   - "meaningful day" marker → streak feedback
+ *
+ * Caps:
+ *   - Max 1 strong hero moment per session
+ *   - No feedback for passive browsing
+ */
+
+import type { ActionType } from './actions';
+import type { ProvinceState } from '../../entities/types';
+
+export type FeedbackType = 'subtle' | 'strong' | 'milestone' | 'streak';
+
+export interface FeedbackSignal {
+    type: FeedbackType;
+    message: string;
+    trigger: string;
+}
+
+export interface FeedbackContext {
+    /** Current province state */
+    provinceState: ProvinceState;
+    /** Action that was just performed */
+    actionType: ActionType;
+    /** Is this the first time this action type for this province? */
+    isFirstTime: boolean;
+    /** Current streak (for streak feedback) */
+    streakCount?: number;
+    /** Is this a siege resolution? */
+    isSiegeResolution?: boolean;
+}
+
+/**
+ * Determines if an action should trigger feedback.
+ * No feedback for passive actions (edit_fields, reschedule without action).
+ */
+export function shouldTriggerFeedback(actionType: ActionType): boolean {
+    const feedbackActions: ActionType[] = [
+        'clarify',
+        'supply',
+        'decompose',
+        'start_move',
+        'log_move',
+        'apply_tactic',
+        'complete',
+        'retreat',
+    ];
+    return feedbackActions.includes(actionType);
+}
+
+/**
+ * Returns the feedback type for an action.
+ */
+export function getFeedbackTypeForAction(actionType: ActionType): FeedbackType | null {
+    switch (actionType) {
+        case 'clarify':
+            return 'subtle';
+        case 'supply':
+        case 'decompose':
+            return 'subtle';
+        case 'start_move':
+        case 'log_move':
+            return 'strong';
+        case 'apply_tactic':
+            return 'milestone';
+        case 'complete':
+            return 'milestone';
+        case 'retreat':
+            return 'subtle';
+        default:
+            return null;
+    }
+}
+
+/**
+ * Generates a feedback signal for an action.
+ */
+export function generateFeedbackSignal(context: FeedbackContext): FeedbackSignal | null {
+    const { actionType, isFirstTime, streakCount, isSiegeResolution } = context;
+
+    // No feedback for passive actions
+    if (!shouldTriggerFeedback(actionType)) {
+        return null;
+    }
+
+    const feedbackType = getFeedbackTypeForAction(actionType);
+    if (!feedbackType) {
+        return null;
+    }
+
+    // Generate message based on feedback type and context
+    let message: string;
+    let trigger: string;
+
+    switch (feedbackType) {
+        case 'subtle':
+            message = getSubtleFeedbackMessage(actionType);
+            trigger = `action:${actionType}`;
+            break;
+
+        case 'strong':
+            message = getStrongFeedbackMessage(actionType, isFirstTime);
+            trigger = `action:${actionType}`;
+            break;
+
+        case 'milestone':
+            if (isSiegeResolution) {
+                message = 'Siege resolved! You\'ve broken through the stalemate.';
+                trigger = 'siege_resolved';
+            } else if (actionType === 'complete') {
+                message = 'Province captured! A significant victory.';
+                trigger = 'province_captured';
+            } else {
+                message = getMilestoneFeedbackMessage(actionType);
+                trigger = `milestone:${actionType}`;
+            }
+            break;
+
+        case 'streak':
+            message = getStreakFeedbackMessage(streakCount ?? 0);
+            trigger = `streak:${streakCount}`;
+            break;
+
+        default:
+            return null;
+    }
+
+    return { type: feedbackType, message, trigger };
+}
+
+/**
+ * Generates subtle feedback messages.
+ */
+function getSubtleFeedbackMessage(actionType: ActionType): string {
+    const messages: Record<ActionType, string> = {
+        clarify: 'Clarity achieved! You now know what success looks like.',
+        supply: 'Resources gathered. You\'re better prepared for action.',
+        decompose: 'Broken down into manageable pieces. Progress made.',
+        start_move: '', // This is strong feedback
+        log_move: '', // This is strong feedback
+        apply_tactic: '', // This is milestone feedback
+        complete: '', // This is milestone feedback
+        retreat: 'Strategic withdrawal noted. Sometimes stepping back is the right move.',
+        edit_fields: '',
+        reschedule: '',
+    };
+
+    return messages[actionType] || 'Action recorded.';
+}
+
+/**
+ * Generates strong feedback messages.
+ */
+function getStrongFeedbackMessage(actionType: ActionType, isFirstTime: boolean): string {
+    if (actionType === 'start_move') {
+        return isFirstTime
+            ? 'First step taken! Momentum is building.'
+            : 'Another step forward. Keep the momentum going!';
+    }
+
+    if (actionType === 'log_move') {
+        return 'Progress logged. You\'re making headway!';
+    }
+
+    return 'Meaningful action completed!';
+}
+
+/**
+ * Generates milestone feedback messages.
+ */
+function getMilestoneFeedbackMessage(actionType: ActionType): string {
+    const messages: Record<ActionType, string> = {
+        apply_tactic: 'Tactic applied! The siege has been broken.',
+        complete: 'Mission accomplished! Province secured.',
+        clarify: '',
+        supply: '',
+        decompose: '',
+        start_move: '',
+        log_move: '',
+        retreat: '',
+        edit_fields: '',
+        reschedule: '',
+    };
+
+    return messages[actionType] || 'Milestone reached!';
+}
+
+/**
+ * Generates streak feedback messages.
+ */
+function getStreakFeedbackMessage(streakCount: number): string {
+    if (streakCount >= 21) {
+        return `Incredible! ${streakCount} day streak! You're on fire!`;
+    }
+    if (streakCount >= 7) {
+        return `Amazing! ${streakCount} days in a row! Keep it up!`;
+    }
+    if (streakCount >= 3) {
+        return `Great job! ${streakCount} meaningful days in a row!`;
+    }
+    if (streakCount >= 1) {
+        return `${streakCount} day streak! Every day counts!`;
+    }
+    return 'New streak started!';
+}
+
+/**
+ * Checks if a hero moment should be triggered.
+ * Hero moments are capped at 1 per session.
+ */
+export function shouldTriggerHeroMoment(
+    actionType: ActionType,
+    isFirstTime: boolean,
+    isSiegeResolution: boolean,
+    streakCount: number,
+    heroMomentsThisSession: number
+): boolean {
+    // Cap: max 1 strong hero moment per session
+    if (heroMomentsThisSession >= 1) {
+        return false;
+    }
+
+    // Hero moment triggers:
+    // - siege resolved
+    // - first clarity unlock (fog → ready)
+    // - first start (ready → in_progress)
+    // - 3 meaningful days in a row
+    // - high-effort capture (effortLevel >= 4)
+
+    if (isSiegeResolution) {
+        return true;
+    }
+
+    if (isFirstTime && actionType === 'clarify') {
+        return true;
+    }
+
+    if (isFirstTime && actionType === 'start_move') {
+        return true;
+    }
+
+    if (streakCount >= 3) {
+        return true;
+    }
+
+    return false;
+}
