@@ -17,6 +17,7 @@ import CapitalPage from '../pages/capital/CapitalPage'
 import ChroniclePage from '../pages/chronicle/ChroniclePage'
 import { Sidebar } from '../shared/components/Sidebar'
 import { FeedbackOverlay } from '../shared/components/FeedbackOverlay'
+import { HeroMomentOverlay } from '../shared/components/HeroMomentOverlay'
 import { OnboardingDialog } from './OnboardingDialog'
 
 function App() {
@@ -46,6 +47,7 @@ function App() {
         </main>
       </div>
       <FeedbackOverlay />
+      <HeroMomentOverlay />
       <OnboardingDialog />
     </BrowserRouter>
   )

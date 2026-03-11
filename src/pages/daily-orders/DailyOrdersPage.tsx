@@ -3,8 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import {
     provinceRepository,
     playerCheckInRepository,
-    dailyMoveRepository
+    dailyMoveRepository,
+    campaignRepository,
+    seasonRepository
 } from '../../storage/repositories';
+import { getSeasonPhase } from '../../game/rules/season';
+import { seasonHints, SeasonPhase } from '../../shared/copy/season-hints';
+import { Season } from '../../entities/types';
 import { getDailyOrders, DailyOrder } from '../../game/rules/recommendations';
 import { useApplyAction } from '../../shared/hooks/useApplyAction';
 import {
@@ -21,6 +26,7 @@ import {
 export default function DailyOrdersPage() {
     const navigate = useNavigate();
     const [orders, setOrders] = useState<DailyOrder[]>([]);
+    const [season, setSeason] = useState<Season | null>(null);
     const [loading, setLoading] = useState(true);
     const { execute } = useApplyAction();
 
@@ -28,11 +34,17 @@ export default function DailyOrdersPage() {
         setLoading(true);
         try {
             const today = new Date().toISOString().split('T')[0];
-            const [provinces, checkIns, history] = await Promise.all([
+            const [provinces, checkIns, history, campaigns, seasons] = await Promise.all([
                 provinceRepository.list(),
                 playerCheckInRepository.listByDate(today),
-                dailyMoveRepository.list()
+                dailyMoveRepository.list(),
+                campaignRepository.list(),
+                seasonRepository.list()
             ]);
+
+            const activeCampaign = campaigns.find(c => c.status === 'active') || campaigns[0];
+            const activeSeason = seasons.find(s => s.id === activeCampaign?.seasonId) || seasons[seasons.length - 1];
+            setSeason(activeSeason || null);
 
             const checkIn = checkIns.length > 0 ? checkIns[checkIns.length - 1] : null;
 
@@ -103,6 +115,19 @@ export default function DailyOrdersPage() {
                     Refresh Recommendations
                 </button>
             </header>
+
+            {/* Weekly Focus Hint Banner */}
+            {season && (
+                <div className={`mb-12 p-6 rounded-3xl bg-white/5 border-l-4 ${seasonHints[getSeasonPhase(season) as SeasonPhase].color.replace('text-', 'border-')} flex items-center justify-between group animate-in fade-in slide-in-from-top-4 duration-700`}>
+                    <div className="flex items-center gap-4">
+                        <Sparkles className={seasonHints[getSeasonPhase(season) as SeasonPhase].color} size={28} />
+                        <div>
+                            <p className={`text-[10px] font-black uppercase tracking-widest ${seasonHints[getSeasonPhase(season) as SeasonPhase].color}`}>{seasonHints[getSeasonPhase(season) as SeasonPhase].title}</p>
+                            <p className="text-xl font-bold tracking-tight">"{seasonHints[getSeasonPhase(season) as SeasonPhase].text}"</p>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {orders.length === 0 ? (
                 <div className="text-center p-20 bg-white/5 rounded-3xl border border-dashed border-white/10">

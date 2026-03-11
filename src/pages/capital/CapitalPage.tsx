@@ -6,15 +6,22 @@ import { Sparkles, Map, BookOpen, Trophy, Shield, Zap as ZapIcon } from 'lucide-
 import {
     campaignRepository,
     provinceRepository,
-    capitalStateRepository
+    capitalStateRepository,
+    playerProfileRepository,
+    seasonRepository
 } from '../../storage/repositories';
-import { Campaign, Province, CapitalState } from '../../entities/types';
+import { Campaign, Province, CapitalState, PlayerProfile, Season } from '../../entities/types';
+import { getStreakState, getStreakStatusMessage } from '../../game/rules/streak';
+import { getSeasonPhase } from '../../game/rules/season';
+import { seasonHints, SeasonPhase } from '../../shared/copy/season-hints';
 
 export default function CapitalPage() {
     const navigate = useNavigate();
     const [campaign, setCampaign] = useState<Campaign | null>(null);
     const [stats, setStats] = useState({ fog: 0, siege: 0, fortified: 0, captured: 0 });
     const [capitalState, setCapitalState] = useState<CapitalState | null>(null);
+    const [profile, setProfile] = useState<PlayerProfile | null>(null);
+    const [season, setSeason] = useState<Season | null>(null);
     const [hotspots, setHotspots] = useState<Province[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -26,10 +33,14 @@ export default function CapitalPage() {
             if (activeCampaign) {
                 setCampaign(activeCampaign);
 
-                const [provinces, cState] = await Promise.all([
+                const [provinces, cState, pProfile, seasons] = await Promise.all([
                     provinceRepository.listByCampaign(activeCampaign.id),
-                    capitalStateRepository.getByCampaignId(activeCampaign.id)
+                    capitalStateRepository.getByCampaignId(activeCampaign.id),
+                    playerProfileRepository.get(),
+                    seasonRepository.list()
                 ]);
+
+                const activeSeason = seasons.find(s => s.id === activeCampaign.seasonId) || seasons[seasons.length - 1];
 
                 const s = { fog: 0, siege: 0, fortified: 0, captured: 0 };
                 provinces.forEach(p => {
@@ -40,6 +51,8 @@ export default function CapitalPage() {
                 });
                 setStats(s);
                 setCapitalState(cState);
+                setProfile(pProfile);
+                setSeason(activeSeason || null);
                 setHotspots(provinces.filter(p => p.frontPressureLevel && p.frontPressureLevel >= 2).slice(0, 3));
             }
             setLoading(false);
@@ -58,6 +71,12 @@ export default function CapitalPage() {
     };
     const tier = tiers[(capitalState?.visualTier as keyof typeof tiers) || 1];
 
+    const streakState = profile ? getStreakState(profile) : { currentStreak: 0, longestStreak: 0, lastMeaningfulDate: null };
+    const streakMessage = getStreakStatusMessage(streakState);
+
+    const phase = season ? getSeasonPhase(season) as SeasonPhase : 'early';
+    const hint = seasonHints[phase];
+
     return (
         <section className="page-shell">
             <p className="eyebrow flex items-center gap-2">
@@ -68,6 +87,23 @@ export default function CapitalPage() {
             <p className="lede mb-8">
                 Your strategic hub. Review the front situation and plan your next campaign move.
             </p>
+
+            {/* Weekly Focus Hint Banner */}
+            <div className={`mb-8 p-6 rounded-2xl bg-white/5 border-l-4 ${hint.color.replace('text-', 'border-')} flex items-center justify-between group`}>
+                <div className="flex items-center gap-4">
+                    <Sparkles className={hint.color} size={24} />
+                    <div>
+                        <p className={`text-[10px] font-black uppercase tracking-widest ${hint.color}`}>{hint.title}</p>
+                        <p className="text-white/80 italic text-sm">"{hint.text}"</p>
+                    </div>
+                </div>
+                <button
+                    onClick={() => navigate('/season')}
+                    className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-white transition-colors"
+                >
+                    Details
+                </button>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* Situation Summary */}
@@ -92,14 +128,22 @@ export default function CapitalPage() {
                     </div>
                 </Panel>
 
-                {/* Clan Identity */}
-                <Panel title="Clan Identity">
+                {/* Clan Identity & Streak */}
+                <Panel title="Commander Overview">
                     <div className="flex flex-col items-center justify-center py-6 text-center">
                         <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 border-2 ${campaign.bannerStyle === 'solid' ? 'bg-white/5 border-white/20' : 'bg-[#f0b35f]/10 border-[#f0b35f]/30'}`}>
                             {campaign.bannerStyle === 'solid' ? <Shield className="text-white/20" size={32} /> : <Sparkles className="text-[#f0b35f]" size={32} />}
                         </div>
                         <h3 className="font-bold">{campaign.factionName || 'Unnamed Clan'}</h3>
-                        <p className="text-xs text-muted-foreground">Tier {capitalState?.visualTier || 1}: {tier.name}</p>
+                        <p className="text-xs text-muted-foreground mb-4 font-mono">Tier {capitalState?.visualTier || 1}: {tier.name}</p>
+
+                        <div className="pt-4 border-t border-white/5 w-full">
+                            <div className="flex items-center justify-center gap-2 text-[#f0b35f]">
+                                <span className="text-2xl font-black">{streakState.currentStreak}</span>
+                                <span className="text-xs font-bold uppercase tracking-widest">Day Streak</span>
+                            </div>
+                            <p className="text-[10px] text-muted-foreground mt-1 px-4">{streakMessage}</p>
+                        </div>
                     </div>
                 </Panel>
 
