@@ -43,7 +43,7 @@ export function useApplyAction() {
         }
 
         // Persist province and side effects
-        await domainService.persistResult(result);
+        await domainService.persistResult(action, result);
 
         // Trigger feedback
         const signal = generateFeedbackSignal({

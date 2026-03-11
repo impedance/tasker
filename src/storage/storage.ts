@@ -137,7 +137,15 @@ export async function getKeysByPrefix(prefix: string): Promise<string[]> {
  */
 export async function clearAll(): Promise<void> {
   try {
-    await db.clear();
+    const keysToRemove: string[] = [];
+    await db.iterate((_value: any, key: string) => {
+      if (key.startsWith(KEY_PREFIX) && key !== KEY_SCHEMA_VERSION) {
+        keysToRemove.push(key);
+      }
+    });
+    for (const key of keysToRemove) {
+      await db.removeItem(key);
+    }
   } catch (error) {
     console.error('[Storage] Failed to clear storage:', error);
     throw new Error('Failed to clear storage', { cause: error });

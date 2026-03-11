@@ -1,8 +1,11 @@
-import { provinceRepository, dailyMoveRepository, siegeEventRepository } from '../../storage/repositories';
+import { provinceRepository, dailyMoveRepository, siegeEventRepository, chronicleEntryRepository, regionRepository } from '../../storage/repositories';
 import type { ApplyActionResult } from '../../game/rules/apply-action';
+import type { DomainAction } from '../../game/rules/actions';
+import { track } from '../events/event-logger';
+import type { ChronicleEntryType, Importance } from '../../entities/types';
 
 export const domainService = {
-    async persistResult(result: Extract<ApplyActionResult, { ok: true }>) {
+    async persistResult(action: DomainAction, result: Extract<ApplyActionResult, { ok: true }>) {
         const { province, sideEffects } = result;
 
         // 1. Persist province update
@@ -36,6 +39,55 @@ export const domainService = {
                     });
                     break;
             }
+        }
+
+        // 3. Track events & Chronicle entries
+        const region = await regionRepository.getById(province.regionId);
+        const campaignId = region?.campaignId || 'unknown';
+
+        const createChronicle = async (entryType: ChronicleEntryType, title: string, importance: Importance = 'medium') => {
+            await chronicleEntryRepository.create({
+                campaignId,
+                regionId: province.regionId,
+                provinceId: province.id,
+                entryType,
+                title,
+                importance
+            });
+        };
+
+        if (action.type === 'clarify') {
+            await track({ name: 'province_clarified', payload: { provinceId: province.id } });
+            await createChronicle('fog_cleared', `Clarified: ${province.title}`);
+        } else if (action.type === 'start_move') {
+            await track({
+                name: 'province_started',
+                payload: { provinceId: province.id, timestamp: new Date().toISOString() }
+            });
+            await createChronicle('province_started' as any, `Started: ${province.title}`);
+        } else if (action.type === 'log_move') {
+            await track({
+                name: 'province_move_logged',
+                payload: {
+                    provinceId: province.id,
+                    moveType: action.payload.moveType || 'assault',
+                    durationMinutes: action.payload.durationMinutes || 0
+                }
+            });
+            await createChronicle('province_move_logged' as any, `Logged Move: ${province.title}`);
+        } else if (action.type === 'apply_tactic') {
+            await track({
+                name: 'siege_resolved',
+                payload: {
+                    provinceId: province.id,
+                    tactic: action.payload.tacticType,
+                    siegeDurationDays: 1 // hardcoded or computed
+                }
+            });
+            await createChronicle('siege_resolved', `Siege Resolved: ${province.title}`);
+        } else if (action.type === 'complete') {
+            await track({ name: 'province_captured', payload: { provinceId: province.id } });
+            await createChronicle('province_captured' as any, `Captured: ${province.title}`, 'high');
         }
     }
 };

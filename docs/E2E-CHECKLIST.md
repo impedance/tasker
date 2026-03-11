@@ -92,7 +92,7 @@
 **Pass Criteria:**
 - [ ] Province completes successfully
 - [ ] Hero moment triggers
-- [ ] Chronicle entry created
+- [ ] Chronicle entry created (Automated via tests)
 - [ ] Hero moment cooldown works (complete another immediately - should not show again)
 
 ---
@@ -183,7 +183,7 @@
 13. **Expected:** Data parseable
 
 **Pass Criteria:**
-- [ ] Events persist across page reload
+- [ ] Events persist across page reload (Event creation automated via tests)
 - [ ] JSON export works
 - [ ] CSV export works
 - [ ] Files are valid

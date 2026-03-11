@@ -41,20 +41,21 @@ describe('Integration: Clarify Flow', () => {
         expect(province!.lastMeaningfulActionAt).toBeUndefined();
 
         // 2. Apply tracking action
-        const actionResult = applyAction(province!, {
+        const clarifyAction = {
             type: 'clarify',
             payload: {
                 desiredOutcome: 'Integration success',
                 firstStep: 'Run vitest',
                 estimatedEntryMinutes: 5
             }
-        });
+        } as const;
+        const actionResult = applyAction(province!, clarifyAction);
 
         expect(actionResult.ok).toBe(true);
         if (!actionResult.ok) return;
 
         // 3. Persist via domainService
-        await domainService.persistResult(actionResult);
+        await domainService.persistResult(clarifyAction, actionResult);
 
         // 4. Reload from repository
         const reloaded = await provinceRepository.getById(testProvinceId);
