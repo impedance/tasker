@@ -133,7 +133,13 @@ export function aggregateTacticEffectiveness(
             completedWithin7DaysCount: number;
             completedWithin7DaysRate: number;
         }
-    > = {} as any;
+    > = {
+        scout: { count: 0, avgSiegeDuration: 0, progressedWithin24hCount: 0, progressedWithin24hRate: 0, completedWithin7DaysCount: 0, completedWithin7DaysRate: 0 },
+        supply: { count: 0, avgSiegeDuration: 0, progressedWithin24hCount: 0, progressedWithin24hRate: 0, completedWithin7DaysCount: 0, completedWithin7DaysRate: 0 },
+        engineer: { count: 0, avgSiegeDuration: 0, progressedWithin24hCount: 0, progressedWithin24hRate: 0, completedWithin7DaysCount: 0, completedWithin7DaysRate: 0 },
+        raid: { count: 0, avgSiegeDuration: 0, progressedWithin24hCount: 0, progressedWithin24hRate: 0, completedWithin7DaysCount: 0, completedWithin7DaysRate: 0 },
+        retreat: { count: 0, avgSiegeDuration: 0, progressedWithin24hCount: 0, progressedWithin24hRate: 0, completedWithin7DaysCount: 0, completedWithin7DaysRate: 0 },
+    };
 
     for (const tacticType of tacticTypes) {
         const tacticRecords = records.filter((r) => r.tacticType === tacticType);

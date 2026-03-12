@@ -33,8 +33,22 @@ export default tseslint.config(
           caughtErrorsIgnorePattern: '^_',
         },
       ],
-      // Keep the signal, but don't block the default smoke loop on typing TODOs.
+      // Default: warn on any (allows gradual cleanup)
       '@typescript-eslint/no-explicit-any': 'warn',
+    },
+  },
+  // Enforce strict no-any rule for domain, features, and storage layers
+  {
+    files: ['src/game/**/*.{ts,tsx}', 'src/features/**/*.{ts,tsx}', 'src/storage/**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'error',
+    },
+  },
+  // Tests are allowed to use any for test fixtures and mocks
+  {
+    files: ['**/*.test.{ts,tsx}', 'src/test/**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
 )

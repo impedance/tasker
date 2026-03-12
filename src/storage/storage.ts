@@ -140,7 +140,7 @@ export async function getKeysByPrefix(prefix: string): Promise<string[]> {
 export async function clearAll(): Promise<void> {
   try {
     const keysToRemove: string[] = [];
-    await db.iterate((_value: any, key: string) => {
+    await db.iterate((_value: unknown, key: string) => {
       if (key.startsWith(KEY_PREFIX) && key !== KEY_SCHEMA_VERSION) {
         keysToRemove.push(key);
       }
@@ -161,7 +161,7 @@ export async function clearAll(): Promise<void> {
 export async function clearAllIncludingEvents(): Promise<void> {
   try {
     const keysToRemove: string[] = [];
-    await db.iterate((_value: any, key: string) => {
+    await db.iterate((_value: unknown, key: string) => {
       // Remove all tasker data and game events
       if (key.startsWith(KEY_PREFIX) || key.startsWith('game_event:')) {
         keysToRemove.push(key);

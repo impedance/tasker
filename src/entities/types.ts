@@ -216,11 +216,20 @@ export interface ShareCard {
   sourceSurface?: string;
 }
 
+/**
+ * Streak tracking data structure
+ */
+export interface StreakData {
+  currentStreak: number;
+  longestStreak: number;
+  lastMeaningfulDate: string | null;
+}
+
 export interface PlayerProfile {
   id: string; // Always 'local'
   preferredWorkWindow?: string;
   frictionStats?: Record<string, number>;
-  streaks?: Record<string, number>;
+  streaks?: StreakData;
   totalCaptured: number;
   totalClarified: number;
   totalStarted: number;

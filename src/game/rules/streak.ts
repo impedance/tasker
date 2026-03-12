@@ -127,11 +127,18 @@ export function updateStreak(
  * Gets current streak state from player profile.
  */
 export function getStreakState(profile: Pick<PlayerProfile, 'streaks'>): StreakState {
-    const streaks = profile.streaks || {};
+    const streaks = profile.streaks;
+    if (!streaks) {
+        return {
+            currentStreak: 0,
+            longestStreak: 0,
+            lastMeaningfulDate: null,
+        };
+    }
     return {
-        currentStreak: (streaks as any)?.currentStreak || 0,
-        longestStreak: (streaks as any)?.longestStreak || 0,
-        lastMeaningfulDate: (streaks as any)?.lastMeaningfulDate || null,
+        currentStreak: streaks.currentStreak ?? 0,
+        longestStreak: streaks.longestStreak ?? 0,
+        lastMeaningfulDate: streaks.lastMeaningfulDate ?? null,
     };
 }
 

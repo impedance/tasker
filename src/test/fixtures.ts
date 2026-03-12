@@ -170,8 +170,7 @@ export async function seedTestState(options: {
 export function freezeTime(frozenDate: Date | string): () => void {
   const frozenTime = new Date(frozenDate).getTime();
   const originalDate = Date;
-  
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   (globalThis as any).Date = class MockDate {
     constructor(date?: Date | string | number) {
       if (date !== undefined) {
@@ -179,17 +178,16 @@ export function freezeTime(frozenDate: Date | string): () => void {
       }
       return new originalDate(frozenTime);
     }
-    
+
     static now() {
       return frozenTime;
     }
-    
+
     static parse = originalDate.parse;
     static UTC = originalDate.UTC;
-  } as any;
-  
+  } as unknown as typeof Date;
+
   return () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (globalThis as any).Date = originalDate;
   };
 }

@@ -267,7 +267,11 @@ export const PlayerProfileSchema = z.object({
   id: z.string(),
   preferredWorkWindow: z.string().optional(),
   frictionStats: z.record(z.string(), z.number()).optional(),
-  streaks: z.record(z.string(), z.number()).optional(),
+  streaks: z.object({
+    currentStreak: z.number(),
+    longestStreak: z.number(),
+    lastMeaningfulDate: z.string().nullable()
+  }).optional(),
   totalCaptured: z.number(),
   totalClarified: z.number(),
   totalStarted: z.number(),
