@@ -1,6 +1,6 @@
 # Chronicle generation + instrumentation hygiene (P0/P1)
 
-> Archived on 2026-03-11. Superseded by `PLANS/EPIC-16-17-18-hardening-and-alignment.md`.
+> Archived on 2026-03-11. Superseded by `PLANS/archive/EPIC-16-17-18-hardening-and-alignment.md`.
 
 **ID:** `EPIC-18`  
 **Priority:** `P0`  

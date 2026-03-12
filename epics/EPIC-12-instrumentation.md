@@ -2,7 +2,7 @@
 
 **ID:** `EPIC-12`  
 **Priority:** `P1`  
-**Status:** `draft`  
+**Status:** `partial`  
 **Owner:** `<TBD>`  
 **PRD reference:** `prd.md` (Metrics)
 

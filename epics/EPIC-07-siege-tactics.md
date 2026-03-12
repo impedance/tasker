@@ -2,7 +2,7 @@
 
 **ID:** `EPIC-07`  
 **Priority:** `P0`  
-**Status:** `draft`  
+**Status:** `partial`  
 **Owner:** `<TBD>`  
 **PRD reference:** `prd.md` (Siege + tactics)
 

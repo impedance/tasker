@@ -5,7 +5,7 @@ Keep this file short. Prefer links over duplication.
 ## Start Here
 - Product spec (system of record): `prd.md`
 - Epic backlog + build order: `epics/00-index.md`
-- Implementation readiness checklist: `epics/IMPLEMENTATION-READINESS.md`
+- Current implementation alignment checklist: `epics/IMPLEMENTATION-READINESS.md`
 - Bootstrap execution source: `epics/00-index.md` + `epics/EPIC-02-bootstrap.md` ... `epics/EPIC-05-creation-flows.md`
 - Engineering requirements (how we build): `docs/engineering_requirements.md`
 - Architecture blueprint (module boundaries): `docs/architecture.md`
@@ -22,7 +22,7 @@ Keep this file short. Prefer links over duplication.
 - `npm test` — unit/integration tests (Vitest)
 - `npm run e2e` — Playwright E2E (requires `npx playwright install`)
 
-## Code Map (current vs target)
+## Code Map
 - Entrypoints: `src/app/main.tsx`, `src/app/App.tsx`
 - Route pages: `src/pages/**`
 - Map UI: `src/pages/MapPage.tsx`, `src/map/**`, `public/assets/maps/**`
@@ -39,7 +39,7 @@ Keep this file short. Prefer links over duplication.
 - Migrations: `src/storage/migrations.ts`
 - Import/export schema + versioning: `src/storage/import-export.ts`
 
-## Test Map (planned)
+## Test Map
 - Smoke: `make smoke` (structural + `npm run lint` + `npm test`)
 - Preflight: `make preflight` (smoke + `npm run typecheck`)
 - E2E: `make e2e` / `npm run e2e` (optional; requires `npx playwright install`). Include in `make preflight` via `E2E=1`.
@@ -47,4 +47,4 @@ Keep this file short. Prefer links over duplication.
 ## Archive
 - Historical plans that are no longer execution sources live in `PLANS/archive/`.
 - Completed execution plans should be archived once their outcomes are reflected in the active docs.
-- `PLANS/EPIC-16-17-18-hardening-and-alignment.md` is historical context once follow-up doc drift is resolved.
+- `PLANS/archive/EPIC-16-17-18-hardening-and-alignment.md` is historical context for the March 2026 hardening pass.

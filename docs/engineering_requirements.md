@@ -18,6 +18,7 @@ System of record:
 Current-repo interpretation:
 - These are target architecture constraints, not a claim that every screen already follows them perfectly.
 - The repo now includes `src/game/**`, `src/map/**`, and `src/shared/**`; `src/features/**` is still the main missing orchestration layer.
+- Active cleanup work should reduce direct page-level orchestration drift rather than re-litigating the module map.
 
 ### 1.2. Offline-first and data safety
 - The app must be usable offline after initial load (no backend assumptions).
@@ -94,6 +95,7 @@ Current status:
 - Active implementation work should point to one current execution plan; completed plans belong in `PLANS/archive/`.
 - When code and docs disagree, either fix the code or update the docs in the same task. Do not leave known drift undocumented.
 - Keep one manual user-path checklist and one mechanics regression checklist; do not duplicate the same QA steps across multiple docs.
+- Epic files remain the backlog/spec layer; the current implementation snapshot lives in `epics/00-index.md`.
 
 ## 6) “Don’t do this” (anti-patterns)
 - UI components directly mutate persisted storage or call localForage.

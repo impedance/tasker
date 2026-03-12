@@ -1,5 +1,7 @@
 # EPIC-16/17/18 hardening + alignment follow-ups (P0/P1)
 
+> Archived on 2026-03-12 after the active documentation set was aligned with the current repo state.
+
 **ID:** `PLAN-16-17-18-HARDENING`  
 **Priority:** `P0`  
 **Status:** `completed`  

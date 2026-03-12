@@ -2,7 +2,7 @@
 
 **ID:** `EPIC-04`  
 **Priority:** `P0`  
-**Status:** `in-progress`  
+**Status:** `partial`  
 **Owner:** `<TBD>`  
 **PRD reference:** `prd.md` (UX: maps)
 

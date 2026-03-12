@@ -2,7 +2,7 @@
 
 **ID:** `EPIC-15`  
 **Priority:** `P0`  
-**Status:** `draft`  
+**Status:** `partial`  
 **Owner:** `<TBD>`  
 **PRD reference:** `prd.md` (Capital/Chronicle/Hero moments, theme, IA)
 

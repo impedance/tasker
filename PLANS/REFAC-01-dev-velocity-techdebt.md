@@ -14,6 +14,7 @@ Make feature work faster and safer by tightening domain/UI/storage boundaries, r
 - There is active type erosion (`any`, `as any`) at key seams (UI → actions, action side effects → persistence, chronicle types).
 - `apply_tactic` logic exists in more than one place (`apply-action.ts` and `tactics.ts`), increasing divergence risk.
 - Time is read ad-hoc (`new Date()`) across rules/services/UI, making deterministic behavior and tests harder as mechanics expand.
+- The current implementation snapshot and remaining drift are tracked in `epics/00-index.md` and `epics/IMPLEMENTATION-READINESS.md`.
 
 ## 3) Scope
 **In scope:**
@@ -215,4 +216,3 @@ Each sub-ticket must:
 ## 10) Open questions
 - Should Chronicle taxonomy include province-level events (started/move logged/captured) explicitly, or should chronicle remain higher-level?
 - For `engineer` tactic: do we want “sub steps text” authored in UI to create sub-provinces automatically (needs a clear contract for sub-province creation)?
-

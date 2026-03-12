@@ -6,7 +6,7 @@ Shared contracts: `epics/EPIC-01-foundation.md` (Appendix A/B).
 Product spec (system of record): `prd.md`.
 Implementation readiness checklist: `epics/IMPLEMENTATION-READINESS.md`.
 
-## Suggested MVP build order (critical path)
+## Suggested MVP build order (historical critical path)
 1) `EPIC-01` — lock contracts (state machine, meaningful action, time boundary, event list).
 2) `EPIC-02` — bootstrap app skeleton + tests/CI.
 3) `EPIC-03` — domain + persistence + import/export (unblocks everything).
@@ -24,9 +24,31 @@ Implementation readiness checklist: `epics/IMPLEMENTATION-READINESS.md`.
 ## Workstreams (Frontend vs Domain/Backend)
 Tasker MVP is a **backend-free** offline SPA. In this repo, “backend” means **in-browser domain logic** (not a server).
 
-Execution note (2026-03-08):
-- The current codebase already contains part of the BE track (`src/entities/**`, `src/storage/**`) and the bootstrap FE shell (`src/app/**`, `src/pages/**`).
-- `src/features/**`, `src/game/**`, `src/map/**`, and `src/shared/**` remain target-state modules for upcoming epics.
+Execution note (current repo snapshot: `2026-03-12`):
+- The repo is already beyond the bootstrap slice. `src/game/**`, `src/map/**`, and `src/shared/**` are implemented and actively used.
+- The main target-state gap remains `src/features/**`; route pages still orchestrate repositories/services directly in several places.
+- The main documentation need is alignment and cutline clarity, not defining the initial module layout from scratch.
+
+## Current implementation status
+This section is the operational snapshot for the current repo state. Epic files remain the product/backlog specs; the statuses below reflect what is already present in code and tests.
+
+| Epic | Status | Repo note |
+|---|---|---|
+| `EPIC-01` | `done` | Contracts and glossary exist; still referenced by rules/tests. |
+| `EPIC-02` | `done` | Vite/React/TS app, routing, tests, harness, and CI are in place. |
+| `EPIC-03` | `done` | Entities, repositories, migrations, import/export, and persistence tests exist. |
+| `EPIC-04` | `partial` | Campaign/region maps, SVG binding, pan/zoom, overflow handling, and slot assignment exist. |
+| `EPIC-05` | `partial` | Campaign/region/province creation, bulk-add, onboarding dialog, and tutorial seed exist. |
+| `EPIC-06` | `partial` | Rule engine, transitions, validation, roles, pressure, and tests exist. |
+| `EPIC-07` | `partial` | Siege detection, tactics, UI, and tests exist; some payload typing/polish drift remains. |
+| `EPIC-08` | `partial` | Check-in, Daily Orders, history, War Council, and recommendation rules exist. |
+| `EPIC-09` | `draft` | No dedicated adaptation layer is implemented yet; only groundwork exists in profile/stat fields. |
+| `EPIC-10` | `partial` | Season rules, service, dashboard, summary, debrief, and tests exist. |
+| `EPIC-11` | `partial` | Feedback overlays, hero moments, streaks, and guardrails exist; some logic is still simplified. |
+| `EPIC-12` | `partial` | Local event logger, export, viewer, and integration tests exist; instrumentation coverage is incomplete. |
+| `EPIC-13` | `partial` | Strong unit/integration coverage and QA checklists exist; pilot/release docs are still incomplete. |
+| `EPIC-14` | `draft` | Sharing/export artifacts are not implemented beyond types/placeholders. |
+| `EPIC-15` | `partial` | Capital, Chronicle, theming shell, and chronicle/event wiring exist with some taxonomy drift remaining. |
 
 - **Frontend (FE):** React UI, routing/navigation, screens, SVG map rendering + interactions, theming tokens, copy wiring, accessibility affordances.
 - **Domain/Backend (BE):** entity schemas + runtime validation, repositories + IndexedDB/localForage storage, import/export + migrations, rule engine transitions, recommendation algorithms, derived signals (pressure/hotspots), event logging.
@@ -52,6 +74,8 @@ Execution note (2026-03-08):
 | `EPIC-15` world shell | FE | BE |
 
 ### Two-junior parallelization (recommended)
+Historical planning note:
+
 Phase 0 (shared, short): lock minimal contracts (types, repos API, import/export shape, rule engine entry point).
 
 Week 1 (parallel):

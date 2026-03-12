@@ -2,7 +2,7 @@
 
 **ID:** `EPIC-05`  
 **Priority:** `P0`  
-**Status:** `draft`  
+**Status:** `partial`  
 **Owner:** `<TBD>`  
 **PRD reference:** `prd.md` (MVP scope, creation flows)
 

@@ -22,11 +22,12 @@ Implemented in the repo now:
 - Map UI surfaces in `src/pages/MapPage.tsx` and `src/map/**`
 - Rule engine and game services in `src/game/**`
 
-Planned but not yet implemented as first-class modules:
+Still missing as a first-class module layer:
 - `src/features/**`
 
-Note:
-- `src/map/**` exists and is used for the EPIC-04 slice, but the full “map layering contract” (meta + graph as typed data) is still planned work.
+Known drift:
+- `src/map/**` exists and is used for the EPIC-04 slice, but the full “map layering contract” (meta + graph as typed data) is still only partially represented as typed data.
+- Several route pages still call repositories/services directly because the `src/features/**` orchestration layer has not been introduced yet.
 
 ## 2) Target module layout
 Suggested target layout (from PRD):
@@ -44,7 +45,7 @@ Suggested target layout (from PRD):
 
 ## 3) Data flow
 
-Current bootstrap flow:
+Current implemented flow:
 1) Route/page code calls repository helpers in `src/storage/**`.
 2) Storage loads and persists `AppState`.
 3) UI renders directly from repository results.
