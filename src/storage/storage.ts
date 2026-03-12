@@ -134,6 +134,8 @@ export async function getKeysByPrefix(prefix: string): Promise<string[]> {
 
 /**
  * Clear all items with tasker prefix
+ * Note: This does NOT clear game events (stored with 'game_event:' prefix)
+ * Use clearAllIncludingEvents() if you need to clear everything
  */
 export async function clearAll(): Promise<void> {
   try {
@@ -149,6 +151,28 @@ export async function clearAll(): Promise<void> {
   } catch (error) {
     console.error('[Storage] Failed to clear storage:', error);
     throw new Error('Failed to clear storage', { cause: error });
+  }
+}
+
+/**
+ * Clear all items including game events
+ * This is a complete wipe of all application data
+ */
+export async function clearAllIncludingEvents(): Promise<void> {
+  try {
+    const keysToRemove: string[] = [];
+    await db.iterate((_value: any, key: string) => {
+      // Remove all tasker data and game events
+      if (key.startsWith(KEY_PREFIX) || key.startsWith('game_event:')) {
+        keysToRemove.push(key);
+      }
+    });
+    for (const key of keysToRemove) {
+      await db.removeItem(key);
+    }
+  } catch (error) {
+    console.error('[Storage] Failed to clear storage including events:', error);
+    throw new Error('Failed to clear storage including events', { cause: error });
   }
 }
 

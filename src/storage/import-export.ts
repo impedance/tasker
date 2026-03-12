@@ -245,8 +245,20 @@ export function createEmptyAppState(): AppState {
 
 /**
  * Reset app state to empty (fresh start)
+ * This preserves event history for audit/support purposes
  */
 export async function resetAppState(): Promise<void> {
+  const emptyState = createEmptyAppState();
+  await saveAppState(emptyState);
+}
+
+/**
+ * Reset app state to empty AND clear all event history
+ * This is a complete wipe - use with caution
+ */
+export async function resetAppStateIncludingEvents(): Promise<void> {
+  const { clearAllIncludingEvents } = await import('./storage');
+  await clearAllIncludingEvents();
   const emptyState = createEmptyAppState();
   await saveAppState(emptyState);
 }

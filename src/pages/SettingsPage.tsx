@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { exportAppStateAsBlob, getExportFilename, importAppStateFromFile, resetAppState } from '../storage/import-export';
+import { exportAppStateAsBlob, getExportFilename, importAppStateFromFile, resetAppState, resetAppStateIncludingEvents } from '../storage/import-export';
 import { Button } from '../shared/ui/button';
 import { Panel } from '../shared/ui/panel';
 import { exportEventsJSON, exportEventsCSV } from '../shared/events/event-logger';
@@ -88,12 +88,20 @@ export default function SettingsPage() {
     }
   };
 
-  const handleReset = async () => {
-    if (!window.confirm('Are you sure you want to reset ALL app data, including event history? This cannot be undone.')) return;
+  const handleReset = async (clearEvents: boolean) => {
+    const message = clearEvents 
+      ? 'Are you sure you want to reset ALL app data, including event history? This cannot be undone.'
+      : 'Are you sure you want to reset all app data? Event history will be preserved.';
+    
+    if (!window.confirm(message)) return;
 
     try {
       setIsProcessing(true);
-      await resetAppState();
+      if (clearEvents) {
+        await resetAppStateIncludingEvents();
+      } else {
+        await resetAppState();
+      }
       setStatus({ type: 'success', message: 'Data reset successful. Reloading...' });
       setTimeout(() => window.location.reload(), 1000);
     } catch (error) {
@@ -156,12 +164,30 @@ export default function SettingsPage() {
 
         <Panel title="Danger Zone">
           <p className="text-sm text-muted-foreground mb-4">
-            Irreversibly delete all local data, including events, and reset the application to its default state.
+            Irreversibly delete all local data and reset the application to its default state.
           </p>
 
-          <Button variant="destructive" onClick={handleReset} disabled={isProcessing}>
-            Reset Application Data
-          </Button>
+          <div className="space-y-3">
+            <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+              <p className="text-xs font-bold mb-2">Option 1: Reset App Data (Events Preserved)</p>
+              <p className="text-xs text-muted-foreground mb-3">
+                Clears campaigns, provinces, seasons, and progress. Event history is kept for audit/support purposes.
+              </p>
+              <Button variant="destructive" onClick={() => handleReset(false)} disabled={isProcessing}>
+                Reset (Keep Events)
+              </Button>
+            </div>
+
+            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+              <p className="text-xs font-bold mb-2 text-red-400">Option 2: Complete Wipe (Everything Deleted)</p>
+              <p className="text-xs text-muted-foreground mb-3">
+                Removes ALL data including event history. This is irreversible - only use if you want a completely fresh start.
+              </p>
+              <Button variant="destructive" onClick={() => handleReset(true)} disabled={isProcessing}>
+                Complete Wipe (Delete Everything)
+              </Button>
+            </div>
+          </div>
         </Panel>
       </div>
     </section>

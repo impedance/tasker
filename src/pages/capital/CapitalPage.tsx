@@ -3,57 +3,25 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../../shared/ui/button';
 import { Panel } from '../../shared/ui/panel';
 import { Sparkles, Map, BookOpen, Trophy, Shield, Zap as ZapIcon } from 'lucide-react';
-import {
-    campaignRepository,
-    provinceRepository,
-    capitalStateRepository,
-    playerProfileRepository,
-    seasonRepository
-} from '../../storage/repositories';
-import { Campaign, Province, CapitalState, PlayerProfile, Season } from '../../entities/types';
-import { getStreakState, getStreakStatusMessage } from '../../game/rules/streak';
-import { getSeasonPhase } from '../../game/rules/season';
-import { seasonHints, SeasonPhase } from '../../shared/copy/season-hints';
+import { loadCapitalData, getCapitalTierInfo, type CapitalData } from '../../features/capital';
+import type { Province } from '../../entities/types';
+import { getStreakStatusMessage } from '../../game/rules/streak';
+import { seasonHints } from '../../shared/copy/season-hints';
 
 export default function CapitalPage() {
     const navigate = useNavigate();
-    const [campaign, setCampaign] = useState<Campaign | null>(null);
-    const [stats, setStats] = useState({ fog: 0, siege: 0, fortified: 0, captured: 0 });
-    const [capitalState, setCapitalState] = useState<CapitalState | null>(null);
-    const [profile, setProfile] = useState<PlayerProfile | null>(null);
-    const [season, setSeason] = useState<Season | null>(null);
-    const [hotspots, setHotspots] = useState<Province[]>([]);
+    const [capitalData, setCapitalData] = useState<CapitalData | null>(null);
+    const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function load() {
-            const campaigns = await campaignRepository.list();
-            const activeCampaign = campaigns.find(c => c.status === 'active') || campaigns[0];
-
-            if (activeCampaign) {
-                setCampaign(activeCampaign);
-
-                const [provinces, cState, pProfile, seasons] = await Promise.all([
-                    provinceRepository.listByCampaign(activeCampaign.id),
-                    capitalStateRepository.getByCampaignId(activeCampaign.id),
-                    playerProfileRepository.get(),
-                    seasonRepository.list()
-                ]);
-
-                const activeSeason = seasons.find(s => s.id === activeCampaign.seasonId) || seasons[seasons.length - 1];
-
-                const s = { fog: 0, siege: 0, fortified: 0, captured: 0 };
-                provinces.forEach(p => {
-                    if (p.state === 'fog') s.fog++;
-                    else if (p.state === 'siege') s.siege++;
-                    else if (p.state === 'fortified') s.fortified++;
-                    else if (p.state === 'captured') s.captured++;
-                });
-                setStats(s);
-                setCapitalState(cState);
-                setProfile(pProfile);
-                setSeason(activeSeason || null);
-                setHotspots(provinces.filter(p => p.frontPressureLevel && p.frontPressureLevel >= 2).slice(0, 3));
+            const result = await loadCapitalData();
+            
+            if ('error' in result) {
+                setError(result.error.message);
+            } else {
+                setCapitalData(result.data);
             }
             setLoading(false);
         }
@@ -61,21 +29,13 @@ export default function CapitalPage() {
     }, []);
 
     if (loading) return <div className="page-shell">Consulting the war mappers...</div>;
-    if (!campaign) return <div className="page-shell">No active campaign found. Start one to see your capital.</div>;
+    if (error) return <div className="page-shell">{error}</div>;
+    if (!capitalData) return <div className="page-shell">No active campaign found. Start one to see your capital.</div>;
 
-    const tiers = {
-        1: { name: 'Outpost', requirement: 'start' },
-        2: { name: 'Garrison', requirement: 'region_captured' },
-        3: { name: 'Stronghold', requirement: '3_meaningful_days' },
-        4: { name: 'Capital', requirement: 'season_completion' },
-    };
-    const tier = tiers[(capitalState?.visualTier as keyof typeof tiers) || 1];
-
-    const streakState = profile ? getStreakState(profile) : { currentStreak: 0, longestStreak: 0, lastMeaningfulDate: null };
+    const { campaign, stats, capitalState, hotspots, streakState, seasonPhase } = capitalData;
+    const tier = getCapitalTierInfo(capitalState?.visualTier);
     const streakMessage = getStreakStatusMessage(streakState);
-
-    const phase = season ? getSeasonPhase(season) as SeasonPhase : 'early';
-    const hint = seasonHints[phase];
+    const hint = seasonHints[seasonPhase as keyof typeof seasonHints] || seasonHints.early;
 
     return (
         <section className="page-shell">
@@ -155,7 +115,7 @@ export default function CapitalPage() {
                         </div>
                     ) : (
                         <div className="space-y-4 py-2">
-                            {hotspots.map(p => (
+                            {hotspots.map((p: Province) => (
                                 <div key={p.id} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10">
                                     <span className="font-bold">{p.title}</span>
                                     <div className="flex items-center gap-2">

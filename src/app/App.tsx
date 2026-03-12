@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom'
 import CampaignsPage from '../pages/CampaignsPage'
 import CampaignMapPage from '../pages/CampaignMapPage'
-import HomePage from '../pages/HomePage'
 import MapPage from '../pages/MapPage'
 import SettingsPage from '../pages/SettingsPage'
 import SiegePage from '../pages/siege/SiegePage'
@@ -23,7 +22,7 @@ import { Sidebar } from '../shared/components/Sidebar'
 import { FeedbackOverlay } from '../shared/components/FeedbackOverlay'
 import { HeroMomentOverlay } from '../shared/components/HeroMomentOverlay'
 import { OnboardingDialog } from './OnboardingDialog'
-import { checkAndCreateSieges } from '../game/services/siege-service'
+import { checkAndCreateSieges } from '../features/siege-resolution'
 import { checkAndStartNewSeason } from '../game/services/season-service'
 
 function App() {
@@ -70,7 +69,7 @@ function App() {
         <Sidebar />
         <main className="flex-1 relative overflow-y-auto overflow-x-hidden">
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<Navigate to="/capital" replace />} />
             <Route path="/campaigns" element={<CampaignsPage />} />
             <Route path="/campaign/:campaignId" element={<CampaignMapPage />} />
             <Route path="/map/:regionId?" element={<MapPage />} />
