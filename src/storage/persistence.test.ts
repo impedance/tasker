@@ -202,8 +202,8 @@ describe('Persistence Integration', () => {
 
             const loadedState = await loadAppState();
             expect(loadedState?.chronicleEntries).toHaveLength(1);
-            expect(loadedState?.chronicleEntries[0]?.entryType).toBe('meaningful_day_streak');
-            expect(loadedState?.chronicleEntries[0]?.body).toContain('[legacy entryType: province_started]');
+            // T4: province_started is now a valid chronicle entry type, so it should be preserved
+            expect(loadedState?.chronicleEntries[0]?.entryType).toBe('province_started');
         });
 
         it('should keep normalized chronicle entries after export/import roundtrip', async () => {
@@ -232,8 +232,8 @@ describe('Persistence Integration', () => {
 
             const loadedState = await loadAppState();
             expect(loadedState?.chronicleEntries).toHaveLength(1);
-            expect(loadedState?.chronicleEntries[0]?.entryType).toBe('meaningful_day_streak');
-            expect(loadedState?.chronicleEntries[0]?.body).toContain('[legacy entryType: province_move_logged]');
+            // T4: province_move_logged is now a valid chronicle entry type, so it should be preserved
+            expect(loadedState?.chronicleEntries[0]?.entryType).toBe('province_move_logged');
         });
     });
 });

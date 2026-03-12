@@ -1,17 +1,25 @@
 /**
  * Province actions feature - handles province-level actions
- * 
+ *
  * Use cases:
  * - Clarify fog province
  * - Start move
  * - Complete province
  * - Apply tactic to siege
+ *
+ * This feature layer orchestrates:
+ * - Loading province data
+ * - Applying actions via useApplyAction hook
+ * - Persisting results
+ *
+ * Pages should use these hooks instead of importing repositories directly.
  */
 
+import { useCallback } from 'react';
+import React from 'react';
 import { provinceRepository, siegeEventRepository } from '../storage/repositories';
 import type { Province, SiegeEvent } from '../entities/types';
-import { domainService } from '../shared/services/domainService';
-import { applyAction } from '../game/rules/apply-action';
+import { useApplyAction } from '../shared/hooks/useApplyAction';
 import type { DomainAction } from '../game/rules/actions';
 
 export interface ProvinceAction {
@@ -30,124 +38,126 @@ export interface ProvinceActionError {
 }
 
 /**
- * Execute a province action
+ * Hook for executing province actions
  */
-export async function executeProvinceAction(
-  action: ProvinceAction
-): Promise<{ ok: true; province: Province } | { ok: false; error: ProvinceActionError }> {
-  try {
-    const province = await provinceRepository.getById(action.provinceId);
-    
-    if (!province) {
-      return {
-        ok: false,
-        error: {
-          type: 'not_found',
-          message: 'Province not found'
-        }
-      };
-    }
-    
-    let domainAction: DomainAction;
-    
-    if (action.type === 'clarify') {
-      domainAction = { type: 'clarify', payload: { desiredOutcome: '', firstStep: '', estimatedEntryMinutes: 5 } };
-    } else if (action.type === 'complete') {
-      domainAction = { type: 'complete', payload: {} };
-    } else if (action.type === 'apply_tactic') {
-      domainAction = { 
-        type: 'apply_tactic',
-        payload: { 
-          tacticType: (action.payload?.tacticType || 'scout') as 'scout' | 'supply' | 'raid' | 'engineer' | 'retreat',
-          siegeEventId: 'unknown'
-        }
-      };
-    } else {
-      domainAction = {
-        type: action.type,
-        payload: {
-          durationMinutes: action.payload?.durationMinutes || 5,
-          moveType: (action.payload?.moveType || 'assault') as 'assault' | 'scout' | 'supply' | 'raid' | 'engineer' | 'retreat'
-        }
-      };
-    }
-    
-    const result = applyAction(province, domainAction);
-    
-    if (!result.ok) {
-      return {
-        ok: false,
-        error: {
-          type: 'rule_violation',
-          message: 'Action not allowed'
-        }
-      };
-    }
-    
-    await domainService.persistResult(domainAction, result);
-    
-    return {
-      ok: true,
-      province: result.province
-    };
-  } catch (error) {
-    return {
-      ok: false,
-      error: {
-        type: 'unknown',
-        message: error instanceof Error ? error.message : 'Unknown error occurred'
+export function useProvinceActions() {
+  const { execute } = useApplyAction();
+
+  const executeAction = useCallback(async (
+    action: ProvinceAction
+  ): Promise<{ ok: true; province: Province } | { ok: false; error: ProvinceActionError }> => {
+    try {
+      const province = await provinceRepository.getById(action.provinceId);
+
+      if (!province) {
+        return {
+          ok: false,
+          error: {
+            type: 'not_found',
+            message: 'Province not found'
+          }
+        };
       }
-    };
-  }
+
+      let domainAction: DomainAction;
+
+      if (action.type === 'clarify') {
+        domainAction = { type: 'clarify', payload: { desiredOutcome: '', firstStep: '', estimatedEntryMinutes: 5 } };
+      } else if (action.type === 'complete') {
+        domainAction = { type: 'complete', payload: {} };
+      } else if (action.type === 'apply_tactic') {
+        domainAction = {
+          type: 'apply_tactic',
+          payload: {
+            tacticType: (action.payload?.tacticType || 'scout') as 'scout' | 'supply' | 'raid' | 'engineer' | 'retreat',
+            siegeEventId: 'unknown'
+          }
+        };
+      } else {
+        domainAction = {
+          type: action.type,
+          payload: {
+            durationMinutes: action.payload?.durationMinutes || 5,
+            moveType: (action.payload?.moveType || 'assault') as 'assault' | 'scout' | 'supply' | 'raid' | 'engineer' | 'retreat'
+          }
+        };
+      }
+
+      const result = await execute(province, domainAction);
+
+      if (!result.ok) {
+        return {
+          ok: false,
+          error: {
+            type: 'rule_violation',
+            message: 'Action not allowed'
+          }
+        };
+      }
+
+      return {
+        ok: true,
+        province: result.province
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: {
+          type: 'unknown',
+          message: error instanceof Error ? error.message : 'Unknown error occurred'
+        }
+      };
+    }
+  }, [execute]);
+
+  return { executeAction };
 }
 
 /**
- * Clarify a fog province
+ * Hook for loading and refreshing a province
  */
-export async function clarifyProvince(provinceId: string): Promise<{ ok: true; province: Province } | { ok: false; error: ProvinceActionError }> {
-  return executeProvinceAction({
-    type: 'clarify',
-    provinceId
-  });
-}
+export function useProvince(provinceId: string | undefined) {
+  const [province, setProvince] = React.useState<Province | null>(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
 
-/**
- * Start a move on a province
- */
-export async function startMove(
-  provinceId: string,
-  moveType: string,
-  durationMinutes: number = 5
-): Promise<{ ok: true; province: Province } | { ok: false; error: ProvinceActionError }> {
-  return executeProvinceAction({
-    type: 'start_move',
-    provinceId,
-    payload: { moveType, durationMinutes }
-  });
-}
+  React.useEffect(() => {
+    async function load() {
+      if (!provinceId) {
+        setLoading(false);
+        return;
+      }
+      try {
+        setError(null);
+        const p = await provinceRepository.getById(provinceId);
+        if (p) {
+          setProvince(p);
+        } else {
+          setError('Province not found');
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load province');
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, [provinceId]);
 
-/**
- * Complete a province
- */
-export async function completeProvince(provinceId: string): Promise<{ ok: true; province: Province } | { ok: false; error: ProvinceActionError }> {
-  return executeProvinceAction({
-    type: 'complete',
-    provinceId
-  });
-}
+  const refresh = useCallback(async () => {
+    if (!provinceId) return;
+    try {
+      const p = await provinceRepository.getById(provinceId);
+      if (p) {
+        setProvince(p);
+      }
+    } catch (err) {
+      // Silently fail on refresh
+      console.error('Failed to refresh province:', err);
+    }
+  }, [provinceId]);
 
-/**
- * Apply a tactic to resolve a siege
- */
-export async function applyTactic(
-  provinceId: string,
-  tacticType: string
-): Promise<{ ok: true; province: Province } | { ok: false; error: ProvinceActionError }> {
-  return executeProvinceAction({
-    type: 'apply_tactic',
-    provinceId,
-    payload: { tacticType }
-  });
+  return { province, loading, error, refresh };
 }
 
 /**

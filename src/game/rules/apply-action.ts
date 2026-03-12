@@ -16,6 +16,7 @@ import { isFog, getMissingClarityFields } from './fog';
 import { advanceProgressStage } from './progress';
 import { getNextState, shouldFortify } from './transitions';
 import { validateActionPayload, validateProvinceFields, mergeValidation } from './validation';
+import { applyTactic } from './tactics';
 
 // ============================================================================
 // Result type
@@ -158,39 +159,23 @@ export function applyAction(
             break;
 
         case 'apply_tactic': {
-            const { tacticType, siegeEventId, data } = action.payload;
+            // Delegate to canonical tactic implementation (T3)
+            const tacticResult = applyTactic(nextProvince, action.payload, now);
+            nextProvince = tacticResult.province;
 
-            // Resolve the siege event
-            sideEffects.push({ type: 'resolve_siege_event', siegeEventId });
-
-            // Tactic-specific mutations
-            if (tacticType === 'scout' && data && data.tacticType === 'scout') {
-                nextProvince = {
-                    ...nextProvince,
-                    ...(data.desiredOutcome !== undefined && { desiredOutcome: data.desiredOutcome }),
-                    ...(data.firstStep !== undefined && { firstStep: data.firstStep }),
-                    ...(data.estimatedEntryMinutes !== undefined && {
-                        estimatedEntryMinutes: data.estimatedEntryMinutes,
-                    }),
-                };
-            } else if (tacticType === 'supply' && data && data.tacticType === 'supply') {
-                nextProvince = {
-                    ...nextProvince,
-                    ...(data.contextLinks !== undefined && { contextLinks: data.contextLinks }),
-                    ...(data.contextNotes !== undefined && { contextNotes: data.contextNotes }),
-                };
-            } else if (tacticType === 'engineer' && data && data.tacticType === 'engineer') {
-                nextProvince = {
-                    ...nextProvince,
-                    decompositionCount: province.decompositionCount + 1,
-                };
-            } else if (tacticType === 'raid' && data && data.tacticType === 'raid') {
-                sideEffects.push({
-                    type: 'create_daily_move',
-                    provinceId: province.id,
-                    moveType: 'raid',
-                    durationMinutes: data.durationMinutes,
-                });
+            // Adapt TacticResult side effects to standard SideEffect union
+            for (const effect of tacticResult.sideEffects) {
+                if (effect.type === 'resolve_siege_event') {
+                    sideEffects.push({ type: 'resolve_siege_event', siegeEventId: effect.siegeEventId });
+                } else if (effect.type === 'create_daily_move') {
+                    sideEffects.push({
+                        type: 'create_daily_move',
+                        provinceId: province.id,
+                        moveType: effect.dailyMove.moveType,
+                        durationMinutes: effect.dailyMove.durationMinutes,
+                    });
+                }
+                // Note: create_sub_province effects are handled by the caller (UI layer)
             }
             break;
         }

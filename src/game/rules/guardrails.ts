@@ -16,6 +16,7 @@
 import type { Province } from '../../entities/types';
 import type { DomainAction } from './actions';
 import { isFog } from './fog';
+import type { Clock } from '../../shared/services/clock';
 
 export interface GuardrailWarning {
     /** Warning type for UI to handle appropriately */
@@ -113,7 +114,8 @@ export function checkMicroTasksGuard(provinces: Province[]): GuardrailWarning | 
 /**
  * Detects long sessions without meaningful action.
  */
-export function checkLongSessionGuard(session: SessionState, now: Date = new Date()): GuardrailWarning | null {
+export function checkLongSessionGuard(session: SessionState, clock: Clock = { now: () => new Date() }): GuardrailWarning | null {
+    const now = clock.now();
     const sessionDurationMs = now.getTime() - session.startedAt.getTime();
     const sessionDurationMinutes = sessionDurationMs / (1000 * 60);
 
@@ -180,7 +182,7 @@ export function runGuardrails(
     history: Array<{ moveType: string; provinceId: string }>,
     session: SessionState,
     action?: DomainAction,
-    now: Date = new Date()
+    clock: Clock = { now: () => new Date() }
 ): GuardrailWarning[] {
     const warnings: GuardrailWarning[] = [];
 
@@ -195,7 +197,7 @@ export function runGuardrails(
     const microTasksWarning = checkMicroTasksGuard(provinces);
     if (microTasksWarning) warnings.push(microTasksWarning);
 
-    const longSessionWarning = checkLongSessionGuard(session, now);
+    const longSessionWarning = checkLongSessionGuard(session, clock);
     if (longSessionWarning) warnings.push(longSessionWarning);
 
     const promptBudgetWarning = checkPromptBudgetGuard(session);

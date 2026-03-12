@@ -7,17 +7,18 @@
 import { provinceRepository, siegeEventRepository } from '../../storage/repositories';
 import { checkSiege, createSiegeEvent } from '../../game/rules/siege';
 import type { Province } from '../../entities/types';
+import type { Clock } from '../../shared/services/clock';
 
 /**
  * Checks all provinces for siege conditions and creates siege events.
  * Returns the number of new siege events created.
- * 
+ *
  * Siege trigger condition:
  *   - state is siege-eligible (ready, in_progress, fortified)
  *   - days since lastMeaningfulActionAt (or createdAt) >= 3
  *   - province is not already in siege state
  */
-export async function checkAndCreateSieges(now: Date = new Date()): Promise<number> {
+export async function checkAndCreateSieges(now: Date = new Date(), clock: Clock = { now: () => now }): Promise<number> {
     const provinces = await provinceRepository.list();
     let siegeCount = 0;
 
@@ -27,14 +28,14 @@ export async function checkAndCreateSieges(now: Date = new Date()): Promise<numb
             continue;
         }
 
-        const siegeCheck = checkSiege(province, now);
+        const siegeCheck = checkSiege(province, clock.now());
 
         if (siegeCheck.shouldTrigger) {
             // Update province state to siege
             const updatedProvince: Province = {
                 ...province,
                 state: 'siege',
-                updatedAt: now.toISOString(),
+                updatedAt: clock.now().toISOString(),
             };
             await provinceRepository.update(province.id, updatedProvince);
 
@@ -55,7 +56,8 @@ export async function checkAndCreateSieges(now: Date = new Date()): Promise<numb
  */
 export async function checkProvinceForSiege(
     provinceId: string,
-    now: Date = new Date()
+    now: Date = new Date(),
+    clock: Clock = { now: () => now }
 ): Promise<boolean> {
     const province = await provinceRepository.getById(provinceId);
     if (!province) {
@@ -67,14 +69,14 @@ export async function checkProvinceForSiege(
         return false;
     }
 
-    const siegeCheck = checkSiege(province, now);
+    const siegeCheck = checkSiege(province, clock.now());
 
     if (siegeCheck.shouldTrigger) {
         // Update province state to siege
         const updatedProvince: Province = {
             ...province,
             state: 'siege',
-            updatedAt: now.toISOString(),
+            updatedAt: clock.now().toISOString(),
         };
         await provinceRepository.update(province.id, updatedProvince);
 

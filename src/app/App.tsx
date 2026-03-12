@@ -24,6 +24,7 @@ import { HeroMomentOverlay } from '../shared/components/HeroMomentOverlay'
 import { OnboardingDialog } from './OnboardingDialog'
 import { checkAndCreateSieges } from '../features/siege-resolution'
 import { checkAndStartNewSeason } from '../game/services/season-service'
+import { systemClock } from '../shared/services/clock'
 
 function App() {
   const [initialized, setInitialized] = useState(false)
@@ -31,14 +32,16 @@ function App() {
   useEffect(() => {
     async function initialize() {
       try {
+        const now = systemClock.now();
+        
         // Auto-trigger siege detection for all provinces
-        const siegeCount = await checkAndCreateSieges(new Date())
+        const siegeCount = await checkAndCreateSieges(now, systemClock)
         if (siegeCount > 0) {
           console.log(`[App] Created ${siegeCount} siege event(s)`)
         }
 
         // Auto-start new season if current season ended
-        const newSeason = await checkAndStartNewSeason(new Date())
+        const newSeason = await checkAndStartNewSeason(now, systemClock)
         if (newSeason) {
           console.log(`[App] Started new season: ${newSeason.title}`)
         }

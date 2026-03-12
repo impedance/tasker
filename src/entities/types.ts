@@ -37,7 +37,7 @@ export type TacticType = 'scout' | 'supply' | 'engineer' | 'raid' | 'retreat';
 
 export type HeroMomentType = 'first_fog_cleared' | 'first_started' | 'siege_resolved' | 'three_meaningful_days' | 'high_effort_captured';
 
-export type ChronicleEntryType = 'fog_cleared' | 'siege_resolved' | 'region_captured' | 'meaningful_day_streak' | 'season_end' | 'campaign_created';
+export type ChronicleEntryType = 'fog_cleared' | 'province_started' | 'province_move_logged' | 'province_captured' | 'siege_resolved' | 'region_captured' | 'meaningful_day_streak' | 'season_end' | 'campaign_created';
 
 export type Importance = 'low' | 'medium' | 'high';
 

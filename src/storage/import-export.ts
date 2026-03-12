@@ -52,6 +52,9 @@ export interface ImportResult {
 
 const SUPPORTED_CHRONICLE_ENTRY_TYPES: ReadonlySet<ChronicleEntryType> = new Set([
   'fog_cleared',
+  'province_started',
+  'province_move_logged',
+  'province_captured',
   'siege_resolved',
   'region_captured',
   'meaningful_day_streak',

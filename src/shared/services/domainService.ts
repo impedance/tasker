@@ -58,7 +58,7 @@ export const domainService = {
 
         // Chronicle stays narrative-oriented and uses its own taxonomy,
         // while event names remain in the analytics/event layer.
-        const narrativeEntryType: ChronicleEntryType = 'meaningful_day_streak';
+        // T4: Use explicit chronicle entry types for province-level events
 
         if (action.type === 'clarify') {
             await track({ name: 'province_clarified', payload: { provinceId: province.id } });
@@ -68,7 +68,7 @@ export const domainService = {
                 name: 'province_started',
                 payload: { provinceId: province.id, timestamp: new Date().toISOString() }
             });
-            await createChronicle(narrativeEntryType, `Started: ${province.title}`);
+            await createChronicle('province_started', `Started: ${province.title}`);
         } else if (action.type === 'log_move') {
             await track({
                 name: 'province_move_logged',
@@ -78,7 +78,7 @@ export const domainService = {
                     durationMinutes: action.payload.durationMinutes || 0
                 }
             });
-            await createChronicle(narrativeEntryType, `Logged Move: ${province.title}`);
+            await createChronicle('province_move_logged', `Logged Move: ${province.title}`);
         } else if (action.type === 'apply_tactic') {
             await track({
                 name: 'siege_resolved',
@@ -91,7 +91,7 @@ export const domainService = {
             await createChronicle('siege_resolved', `Siege Resolved: ${province.title}`);
         } else if (action.type === 'complete') {
             await track({ name: 'province_captured', payload: { provinceId: province.id } });
-            await createChronicle(narrativeEntryType, `Captured: ${province.title}`, 'high');
+            await createChronicle('province_captured', `Captured: ${province.title}`, 'high');
         }
     }
 };

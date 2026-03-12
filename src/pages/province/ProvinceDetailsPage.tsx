@@ -1,10 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '../../shared/ui/button';
 import { Panel } from '../../shared/ui/panel';
-import { useApplyAction } from '../../shared/hooks/useApplyAction';
-import { provinceRepository } from '../../storage/repositories';
-import type { Province } from '../../entities/types';
+import { useProvince, useProvinceActions } from '../../features/province-actions';
 import type { ActionType, DomainAction } from '../../game/rules/actions';
 import { isTransitionAllowed } from '../../game/rules/transitions';
 
@@ -52,40 +50,34 @@ function buildAvailabilityAction(actionType: ActionType): DomainAction {
     }
 }
 
-export function isProvinceActionAvailable(province: Province, actionType: ActionType): boolean {
+export function isProvinceActionAvailable(province: import('../../entities/types').Province, actionType: ActionType): boolean {
     return isTransitionAllowed(province.state, buildAvailabilityAction(actionType));
 }
 
 export default function ProvinceDetailsPage() {
     const { provinceId } = useParams<{ provinceId: string }>();
     const navigate = useNavigate();
-    const { execute } = useApplyAction();
+    const { province, loading, error: loadError, refresh } = useProvince(provinceId);
+    const { executeAction } = useProvinceActions();
+    const [actionError, setActionError] = useState<string | null>(null);
 
-    const [province, setProvince] = useState<Province | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-        async function load() {
-            if (!provinceId) return;
-            const p = await provinceRepository.getById(provinceId);
-            if (p) setProvince(p);
-            setLoading(false);
-        }
-        load();
-    }, [provinceId]);
+    const error = loadError || actionError;
 
     const handleAction = async (action: DomainAction) => {
         if (!province) return;
         try {
-            setError(null);
-            await execute(province, action);
+            setActionError(null);
+            const actionWrapper = {
+                type: action.type as 'clarify' | 'start_move' | 'complete' | 'apply_tactic',
+                provinceId: province.id,
+                payload: action.payload as any
+            };
+            await executeAction(actionWrapper);
             // Reload province after action
-            const updated = await provinceRepository.getById(province.id);
-            if (updated) setProvince(updated);
+            await refresh();
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : `Failed to execute ${action.type}`;
-            setError(message);
+            setActionError(message);
         }
     };
 

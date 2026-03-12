@@ -67,12 +67,15 @@ export const HeroMomentTypeSchema = z.enum([
 ]);
 
 export const ChronicleEntryTypeSchema = z.enum([
-  'fog_cleared',
-  'siege_resolved',
-  'region_captured',
-  'meaningful_day_streak',
-  'season_end',
-  'campaign_created'
+    'fog_cleared',
+    'province_started',
+    'province_move_logged',
+    'province_captured',
+    'siege_resolved',
+    'region_captured',
+    'meaningful_day_streak',
+    'season_end',
+    'campaign_created'
 ]);
 
 export const ImportanceSchema = z.enum(['low', 'medium', 'high']);

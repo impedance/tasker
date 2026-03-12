@@ -12,6 +12,7 @@
 import { seasonRepository, provinceRepository, playerProfileRepository } from '../../storage/repositories';
 import { getSeasonDayNumber, SEASON_LENGTH_DAYS, createSeason } from '../../game/rules/season';
 import type { Season, Province } from '../../entities/types';
+import type { Clock } from '../../shared/services/clock';
 
 /**
  * Checks if current season has ended and creates a new season if needed.
@@ -25,7 +26,7 @@ import type { Season, Province } from '../../entities/types';
  *   - PlayerProfile.currentSeasonId is updated
  *   - Active provinces (in_progress) transition to ready
  */
-export async function checkAndStartNewSeason(now: Date = new Date()): Promise<Season | null> {
+export async function checkAndStartNewSeason(now: Date = new Date(), clock: Clock = { now: () => now }): Promise<Season | null> {
     const seasons = await seasonRepository.list();
     const currentSeason = seasons[seasons.length - 1];
 
@@ -33,7 +34,7 @@ export async function checkAndStartNewSeason(now: Date = new Date()): Promise<Se
         return null;
     }
 
-    const dayNumber = getSeasonDayNumber(currentSeason, now);
+    const dayNumber = getSeasonDayNumber(currentSeason, clock.now());
 
     if (dayNumber >= SEASON_LENGTH_DAYS) {
         // Check if already migrated (new season already exists)
@@ -45,7 +46,7 @@ export async function checkAndStartNewSeason(now: Date = new Date()): Promise<Se
         // Create new season
         const newSeasonData = createSeason(
             `Season ${seasons.length + 1}`,
-            now,
+            clock.now(),
             currentSeason.timezone || 'UTC'
         );
 
@@ -63,7 +64,7 @@ export async function checkAndStartNewSeason(now: Date = new Date()): Promise<Se
                 const updatedProvince: Province = {
                     ...province,
                     state: 'ready',
-                    updatedAt: now.toISOString(),
+                    updatedAt: clock.now().toISOString(),
                 };
                 await provinceRepository.update(province.id, updatedProvince);
             }
@@ -79,7 +80,7 @@ export async function checkAndStartNewSeason(now: Date = new Date()): Promise<Se
  * Gets the current active season.
  * Returns the most recent season that hasn't ended.
  */
-export async function getCurrentSeason(): Promise<Season | null> {
+export async function getCurrentSeason(_clock: Clock = { now: () => new Date() }): Promise<Season | null> {
     const seasons = await seasonRepository.list();
     if (seasons.length === 0) {
         return null;
@@ -93,14 +94,15 @@ export async function getCurrentSeason(): Promise<Season | null> {
  * Gets season statistics.
  */
 export async function getSeasonStats(
-    season: Season
+    season: Season,
+    clock: Clock = { now: () => new Date() }
 ): Promise<{
     dayNumber: number;
     daysRemaining: number;
     progress: number;
     phase: 'early' | 'mid' | 'late' | 'ended';
 }> {
-    const dayNumber = getSeasonDayNumber(season, new Date());
+    const dayNumber = getSeasonDayNumber(season, clock.now());
     const daysRemaining = Math.max(0, SEASON_LENGTH_DAYS - dayNumber);
     const progress = Math.round((dayNumber / SEASON_LENGTH_DAYS) * 100);
 

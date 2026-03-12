@@ -7,13 +7,14 @@ import { useFeedbackStore } from '../store/useFeedbackStore';
 import { provinceRepository, dailyMoveRepository } from '../../storage/repositories';
 import type { Province } from '../../entities/types';
 import type { DomainAction } from '../../game/rules/actions';
+import type { Clock } from '../services/clock';
 
 export function useApplyAction() {
     const triggerSignal = useFeedbackStore(s => s.triggerSignal);
     const triggerHeroMoment = useFeedbackStore(s => s.triggerHeroMoment);
     const triggerWarning = useFeedbackStore(s => s.triggerWarning);
 
-    const execute = useCallback(async (province: Province, action: DomainAction) => {
+    const execute = useCallback(async (province: Province, action: DomainAction, clock: Clock = { now: () => new Date() }) => {
         // Fetch data for guardrails
         const [allProvinces, history] = await Promise.all([
             provinceRepository.list(),
@@ -22,10 +23,10 @@ export function useApplyAction() {
 
         // Run guardrails
         const warnings = runGuardrails(province, allProvinces, history, {
-            startedAt: new Date(sessionStorage.getItem('session_start') || new Date().toISOString()),
+            startedAt: new Date(sessionStorage.getItem('session_start') || clock.now().toISOString()),
             meaningfulActionCount: parseInt(sessionStorage.getItem('meaningful_actions') || '0'),
             promptCount: 0 // Mock for now
-        }, action);
+        }, action, clock);
 
         if (hasBlockerWarning(warnings)) {
             throw new Error(getBlockerWarnings(warnings)[0].message);
@@ -70,7 +71,7 @@ export function useApplyAction() {
         }
 
         return result;
-    }, [triggerSignal, triggerHeroMoment]);
+    }, [triggerSignal, triggerHeroMoment, triggerWarning]);
 
     return { execute };
 }
