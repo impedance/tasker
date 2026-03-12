@@ -48,6 +48,43 @@ Notes:
 - Each ticket should be a small PR.
 - Avoid “drive-by” formatting; keep diffs minimal and behavior-preserving.
 - Always run `make smoke` before requesting review; run `make preflight` for any cross-cutting change.
+- Verification-first: add mechanical checks early so implementers can validate progress without manually reading code.
+
+### T0. Verification-first: black-box checks for REFAC-01 invariants (Pareto gate)
+**Description:** Add a fast, offline verification command that fails if key refactor outcomes are not met, so implementers can iterate without manual code review.  
+**Why this is Pareto:** It turns ambiguous “did I refactor correctly?” into a binary signal for the top-risk seams (pages → features → storage, typed boundaries, side-effects persistence).  
+**Deliverables:**
+- `tools/refac_blackbox.sh` with structural invariants (rg-based).
+- `make blackbox` to run it.
+- Optional `E2E=1 make blackbox` to run Playwright when available.
+**How to use (phased, no-code-reading workflow):**
+- Always run `make preflight` after each ticket.
+- Run `PHASE=1 make blackbox` during early tickets (tighten the highest-risk seams first).
+- Run `PHASE=2 make blackbox` once the first feature-layer migration (T6) is in place.
+- Run `make blackbox` (defaults to `PHASE=3`) only near the end, when pages are fully migrated and typed-boundary holes are eliminated.
+
+**Phase definitions (machine-checkable):**
+- **PHASE=1 (Pareto seams):**
+  - `src/pages/siege/SiegePage.tsx` must not use `any` for tactic payload state/params.
+  - `src/shared/services/domainService.ts` must not use `moveType ... as any`.
+  - `localforage` must not leak outside `src/storage/**`.
+- **PHASE=2 (prove the feature layer pattern):**
+  - Includes Phase 1, plus: `ProvinceDetailsPage` must not import `storage/repositories` directly (T6).
+- **PHASE=3 (end-state):**
+  - Includes Phase 2, plus: no `src/pages/**` may import `storage/repositories`.
+  - No `any` / `as any` escape hatches in `src/game/**`, `src/features/**`, `src/storage/**` (tests excluded).
+
+**Invariants to encode (must be machine-checkable):**
+- Pages do not import `storage/repositories` directly (composition-only).
+- `localforage` is only imported from `src/storage/**`.
+- No `any`/`as any` escape hatches in `src/game/**`, `src/features/**`, `src/storage/**` (tests excluded).
+- No `moveType as any` in side-effect persistence (`domainService`).
+**Acceptance criteria:**
+- `make blackbox` returns success only when the invariants above are met.
+- `make smoke` and `make preflight` remain unchanged (fast and deterministic).
+**DoD (done when):**
+- `make blackbox` exists and is documented in `docs/testing.md`.
+**Estimate:** `S=30–60m`
 
 ### T1. Audit + lock contracts for tactics payload (fix invalid UI payload shape)
 **Description:** Ensure UI builds a payload that matches the domain `ApplyTacticPayloadSchema` and that invalid payload shapes cannot compile.  
@@ -60,6 +97,9 @@ Notes:
 - `SiegePage` builds `apply_tactic` payload without `any`.
 - `engineer` payload matches domain schema (no `subSteps` mismatch).
 - Tests cover the payload shapes used by UI.
+**Verification:**
+- `make preflight`
+- `make blackbox` (typed-boundaries / no-`any` gate for `src/features/**` + `src/game/**`)
 **DoD (done when):**
 - `make smoke` passes.
 - New test(s) fail if payload shape drifts.
@@ -77,6 +117,9 @@ Notes:
 **Acceptance criteria:**
 - No `as any` for move types in `domainService`.
 - Compiler prevents invalid move types in side effects.
+**Verification:**
+- `make preflight`
+- `make blackbox` (no `moveType as any`)
 **DoD (done when):**
 - `make preflight` passes.
 **Estimate:** `S=1–2h`  
@@ -142,6 +185,9 @@ Notes:
 **Acceptance criteria:**
 - `ProvinceDetailsPage` no longer imports repositories directly.
 - One canonical execution path is used (feature → `useApplyAction`).
+**Verification:**
+- `make preflight`
+- `make blackbox` (pages-import-repositories gate)
 **DoD (done when):**
 - `make smoke` passes.
 **Estimate:** `M=0.5d`  

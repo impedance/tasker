@@ -7,7 +7,7 @@ E2E ?= 0
 PYTHON ?= python3
 BLACKBOX_CMD ?=
 
-.PHONY: smoke preflight e2e lint typecheck test structural agent-smoke doctor
+.PHONY: smoke preflight e2e lint typecheck test structural agent-smoke doctor blackbox
 smoke: structural lint test
 
 preflight: structural lint typecheck test
@@ -18,6 +18,9 @@ endif
 
 structural:
 	@STRICT="$(STRICT)" bash tools/structural_check.sh
+
+blackbox:
+	@bash tools/refac_blackbox.sh
 
 agent-smoke: smoke
 	@set -eu; 	if [ -n "$(BLACKBOX_CMD)" ]; then 		mkdir -p "$(ARTIFACTS_DIR)"; 		bash -lc "$(BLACKBOX_CMD)"; 	else 		echo "NOTE: agent-smoke is not wired (BLACKBOX_CMD is empty)."; 		echo "Remediation: set BLACKBOX_CMD='...' or define your own agent-smoke target."; 		[ "$(STRICT)" = "1" ] && exit 2 || true; 	fi
