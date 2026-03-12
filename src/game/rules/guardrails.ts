@@ -31,7 +31,8 @@ export type GuardrailType =
     | 'over_planning'
     | 'micro_tasks'
     | 'long_session_no_progress'
-    | 'prompt_budget';
+    | 'prompt_budget'
+    | 'map_slot_collision';
 
 export interface SessionState {
     /** Session start time */
@@ -141,6 +142,36 @@ export function checkPromptBudgetGuard(session: SessionState, maxPrompts: number
 }
 
 /**
+ * Blocks duplicate map slot assignment within the same region.
+ */
+export function checkMapSlotCollisionGuard(
+    province: Province,
+    provinces: Province[],
+    action?: DomainAction
+): GuardrailWarning | null {
+    if (action?.type !== 'edit_fields' || !action.payload.mapSlotId) {
+        return null;
+    }
+
+    const conflictingProvince = provinces.find(
+        (candidate) =>
+            candidate.id !== province.id &&
+            candidate.regionId === province.regionId &&
+            candidate.mapSlotId === action.payload.mapSlotId
+    );
+
+    if (!conflictingProvince) {
+        return null;
+    }
+
+    return {
+        type: 'map_slot_collision',
+        message: `Slot ${action.payload.mapSlotId} is already assigned to "${conflictingProvince.title}". Choose another slot.`,
+        severity: 'blocker',
+    };
+}
+
+/**
  * Runs all guardrails and returns array of warnings.
  */
 export function runGuardrails(
@@ -169,6 +200,9 @@ export function runGuardrails(
 
     const promptBudgetWarning = checkPromptBudgetGuard(session);
     if (promptBudgetWarning) warnings.push(promptBudgetWarning);
+
+    const slotCollisionWarning = checkMapSlotCollisionGuard(province, provinces, action);
+    if (slotCollisionWarning) warnings.push(slotCollisionWarning);
 
     return warnings;
 }

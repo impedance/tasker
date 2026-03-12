@@ -5,7 +5,56 @@ import { Panel } from '../../shared/ui/panel';
 import { useApplyAction } from '../../shared/hooks/useApplyAction';
 import { provinceRepository } from '../../storage/repositories';
 import type { Province } from '../../entities/types';
-import type { ActionType } from '../../game/rules/actions';
+import type { ActionType, DomainAction } from '../../game/rules/actions';
+import { isTransitionAllowed } from '../../game/rules/transitions';
+
+function buildAvailabilityAction(actionType: ActionType): DomainAction {
+    switch (actionType) {
+        case 'clarify':
+            return {
+                type: 'clarify',
+                payload: {
+                    desiredOutcome: 'placeholder outcome',
+                    firstStep: 'placeholder step',
+                    estimatedEntryMinutes: 5,
+                },
+            };
+        case 'supply':
+            return { type: 'supply', payload: { contextNotes: 'Added supplies' } };
+        case 'decompose':
+            return { type: 'decompose', payload: { subProvinceIds: ['placeholder-sub-province'] } };
+        case 'start_move':
+            return { type: 'start_move', payload: { durationMinutes: 25 } };
+        case 'log_move':
+            return { type: 'log_move', payload: { durationMinutes: 25 } };
+        case 'apply_tactic':
+            return {
+                type: 'apply_tactic',
+                payload: {
+                    tacticType: 'scout',
+                    siegeEventId: 'placeholder-siege-event',
+                    data: {
+                        tacticType: 'scout',
+                        desiredOutcome: 'placeholder outcome',
+                        firstStep: 'placeholder step',
+                        estimatedEntryMinutes: 5,
+                    },
+                },
+            };
+        case 'complete':
+            return { type: 'complete', payload: { note: 'Completed manually via UI' } };
+        case 'retreat':
+            return { type: 'retreat', payload: { reason: 'Retreating to reconsider approach' } };
+        case 'reschedule':
+            return { type: 'reschedule', payload: { reason: 'Rescheduling for later' } };
+        case 'edit_fields':
+            return { type: 'edit_fields', payload: { title: 'Edited title' } };
+    }
+}
+
+export function isProvinceActionAvailable(province: Province, actionType: ActionType): boolean {
+    return isTransitionAllowed(province.state, buildAvailabilityAction(actionType));
+}
 
 export default function ProvinceDetailsPage() {
     const { provinceId } = useParams<{ provinceId: string }>();
@@ -26,16 +75,17 @@ export default function ProvinceDetailsPage() {
         load();
     }, [provinceId]);
 
-    const handleAction = async (actionType: ActionType, payload: any = {}) => {
+    const handleAction = async (action: DomainAction) => {
         if (!province) return;
         try {
             setError(null);
-            await execute(province, { type: actionType as any, payload });
+            await execute(province, action);
             // Reload province after action
             const updated = await provinceRepository.getById(province.id);
             if (updated) setProvince(updated);
-        } catch (err: any) {
-            setError(err.message || `Failed to execute ${actionType}`);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : `Failed to execute ${action.type}`;
+            setError(message);
         }
     };
 
@@ -69,50 +119,51 @@ export default function ProvinceDetailsPage() {
                         ) : (
                             <>
                                 <Button
-                                    onClick={() => handleAction('start_move', { durationMinutes: 25 })}
+                                    onClick={() => handleAction({ type: 'start_move', payload: { durationMinutes: 25 } })}
                                     className="w-full justify-start"
-                                    disabled={province.state !== 'ready' && province.state !== 'in_progress'}
+                                    disabled={!isProvinceActionAvailable(province, 'start_move')}
                                 >
                                     Start Work (25m)
                                 </Button>
                                 <Button
-                                    onClick={() => handleAction('log_move', { durationMinutes: 25 })}
+                                    onClick={() => handleAction({ type: 'log_move', payload: { durationMinutes: 25 } })}
                                     className="w-full justify-start"
-                                    disabled={province.state !== 'in_progress'}
+                                    disabled={!isProvinceActionAvailable(province, 'log_move')}
                                 >
                                     Log Progress (25m)
                                 </Button>
                                 <Button
-                                    onClick={() => handleAction('supply', { contextNotes: 'Added supplies' })}
+                                    onClick={() => handleAction({ type: 'supply', payload: { contextNotes: 'Added supplies' } })}
                                     className="w-full justify-start"
-                                    disabled={province.state === 'captured'}
+                                    disabled={!isProvinceActionAvailable(province, 'supply')}
                                 >
                                     Supply
                                 </Button>
                                 <Button
-                                    onClick={() => handleAction('complete', { note: 'Completed manually via UI' })}
+                                    onClick={() => handleAction({ type: 'complete', payload: { note: 'Completed manually via UI' } })}
                                     className="w-full justify-start"
-                                    disabled={province.state === 'captured'}
+                                    disabled={!isProvinceActionAvailable(province, 'complete')}
                                 >
                                     Mark as Completed
                                 </Button>
                                 <Button
-                                    onClick={() => handleAction('retreat', { reason: 'Retreating to reconsider approach' })}
+                                    onClick={() => handleAction({ type: 'retreat', payload: { reason: 'Retreating to reconsider approach' } })}
                                     className="w-full justify-start"
-                                    disabled={province.state === 'captured'}
+                                    disabled={!isProvinceActionAvailable(province, 'retreat')}
                                 >
                                     Retreat
                                 </Button>
                                 <Button
-                                    onClick={() => handleAction('reschedule', { reason: 'Rescheduling for later' })}
+                                    onClick={() => handleAction({ type: 'reschedule', payload: { reason: 'Rescheduling for later' } })}
                                     className="w-full justify-start"
-                                    disabled={province.state === 'captured'}
+                                    disabled={!isProvinceActionAvailable(province, 'reschedule')}
                                 >
                                     Reschedule
                                 </Button>
                                 <Button
-                                    onClick={() => handleAction('edit_fields', { title: province.title + ' (Edited)' })}
+                                    onClick={() => handleAction({ type: 'edit_fields', payload: { title: `${province.title} (Edited)` } })}
                                     className="w-full justify-start"
+                                    disabled={!isProvinceActionAvailable(province, 'edit_fields')}
                                 >
                                     Edit Name (Demo)
                                 </Button>

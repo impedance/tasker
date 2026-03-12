@@ -2,7 +2,7 @@
 import { describe, it, expect, beforeEach, afterAll } from 'vitest';
 import { campaignRepository, regionRepository, provinceRepository, seasonRepository } from './repositories';
 import { clearAll, initStorage, loadAppState, db } from './storage';
-import { exportAppState, importAppState } from './import-export';
+import { createEmptyAppState, exportAppState, importAppState } from './import-export';
 import { CURRENT_SCHEMA_VERSION } from './migrations';
 
 describe('Persistence Integration', () => {
@@ -181,6 +181,59 @@ describe('Persistence Integration', () => {
             expect(loadedState?.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
             expect(loadedState?.campaigns[0]?.title).toBe('Legacy Campaign');
             expect(loadedState?.provinces[0]?.id).toBe('p-1');
+        });
+
+        it('should import legacy chronicle entries with unknown entryType', async () => {
+            const now = new Date().toISOString();
+            const snapshot = createEmptyAppState();
+            snapshot.chronicleEntries = [
+                {
+                    id: 'chron-legacy-1',
+                    campaignId: 'camp-1',
+                    entryType: 'province_started' as any,
+                    title: 'Started: Legacy Province',
+                    importance: 'medium',
+                    createdAt: now
+                }
+            ];
+
+            const importResult = await importAppState(JSON.stringify(snapshot));
+            expect(importResult.success).toBe(true);
+
+            const loadedState = await loadAppState();
+            expect(loadedState?.chronicleEntries).toHaveLength(1);
+            expect(loadedState?.chronicleEntries[0]?.entryType).toBe('meaningful_day_streak');
+            expect(loadedState?.chronicleEntries[0]?.body).toContain('[legacy entryType: province_started]');
+        });
+
+        it('should keep normalized chronicle entries after export/import roundtrip', async () => {
+            const now = new Date().toISOString();
+            const snapshot = createEmptyAppState();
+            snapshot.chronicleEntries = [
+                {
+                    id: 'chron-legacy-2',
+                    campaignId: 'camp-1',
+                    entryType: 'province_move_logged' as any,
+                    title: 'Logged Move: Legacy Province',
+                    importance: 'medium',
+                    createdAt: now
+                }
+            ];
+
+            const firstImport = await importAppState(JSON.stringify(snapshot));
+            expect(firstImport.success).toBe(true);
+
+            const exportedJson = await exportAppState();
+            await clearAll();
+            await initStorage();
+
+            const secondImport = await importAppState(exportedJson);
+            expect(secondImport.success).toBe(true);
+
+            const loadedState = await loadAppState();
+            expect(loadedState?.chronicleEntries).toHaveLength(1);
+            expect(loadedState?.chronicleEntries[0]?.entryType).toBe('meaningful_day_streak');
+            expect(loadedState?.chronicleEntries[0]?.body).toContain('[legacy entryType: province_move_logged]');
         });
     });
 });

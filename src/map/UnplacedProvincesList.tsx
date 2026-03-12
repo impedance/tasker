@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Province } from "../entities/types"
 import { Panel } from "../shared/ui/panel"
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "../shared/ui/dialog"
@@ -51,6 +51,13 @@ export function UnplacedProvincesList({ provinces, freeSlots, onSelect, onAssign
     )
 }
 
+export function resolveSlotSelection(currentSlotId: string, freeSlots: string[]): string {
+    if (freeSlots.length === 0) {
+        return ''
+    }
+    return freeSlots.includes(currentSlotId) ? currentSlotId : freeSlots[0]
+}
+
 function AssignSlotDialog({
     province,
     freeSlots,
@@ -61,13 +68,12 @@ function AssignSlotDialog({
     onAssign: (pId: string, sId: string) => Promise<void>
 }) {
     const [open, setOpen] = useState(false)
-    const [slotId, setSlotId] = useState(freeSlots[0] || '')
+    const [slotId, setSlotId] = useState(() => resolveSlotSelection('', freeSlots))
     const [isSubmitting, setIsSubmitting] = useState(false)
 
-    // Ensure slotId is syncing if freeSlots change
-    if (!freeSlots.includes(slotId) && freeSlots.length > 0) {
-        setSlotId(freeSlots[0])
-    }
+    useEffect(() => {
+        setSlotId((current) => resolveSlotSelection(current, freeSlots))
+    }, [freeSlots])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()

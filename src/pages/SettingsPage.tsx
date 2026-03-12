@@ -89,7 +89,7 @@ export default function SettingsPage() {
   };
 
   const handleReset = async () => {
-    if (!window.confirm('Are you sure you want to reset ALL data? This cannot be undone.')) return;
+    if (!window.confirm('Are you sure you want to reset ALL app data, including event history? This cannot be undone.')) return;
 
     try {
       setIsProcessing(true);
@@ -156,7 +156,7 @@ export default function SettingsPage() {
 
         <Panel title="Danger Zone">
           <p className="text-sm text-muted-foreground mb-4">
-            Irreversibly delete all local data and reset the application to its default state.
+            Irreversibly delete all local data, including events, and reset the application to its default state.
           </p>
 
           <Button variant="destructive" onClick={handleReset} disabled={isProcessing}>

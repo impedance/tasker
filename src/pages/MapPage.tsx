@@ -7,6 +7,7 @@ import { ProvinceDrawer } from "../map/ProvinceDrawer"
 import { UnplacedProvincesList } from "../map/UnplacedProvincesList"
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "../shared/ui/dialog"
 import { Plus, ListPlus, Wand2 } from "lucide-react"
+import { useApplyAction } from "../shared/hooks/useApplyAction"
 
 export default function MapPage() {
     const { regionId } = useParams<{ regionId: string }>()
@@ -24,6 +25,8 @@ export default function MapPage() {
     const [title, setTitle] = React.useState('')
     const [bulkText, setBulkText] = React.useState('')
     const [isSubmitting, setIsSubmitting] = React.useState(false)
+    const [assignError, setAssignError] = React.useState<string | null>(null)
+    const { execute } = useApplyAction()
 
     // Load data
     const loadData = React.useCallback(async () => {
@@ -225,9 +228,20 @@ export default function MapPage() {
 
     const handleAssignSlot = async (provinceId: string, slotId: string) => {
         try {
-            await provinceRepository.setMapSlot(provinceId, slotId)
-            loadData()
+            const province = provinces.find((item) => item.id === provinceId)
+            if (!province) {
+                throw new Error('Province not found')
+            }
+
+            setAssignError(null)
+            await execute(province, {
+                type: 'edit_fields',
+                payload: { mapSlotId: slotId }
+            })
+            await loadData()
         } catch (err) {
+            const message = err instanceof Error ? err.message : 'Failed to assign slot'
+            setAssignError(message)
             console.error('Failed to assign slot:', err)
         }
     }
@@ -374,6 +388,11 @@ export default function MapPage() {
                         onSelect={setSelectedProvince}
                         onAssignSlot={handleAssignSlot}
                     />
+                    {assignError && (
+                        <div className="rounded-lg border border-red-400/40 bg-red-400/10 px-3 py-2 text-sm text-red-200">
+                            {assignError}
+                        </div>
+                    )}
 
                     <div className="p-4 bg-white/5 border border-white/10 rounded-xl">
                         <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Map Legend</p>
@@ -407,4 +426,3 @@ function LegendItem({ color, label }: { color: string, label: string }) {
         </div>
     )
 }
-

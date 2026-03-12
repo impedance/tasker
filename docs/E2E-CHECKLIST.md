@@ -235,9 +235,32 @@
 
 ---
 
+## Scenario 9: Reset Semantics (State + Events)
+
+**Goal:** Verify reset behavior matches Settings copy and clears event history
+
+1. Perform several actions (create, clarify, start, complete)
+2. Navigate to `/dev/events`
+3. **Expected:** Event history is non-empty
+4. Navigate to `/settings`
+5. Click **Reset Application Data**
+6. Confirm the dialog mentioning app data **including event history**
+7. Wait for automatic reload
+8. Navigate to `/dev/events`
+9. **Expected:** Event history is empty after reset
+10. Navigate to `/map`
+11. **Expected:** No existing campaign/region/province data remains
+
+**Pass Criteria:**
+- [ ] Reset copy matches actual behavior
+- [ ] Events are cleared by reset
+- [ ] App state is fully reset
+
+---
+
 ## Summary
 
-**Total Scenarios:** 8  
+**Total Scenarios:** 9  
 **Date Tested:** ___________  
 **Tester:** ___________  
 
@@ -251,6 +274,7 @@
 | 6. Event Export | ☐ | ☐ | |
 | 7. Overflow and Slot Assignment | ☐ | ☐ | |
 | 8. ProvinceDrawer Actions | ☐ | ☐ | |
+| 9. Reset Semantics (State + Events) | ☐ | ☐ | |
 
 **Issues Found:**
 - [ ] None

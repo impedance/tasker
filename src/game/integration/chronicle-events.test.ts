@@ -65,7 +65,7 @@ describe('Integration: Chronicle + Events', () => {
         // check chronicle
         const chronicles = await chronicleEntryRepository.list();
         expect(chronicles.length).toBe(1);
-        expect(chronicles[0].entryType as any).toBe('province_started');
+        expect(chronicles[0].entryType).toBe('meaningful_day_streak');
         expect(chronicles[0].provinceId).toBe(testProvinceId);
 
         // check events

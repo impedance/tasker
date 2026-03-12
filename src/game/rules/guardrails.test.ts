@@ -9,6 +9,7 @@ import {
     checkMicroTasksGuard,
     checkLongSessionGuard,
     checkPromptBudgetGuard,
+    checkMapSlotCollisionGuard,
     runGuardrails,
     hasBlockerWarning,
 } from './guardrails';
@@ -217,6 +218,45 @@ describe('checkPromptBudgetGuard', () => {
     });
 });
 
+describe('checkMapSlotCollisionGuard', () => {
+    it('returns blocker when target map slot is already taken in same region', () => {
+        const province = makeProvince({ id: 'province-a', regionId: 'region-1' });
+        const provinces = [
+            province,
+            makeProvince({
+                id: 'province-b',
+                regionId: 'region-1',
+                title: 'Occupied Province',
+                mapSlotId: 'p03',
+            }),
+        ];
+
+        const warning = checkMapSlotCollisionGuard(province, provinces, {
+            type: 'edit_fields',
+            payload: { mapSlotId: 'p03' },
+        });
+
+        expect(warning).toBeDefined();
+        expect(warning?.type).toBe('map_slot_collision');
+        expect(warning?.severity).toBe('blocker');
+    });
+
+    it('returns null when slot is free', () => {
+        const province = makeProvince({ id: 'province-a', regionId: 'region-1' });
+        const provinces = [
+            province,
+            makeProvince({ id: 'province-b', regionId: 'region-1', mapSlotId: 'p03' }),
+        ];
+
+        const warning = checkMapSlotCollisionGuard(province, provinces, {
+            type: 'edit_fields',
+            payload: { mapSlotId: 'p04' },
+        });
+
+        expect(warning).toBe(null);
+    });
+});
+
 describe('runGuardrails', () => {
     it('should return all applicable warnings', () => {
         const province = makeProvince({
@@ -237,6 +277,29 @@ describe('runGuardrails', () => {
         expect(warnings.length).toBeGreaterThan(1);
         expect(warnings.map((w) => w.type)).toContain('fog_block');
         expect(warnings.map((w) => w.type)).toContain('over_planning');
+    });
+
+    it('returns slot collision blocker for stale map assignment', () => {
+        const staleProvince = makeProvince({ id: 'province-a', regionId: 'region-1' });
+        const provinces = [
+            staleProvince,
+            makeProvince({
+                id: 'province-b',
+                regionId: 'region-1',
+                title: 'Already Placed',
+                mapSlotId: 'p01',
+            }),
+        ];
+        const warnings = runGuardrails(
+            staleProvince,
+            provinces,
+            [],
+            { startedAt: new Date(), meaningfulActionCount: 0, promptCount: 0 },
+            { type: 'edit_fields', payload: { mapSlotId: 'p01' } }
+        );
+
+        expect(warnings.map((w) => w.type)).toContain('map_slot_collision');
+        expect(hasBlockerWarning(warnings)).toBe(true);
     });
 });
 

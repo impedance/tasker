@@ -4,7 +4,7 @@
  */
 
 import { AppStateSchema } from '../entities/schemas';
-import type { AppState } from '../entities/types';
+import type { AppState, ChronicleEntryType } from '../entities/types';
 import { migrate, validateAppState, CURRENT_SCHEMA_VERSION } from './migrations';
 import { saveAppState, loadAppState } from './storage';
 
@@ -50,6 +50,40 @@ export interface ImportResult {
   migratedFromVersion?: number;
 }
 
+const SUPPORTED_CHRONICLE_ENTRY_TYPES: ReadonlySet<ChronicleEntryType> = new Set([
+  'fog_cleared',
+  'siege_resolved',
+  'region_captured',
+  'meaningful_day_streak',
+  'season_end',
+  'campaign_created'
+]);
+
+function isSupportedChronicleEntryType(value: unknown): value is ChronicleEntryType {
+  return typeof value === 'string' && SUPPORTED_CHRONICLE_ENTRY_TYPES.has(value as ChronicleEntryType);
+}
+
+function normalizeChronicleEntries(state: AppState): AppState {
+  return {
+    ...state,
+    chronicleEntries: state.chronicleEntries.map((entry) => {
+      if (isSupportedChronicleEntryType(entry.entryType)) {
+        return entry;
+      }
+
+      const legacyType = typeof entry.entryType === 'string' ? entry.entryType : 'unknown';
+      const legacyMarker = `[legacy entryType: ${legacyType}]`;
+      const normalizedBody = entry.body ? `${legacyMarker} ${entry.body}` : legacyMarker;
+
+      return {
+        ...entry,
+        entryType: 'meaningful_day_streak',
+        body: normalizedBody
+      };
+    })
+  };
+}
+
 /**
  * Parse import JSON, validate minimal shape, migrate, and strictly validate.
  */
@@ -87,8 +121,11 @@ export function parseImportData(jsonString: string): {
     return { errors };
   }
 
-  // 4) Strict post-migration validation
-  const zodResult = AppStateSchema.safeParse(migratedState);
+  // 4) Normalize legacy Chronicle entryType drift before strict validation
+  const normalizedState = normalizeChronicleEntries(migratedState);
+
+  // 5) Strict post-migration validation
+  const zodResult = AppStateSchema.safeParse(normalizedState);
   if (!zodResult.success) {
     errors.push(
       ...zodResult.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`)

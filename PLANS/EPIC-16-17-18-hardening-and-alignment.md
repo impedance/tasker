@@ -2,7 +2,7 @@
 
 **ID:** `PLAN-16-17-18-HARDENING`  
 **Priority:** `P0`  
-**Status:** `ready`  
+**Status:** `completed`  
 **Owner:** `FE+BE`  
 **Last Reviewed:** `2026-03-12`  
 **References:** `prd.md`, `epics/EPIC-01-foundation.md`, `epics/EPIC-15-world-shell.md`, `PLANS/archive/EPIC-16-province-action-surfaces.md`, `PLANS/archive/EPIC-17-map-placement-and-overflow.md`, `PLANS/archive/EPIC-18-chronicle-and-instrumentation-hygiene.md`
