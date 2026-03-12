@@ -35,8 +35,8 @@ If any item below is missing, implementation will drift across EPICs and create 
 - [ ] Map interaction runtime decision is locked (DOM/SVG-first + pan/zoom wrapper for MVP) and is kept decoupled from domain logic: `epics/EPIC-04-map-ui.md`.
 
 Bootstrap reality check:
-- As of 2026-03-08, the repo has the storage/domain bootstrap slice, but no dedicated `src/game/**`, `src/map/**`, `src/shared/**`, or `src/features/**` modules yet.
-- Readiness means the contracts are settled before those modules are added, not that they already exist.
+- As of 2026-03-12, the repo already contains `src/game/**`, `src/map/**`, and `src/shared/**`.
+- The main remaining architecture gap is a thin `src/features/**` orchestration layer and follow-up hardening where UI still bypasses domain boundaries.
 
 ---
 
@@ -101,10 +101,10 @@ Use these as “Definition of Done” anchors across EPICs:
 
 ---
 
-## 7) Week 2 Integration Status (WEEK2-INTEGRATION-PLAN)
+## 7) Recent execution status
 
-**Status:** ✅ Complete  
-**Date:** 2026-03-11  
+**Week 2 integration:** completed on `2026-03-11` and archived as historical execution context.  
+**Current follow-up:** use `PLANS/EPIC-16-17-18-hardening-and-alignment.md` for active hardening/alignment work.
 
 ### P0 Critical Tasks
 - [x] **T0.1** Siege auto-trigger on app load (`src/game/services/siege-service.ts`)
@@ -176,11 +176,14 @@ Use this checklist before pilot deployment:
 ### UI/UX
 - [ ] ProvinceDrawer Scout button works for fog provinces (navigates to clarify)
 - [ ] ProvinceDrawer Scout button logs move for ready provinces
+- [ ] Province Details actions are enabled/disabled strictly from transition rules
+- [ ] Unplaced province assignment blocks slot collisions at the domain boundary
 - [ ] Feedback overlay appears after actions
 - [ ] Copy layering correct (fantasy-first on map, plain on action surfaces)
 
 ### Data Integrity
 - [ ] Import/export roundtrip stable
+- [ ] Legacy Chronicle entry types do not brick import
 - [ ] No data loss on season transition
 - [ ] IndexedDB storage works reliably
 - [ ] Schema migrations work (if applicable)

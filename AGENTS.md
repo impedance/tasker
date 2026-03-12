@@ -9,7 +9,7 @@ If a user message is in Russian, still keep repository documentation in English 
 ## System of record (read first)
 - Product requirements: `prd.md`
 - Epic backlog + build order: `epics/00-index.md`
-- Executable junior ticket plan (Week 1 slice): `PLANS/EPIC-02-05-junior-tickets.md`
+- Bootstrap execution sources (Week 1 slice): `epics/EPIC-02-bootstrap.md`, `epics/EPIC-03-domain-persistence.md`, `epics/EPIC-04-map-ui.md`, `epics/EPIC-05-creation-flows.md`
 - Plan template: `PLANS/plan.md`
 - Implementation readiness checklist: `epics/IMPLEMENTATION-READINESS.md`
 - Repo map: `docs/index.md`

@@ -1,8 +1,8 @@
 # Manual E2E Test Checklist
 
-**Version:** 1.0  
-**Last Updated:** 2026-03-11  
-**Purpose:** Manual testing of key user flows for Week 2 Integration
+**Version:** 1.1  
+**Last Updated:** 2026-03-12  
+**Purpose:** Manual testing of key MVP flows after the current hardening pass
 
 ---
 
@@ -19,7 +19,7 @@
 **Goal:** Verify province creation and clarification flow
 
 1. Navigate to `/map`
-2. Click on empty map slot to create new province
+2. Click **Add**
 3. Verify province created in `fog` state
 4. Open province drawer (click on province)
 5. Click **"Scout"** button
@@ -27,7 +27,7 @@
 7. Fill in form:
    - Outcome: "Completed"
    - First step: "Write documentation"
-   - Entry type: "Solo"
+   - Entry minutes: `15`
 8. Submit form
 9. **Expected:** Province state changes to `ready`
 10. **Expected:** Progress stage is `scouted`
@@ -190,7 +190,30 @@
 
 ---
 
-## Scenario 7: ProvinceDrawer Actions
+## Scenario 7: Overflow and Slot Assignment
+
+**Goal:** Verify extra provinces remain playable and slot assignment is safe
+
+1. Navigate to `/map/:regionId`
+2. Create provinces until all 16 SVG slots are occupied
+3. Create one more province
+4. **Expected:** The extra province appears in **Unplaced Provinces**
+5. Click **Assign** for the unplaced province
+6. Choose a free slot and confirm
+7. **Expected:** Province appears on the map
+8. Reload the page
+9. **Expected:** Province stays assigned
+10. Attempt to assign the same slot to another province using stale UI or a second open dialog
+11. **Expected:** The app blocks the assignment with a readable error and the previous province keeps the slot
+
+**Pass Criteria:**
+- [ ] Overflow provinces remain visible/playable
+- [ ] Assignment persists across reload
+- [ ] Slot collisions are blocked
+
+---
+
+## Scenario 8: ProvinceDrawer Actions
 
 **Goal:** Verify drawer buttons wire to applyAction
 
@@ -214,7 +237,7 @@
 
 ## Summary
 
-**Total Scenarios:** 7  
+**Total Scenarios:** 8  
 **Date Tested:** ___________  
 **Tester:** ___________  
 
@@ -226,7 +249,8 @@
 | 4. Daily Orders | ☐ | ☐ | |
 | 5. Season Transition | ☐ | ☐ | |
 | 6. Event Export | ☐ | ☐ | |
-| 7. ProvinceDrawer Actions | ☐ | ☐ | |
+| 7. Overflow and Slot Assignment | ☐ | ☐ | |
+| 8. ProvinceDrawer Actions | ☐ | ☐ | |
 
 **Issues Found:**
 - [ ] None

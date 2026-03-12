@@ -1,5 +1,7 @@
 # Week 2 Integration Plan — P0/P1 Completion
 
+> Archived on 2026-03-12. Completed on 2026-03-11 and retained for historical context only.
+
 **ID:** `WEEK2-INTEGRATION`
 **Priority:** `P0`
 **Status:** `ready`

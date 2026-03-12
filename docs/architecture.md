@@ -20,10 +20,10 @@ Implemented in the repo now:
 - Storage, repositories, migrations, import/export in `src/storage/**`
 - Shared UI primitives + theme tokens in `src/shared/**`
 - Map UI surfaces in `src/pages/MapPage.tsx` and `src/map/**`
+- Rule engine and game services in `src/game/**`
 
 Planned but not yet implemented as first-class modules:
 - `src/features/**`
-- `src/game/**`
 
 Note:
 - `src/map/**` exists and is used for the EPIC-04 slice, but the full “map layering contract” (meta + graph as typed data) is still planned work.
@@ -63,9 +63,9 @@ Target MVP flow after EPIC-04..08:
 - Storage owns migrations and import/export compatibility.
 - Import must validate unknown JSON and migrate to the latest schema version.
 
-Interim rule until `src/features/**` and `src/game/**` exist:
+Interim rule until `src/features/**` exists broadly:
 - Keep business logic out of route components as much as possible.
-- New mechanics should not be added straight into pages; they should land in dedicated modules even if those modules are still under `src/storage/**` or `src/entities/**` temporarily.
+- New mechanics should not be added straight into pages; they should land in dedicated modules even if a full feature layer is not in place yet.
 
 ## 4) Map layering contract
 - **SVG template (view):** contains paths/slots/labels with stable IDs.

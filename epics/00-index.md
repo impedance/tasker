@@ -1,7 +1,7 @@
 # Epic index (Tasker MVP)
 
 Template: `PLANS/plan.md`.
-Executable junior ticket plan (EPIC-02..05): `PLANS/EPIC-02-05-junior-tickets.md`.
+Bootstrap execution sources: `epics/EPIC-02-bootstrap.md`, `epics/EPIC-03-domain-persistence.md`, `epics/EPIC-04-map-ui.md`, `epics/EPIC-05-creation-flows.md`.
 Shared contracts: `epics/EPIC-01-foundation.md` (Appendix A/B).
 Product spec (system of record): `prd.md`.
 Implementation readiness checklist: `epics/IMPLEMENTATION-READINESS.md`.

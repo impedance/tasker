@@ -2,175 +2,168 @@
 
 **ID:** `PLAN-16-17-18-HARDENING`  
 **Priority:** `P0`  
-**Status:** `draft`  
+**Status:** `ready`  
 **Owner:** `FE+BE`  
-**PRD/RFC reference:** `PLANS/archive/EPIC-16-province-action-surfaces.md, PLANS/archive/EPIC-17-map-placement-and-overflow.md, PLANS/archive/EPIC-18-chronicle-and-instrumentation-hygiene.md, docs/E2E-CHECKLIST.md`
+**Last Reviewed:** `2026-03-12`  
+**References:** `prd.md`, `epics/EPIC-01-foundation.md`, `epics/EPIC-15-world-shell.md`, `PLANS/archive/EPIC-16-province-action-surfaces.md`, `PLANS/archive/EPIC-17-map-placement-and-overflow.md`, `PLANS/archive/EPIC-18-chronicle-and-instrumentation-hygiene.md`
 
-## 1) Objective (Outcome)
-Bring the shipped implementation in line with EPIC-16/17/18 contracts by removing schema inconsistencies, making map-slot assignment conflict-safe, and aligning user-facing docs/copy with real behavior. Ensure export/import does not brick due to Chronicle entry type drift, and overflow provinces remain playable and assignable without data loss.
+## 1) Objective
+Remove high-risk drift between product contracts, domain rules, and shipped UI. The outcome of this plan is:
+- import/export stays resilient even with legacy Chronicle data;
+- map slot assignment is safe at the domain boundary, not just in UI;
+- Province Details stops offering invalid actions;
+- manual QA docs and Settings copy match real app behavior;
+- Chronicle compatibility is fixed without silently redefining Chronicle as an event log.
 
-## 2) Context
-- EPIC-18 currently writes Chronicle entry types that are not part of the `ChronicleEntryType` union / Zod schema, which can break strict import validation.
-- EPIC-17 "Assign to slot" currently bypasses domain actions and does not prevent slot collisions.
-- EPIC-16 core flows work, but action availability/UX and docs drift can cause incorrect expectations and subtle invalid transitions.
+## 2) Why this plan exists
+The codebase already ships EPIC-16/17/18 slices, but several follow-ups are still required:
+- `domainService` writes Chronicle entry types that are outside the current `ChronicleEntryType` schema;
+- strict import validation can fail on those entries;
+- slot assignment still bypasses the domain action path and allows collision risk if UI state is stale;
+- `AssignSlotDialog` mutates state during render;
+- Province Details button enable/disable logic drifts from the transition table;
+- `docs/E2E-CHECKLIST.md` and Settings reset copy no longer describe the actual UI/semantics.
 
-## 3) Scope
+This is a hardening plan, not a feature expansion plan.
+
+## 3) Product decisions locked for this plan
+- `prd.md` remains the product source of truth.
+- Chronicle is a human-readable memory layer, not a full analytics/event stream.
+- Events may remain more granular than Chronicle.
+- Reset semantics must be explicit:
+  - either `Reset Application Data` preserves events,
+  - or the UI must expose a separate `Clear Events` action.
+
+## 4) Scope
 **In scope:**
-- Chronicle entry type alignment (types/schemas) + anti-bricking import normalization.
-- Map-slot assignment: conflict checks + route through a domain action (`edit_fields`) so the UI→domain mapping is 1:1.
-- Fix React anti-pattern in `AssignSlotDialog` (no state updates during render).
-- Tighten action enable/disable logic on Province Details to match transition rules (prevent invalid actions).
-- Update manual E2E checklist and Settings copy to match reset/export semantics.
+- Chronicle compatibility fix and import anti-brick behavior.
+- Slot-assignment hardening through the domain action path.
+- React render-phase fix in the assign dialog.
+- Province Details action gating aligned with domain transitions.
+- Documentation/copy alignment for create/clarify/overflow/reset flows.
 
-**Out of scope (explicit non-goals):**
-- Re-architecting storage layers or changing persistence technology.
+**Out of scope:**
+- Re-architecting storage or changing persistence technology.
+- Chronicle copy polish beyond minimal readable titles.
 - Drag-and-drop map placement.
-- Full Chronicle templating/copy polish beyond minimal readable titles.
-- Adding remote analytics, dashboards, or aggregation pipelines.
+- New analytics, dashboards, or online features.
 
-## 4) Deliverables
-- Updated `ChronicleEntryType` union and `ChronicleEntryTypeSchema` to include the EPIC-18 “core meaningful action” entry types that are being written.
-- Import-time normalizer to prevent hard failures when unknown Chronicle entry types are encountered.
-- Map assignment flow implemented via `useApplyAction` / domain action and guarded against slot conflicts.
-- Fixed `AssignSlotDialog` state synchronization (no render-phase state writes).
-- Updated `docs/E2E-CHECKLIST.md` (scenarios touching create/clarify, overflow, chronicle, events).
-- Tests (unit/integration) covering: chronicle types roundtrip, slot collision prevention, action availability logic.
+## 5) Deliverables
+- No code path writes a Chronicle entry type that import/export cannot validate.
+- Import normalizes unknown legacy Chronicle entry types instead of failing hard.
+- Map assignment uses `edit_fields` through the standard action path and blocks collisions.
+- `AssignSlotDialog` no longer updates state during render.
+- Province Details uses transition helpers as the source of truth for button availability.
+- `docs/E2E-CHECKLIST.md`, `docs/index.md`, and Settings copy are aligned with the shipped behavior.
 
-## 5) Dependencies
-- Technical: `src/shared/hooks/useApplyAction.ts`, `src/game/rules/transitions.ts`, `src/game/rules/guardrails.ts`, `src/storage/import-export.ts`.
-- Product/design: confirm wording for “Reset Application Data” vs “Clear Events” semantics.
-- Data/tools: none (offline deterministic only).
+## 6) Execution order
 
-## 6) Work breakdown (junior-friendly tasks)
+### Track A. Data safety first
+Do these first because they protect existing user data and exported snapshots.
 
-### T1. Align Chronicle entry types with what is written
-**Description:** Add missing Chronicle entry types so `domainService` does not rely on `as any`, and strict AppState import/export remains valid.  
+### T1. Add Chronicle compatibility layer
+**Goal:** stop writing invalid Chronicle entry types and make the choice explicit.  
+**Implementation rule:**
+- Do not blindly treat every event name as a Chronicle taxonomy entry.
+- Choose one of two implementation paths and document it in the PR:
+  - **Path A (preferred):** keep Chronicle narrative and map `start/log/complete` onto approved Chronicle types/titles.
+  - **Path B (allowed as a short-term compatibility fix):** extend `ChronicleEntryType` and `ChronicleEntryTypeSchema` with the currently-written values, but explicitly note that this is a compatibility compromise and not the final Chronicle taxonomy.
 **Steps:**
-1) Add new values to `ChronicleEntryType` and `ChronicleEntryTypeSchema`:
-   - `province_started`, `province_move_logged`, `province_captured` (and any other types currently written).
-2) Remove `as any` casts in `src/shared/services/domainService.ts` and use typed values.
-3) Add/extend a test to export AppState and re-import it after generating a Chronicle entry for each supported type.
+1) Remove `as any` Chronicle writes from `src/shared/services/domainService.ts`.
+2) Update `src/entities/types.ts` and `src/entities/schemas.ts` consistently.
+3) Update tests so they assert the chosen canonical taxonomy instead of asserting implementation drift.
 **Acceptance criteria:**
-- No code path writes an invalid `ChronicleEntry.entryType` relative to the Zod schema.
-- Exported state with new Chronicle entries imports successfully.
-**DoD (done when):**
-- `make smoke` and `make preflight` pass.
-- Added tests fail before the change and pass after.
-**Estimate:** `S=1–2h`  
-**Risks/notes:** Ensure backward compatibility for existing stored entries (handled further in T2).
+- `domainService` compiles without `as any` for Chronicle entry types.
+- Chronicle write path and schema agree.
 
-### T2. Make import/export anti-brick for unknown Chronicle entry types
-**Description:** Prevent strict import from failing if a snapshot contains Chronicle entries with unknown `entryType` (e.g., produced by an older buggy build).  
+### T2. Make import/export anti-brick for legacy Chronicle snapshots
+**Goal:** importing historical snapshots must not fail only because of unknown Chronicle `entryType`.  
 **Steps:**
-1) Implement an import-time normalizer in `parseImportData` (before Zod validation) that:
-   - maps unknown `chronicleEntries[].entryType` to a safe fallback (e.g., `campaign_created`)
-   - optionally prefixes `title` with `[legacy]` to preserve forensic value.
-2) Add a unit test feeding `importAppState` a snapshot containing an unknown chronicle `entryType` and assert import succeeds and entry is normalized.
+1) Add import-time normalization in `parseImportData(...)` before strict Zod validation.
+2) Normalize unknown `chronicleEntries[].entryType` to a safe fallback.
+3) Preserve forensic value in `title` or `body` instead of silently dropping entries.
+4) Add tests for:
+   - unknown `entryType` import succeeds;
+   - normalized entries survive roundtrip export/import.
 **Acceptance criteria:**
-- Import never hard-fails due to unknown Chronicle entry types.
-**DoD (done when):**
-- Tests demonstrate the anti-brick behavior.
-- `make preflight` passes.
-**Estimate:** `S=1–2h`  
-**Risks/notes:** Keep normalization minimal and deterministic; do not drop entries silently.
+- strict import no longer bricks on legacy Chronicle entry type drift.
 
-### T3. Route “Assign to slot” through domain action and prevent slot collisions
-**Description:** Ensure map placement is an explicit domain action and block assigning an occupied slot (even if the UI list is stale).  
+### Track B. Domain boundary hardening
+Do these second because they reduce invalid state transitions and stale-UI issues.
+
+### T3. Route slot assignment through domain action and block collisions
+**Goal:** slot assignment must be handled like any other domain mutation.  
 **Steps:**
-1) Update MapPage assign handler to:
-   - fetch the latest province
-   - call `execute(province, { type: 'edit_fields', payload: { mapSlotId: slotId } })`
-   - refresh view after success
-2) Add a guardrail in `runGuardrails(...)` for `edit_fields` when `payload.mapSlotId` exists:
-   - block if another province in the same region already has that slot
-3) Update `UnplacedProvincesList` to surface errors (toast/banner) when assignment is blocked.
-4) Add an integration/unit test:
-   - create two provinces in same region
-   - assign slot `p01` to province A
-   - attempt to assign slot `p01` to province B via `useApplyAction` path
-   - assert it throws a blocker warning and province B remains unassigned
+1) Change map assignment flow to use `useApplyAction()` with `edit_fields`.
+2) Add a guardrail/blocker for `payload.mapSlotId` collisions within the same region.
+3) Surface the error in map UI with readable user feedback.
+4) Add a test that proves a stale UI cannot double-assign the same slot.
 **Acceptance criteria:**
-- Slot collisions are prevented at the domain boundary, not only in UI.
-- Assignment persists across reload and remains visible on the map.
-**DoD (done when):**
-- Automated test covers collision case.
-- Manual verification: stale UI cannot override and double-assign.
-- `make preflight` passes.
-**Estimate:** `M=0.5d`  
-**Risks/notes:** Guardrails must be deterministic and rely only on locally available data.
+- slot collisions are blocked at the domain boundary;
+- successful assignment persists after reload.
 
-### T4. Fix `AssignSlotDialog` render-phase state updates
-**Description:** Remove `setState` calls that occur during render; sync selected slot when `freeSlots` changes via `useEffect`.  
+### T4. Fix render-phase state updates in `AssignSlotDialog`
+**Goal:** remove the React anti-pattern without changing UX.  
 **Steps:**
-1) Replace render-phase `if (!freeSlots.includes(slotId)) setSlotId(...)` with a `useEffect` triggered by `freeSlots`.
-2) Add a small unit test (or a story/manual reproduction note) to confirm no React warnings and that slot selection updates when free slots change.
+1) Move slot synchronization into `useEffect`.
+2) Keep current user selection unless it becomes invalid.
+3) Add either a focused test or a documented manual verification note.
 **Acceptance criteria:**
-- No state updates during render.
-- Slot selection stays valid when freeSlots list changes.
-**DoD (done when):**
-- `make preflight` passes.
-**Estimate:** `S=1–2h`  
-**Risks/notes:** Keep UX stable (don’t reset user selection unnecessarily).
+- no render-phase `setState`;
+- dialog stays stable when `freeSlots` changes.
 
-### T5. Enforce action availability on Province Details using transition rules
-**Description:** Disable actions strictly based on domain transitions (avoid “start_move while already in_progress”, etc.).  
+### T5. Align Province Details action gating with transition rules
+**Goal:** the UI must not offer invalid transitions.  
 **Steps:**
-1) Use `isTransitionAllowed(currentState, actionType)` (or equivalent helper) to compute button disabled states.
-2) Add a unit test for the UI mapping helper (or a lightweight integration test) ensuring disallowed actions are disabled for key states.
-3) Ensure error messaging remains readable if an invalid action is attempted (fallback safety net).
+1) Introduce a helper based on `isTransitionAllowed(...)`.
+2) Use that helper for button disabled states.
+3) Keep runtime error handling as a fallback, not the primary guard.
+4) Add a test for key states (`fog`, `ready`, `in_progress`, `captured`) and representative actions.
 **Acceptance criteria:**
-- Province Details does not offer invalid transitions (or clearly blocks them).
-**DoD (done when):**
-- Tests cover at least fog/ready/in_progress/captured states for 2–3 actions.
-- `make preflight` passes.
-**Estimate:** `M=0.5d`  
-**Risks/notes:** Use domain functions as the source of truth; avoid duplicating transition logic.
+- `start_move` is not shown as available from invalid states;
+- other actions follow the same domain truth.
 
-### T6. Align manual E2E checklist and Settings copy with real behavior
-**Description:** Remove drift: reflect actual UI (Add dialog, Clarify fields) and clarify reset semantics with event persistence.  
+### Track C. Documentation and copy alignment
+Do these last so the docs reflect the final implementation.
+
+### T6. Update docs and copy to match shipped behavior
+**Goal:** remove misleading instructions from developer/user-facing docs.  
 **Steps:**
 1) Update `docs/E2E-CHECKLIST.md`:
-   - Scenario 1 creation step (Add dialog vs “click empty slot”)
-   - Clarify fields (minutes instead of “Entry type”)
-   - Add/adjust a scenario for overflow (17th province appears as unplaced; assign to slot)
-2) Update Settings “Danger Zone” copy if reset does not clear events; optionally add a separate “Clear Events” action if product wants “delete all data” literally.
-3) Add a black-box checklist item verifying:
-   - Reset app state preserves events (if intended), or clears them (if “Clear Events” is added).
+   - creation via Add dialog;
+   - clarify fields use entry minutes, not `Entry type`;
+   - overflow scenario with unplaced provinces and manual assignment;
+   - reset/events verification step.
+2) Update `src/pages/SettingsPage.tsx` copy:
+   - match actual reset semantics;
+   - add `Clear Events` only if product intent is truly delete-all.
+3) Update `docs/index.md` if active/archived plan links changed.
 **Acceptance criteria:**
-- Manual checklist matches the shipped UI and storage semantics.
-**DoD (done when):**
-- `make preflight` passes.
-**Estimate:** `S=1–2h`  
-**Risks/notes:** Copy must match product intent; confirm desired semantics before shipping UI text changes.
+- no active doc tells the developer or tester to use a removed flow;
+- reset wording is truthful.
 
-## 7) Testing and QA
-- Unit:
-  - Import-time Chronicle normalizer (unknown type → fallback).
-  - Guardrail for `edit_fields.mapSlotId` collision prevention.
-  - Action availability mapping helper (states → disabled buttons).
-- Integration:
-  - AppState export/import roundtrip after generating Chronicle entries of each supported type.
-  - Map-slot collision attempt via `useApplyAction` path.
-- E2E (black-box manual):
-  1) Create 17 provinces in a region → the 17th shows under “Unplaced Provinces”.
-  2) Assign an unplaced province to a free slot → appears on map; reload → still placed.
-  3) Attempt to assign the same slot to another province → blocked with a readable error; no silent overwrite.
-  4) Perform actions (clarify, start, log, complete, siege resolve) → `/chronicle` shows entries; export state → import state → no errors.
-  5) Perform actions → `/dev/events` shows events; export events JSON/CSV works; reset behavior matches Settings copy.
+## 7) Suggested ticket split
+- `T1-T2` can be one BE ticket if kept small.
+- `T3-T4` can be one FE/Shared ticket.
+- `T5` is a FE ticket with domain-helper reuse.
+- `T6` is a docs/copy ticket after code lands.
 
-## 8) Metrics / Events (if applicable)
-- Optional: add `province_map_slot_assigned` event when `edit_fields.mapSlotId` changes from empty→set.
-- Metric idea: “overflow pressure” = count of unplaced provinces per region over time (computed from AppState, not analytics).
+## 8) Verification
+- `make smoke`
+- `make preflight`
+- Manual checks:
+  1) create 17 provinces in one region and verify overflow handling;
+  2) assign an unplaced province to a free slot and verify persistence after reload;
+  3) try to double-assign the same slot and verify it is blocked;
+  4) perform meaningful actions, open `/chronicle`, export/import app state, verify no import error;
+  5) verify Settings reset behavior matches the UI text.
 
-## 9) Risks and mitigations
-- Risk: existing users already have invalid Chronicle entry types in storage.
-  - Mitigation: T2 import normalizer + T1 schema alignment.
-- Risk: UI-only collision checks are bypassed by stale state.
-  - Mitigation: T3 guardrail blocks at domain boundary.
-- Risk: “Reset Application Data” copy conflicts with event persistence.
-  - Mitigation: T6 copy alignment or add explicit “Clear Events”.
+## 9) Risks
+- If T1 chooses compatibility-only schema expansion, Chronicle may continue drifting toward an event log.
+- If T6 lands before code changes, docs will still lie.
+- If slot collision checks stay UI-only, stale state will keep producing invalid assignments.
 
 ## 10) Open questions
-- Should “Reset Application Data” clear events or preserve them? (EPIC-18 suggests preserve; Settings copy currently implies delete-all.)
-- Do we want Chronicle entry deduplication/idempotency now (action retries), or accept duplicates for MVP?
-- Should map-slot assignment be treated as meaningful (Chronicle/event) or administrative (no logging)?
+- Should `Reset Application Data` preserve events or should delete-all become a two-step action?
+- Should `province_move_logged` remain an event only, or also live in Chronicle long-term?
+- Should successful slot assignment emit an event, or stay purely administrative?

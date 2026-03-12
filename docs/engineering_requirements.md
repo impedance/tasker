@@ -5,7 +5,7 @@ Purpose: turn the PRD + EPIC specs into implementation contracts that keep devel
 System of record:
 - Product + stack overview: `prd.md` (see “Technical architecture (MVP)”)
 - Mechanics and contracts: `epics/EPIC-01-foundation.md`
-- Week 1 executable plan: `PLANS/EPIC-02-05-junior-tickets.md`
+- Bootstrap execution sources: `epics/00-index.md`, `epics/EPIC-02-bootstrap.md`, `epics/EPIC-03-domain-persistence.md`, `epics/EPIC-04-map-ui.md`, `epics/EPIC-05-creation-flows.md`
 
 ## 1) Non-negotiables (MUST)
 
@@ -16,8 +16,8 @@ System of record:
 - **Map is layered:** SVG template is view-only; map metadata and adjacency graph are typed data independent from SVG.
 
 Current-repo interpretation:
-- These are target architecture constraints, not a claim that every layer already exists.
-- For the current bootstrap slice, `src/app`, `src/pages`, `src/entities`, and `src/storage` are the only implemented layers.
+- These are target architecture constraints, not a claim that every screen already follows them perfectly.
+- The repo now includes `src/game/**`, `src/map/**`, and `src/shared/**`; `src/features/**` is still the main missing orchestration layer.
 
 ### 1.2. Offline-first and data safety
 - The app must be usable offline after initial load (no backend assumptions).
@@ -84,6 +84,11 @@ Wire these in `package.json` (names are stable to match the harness):
 
 Current status:
 - All four scripts exist and are wired.
+
+## 6) Documentation hygiene
+- `prd.md` remains the product source of truth unless explicitly replaced.
+- Active implementation work should point to one current execution plan; completed plans belong in `PLANS/archive/`.
+- When code and docs disagree, either fix the code or update the docs in the same task. Do not leave known drift undocumented.
 
 ## 5) “Don’t do this” (anti-patterns)
 - UI components directly mutate persisted storage or call localForage.
