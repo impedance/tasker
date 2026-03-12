@@ -123,8 +123,16 @@ Interaction classes:
 - SVG assets + a stable ID/data-attribute convention.
 - Styling for each province state.
 - A minimal map style guide (colors/patterns) implemented in CSS tokens.
-- Asset plan (SVG templates, patterns, stamps, mon icons): `epics/ASSET-PLAN.md`.
 - A thin set of map primitives (component-level contract): ProvincePath, ProvinceLabel, ProvinceStateOverlay, ProvinceRoleBadge, SiegeRing, FogLayer, RouteLine, CapitalMarker.
+
+### 4.1) Asset baseline (MVP)
+Keep the asset contract small and implementation-facing. The MVP needs:
+- fixed SVG templates for campaign/region maps;
+- stable slot IDs on interactive shapes;
+- CSS-token-based state styling in `src/shared/theme/map.css`;
+- optional simple inline markers/patterns for `fog`, `siege`, and `fortified`.
+
+Do not treat icons/stamps/mon libraries as a separate planning layer unless active implementation work starts on them.
 
 ## 6) Work breakdown
 

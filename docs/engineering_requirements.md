@@ -28,6 +28,10 @@ Current-repo interpretation:
 - Any “current time” usage must be routed through a single boundary (injectable clock) so rules are deterministic and testable.
 - Any non-determinism (random names, etc.) must be isolated behind a boundary and be seedable in tests.
 
+Current-repo note:
+- This remains a target-state rule.
+- Repositories and several services still use direct `new Date()` calls, so new mechanics work should reduce that drift instead of expanding it.
+
 ## 2) Defaults (SHOULD)
 
 ### 2.1. Tech stack (recommended defaults)
@@ -85,12 +89,13 @@ Wire these in `package.json` (names are stable to match the harness):
 Current status:
 - All four scripts exist and are wired.
 
-## 6) Documentation hygiene
+## 5) Documentation hygiene
 - `prd.md` remains the product source of truth unless explicitly replaced.
 - Active implementation work should point to one current execution plan; completed plans belong in `PLANS/archive/`.
 - When code and docs disagree, either fix the code or update the docs in the same task. Do not leave known drift undocumented.
+- Keep one manual user-path checklist and one mechanics regression checklist; do not duplicate the same QA steps across multiple docs.
 
-## 5) “Don’t do this” (anti-patterns)
+## 6) “Don’t do this” (anti-patterns)
 - UI components directly mutate persisted storage or call localForage.
 - Rules read from global state, `Date.now()`, or random generators without boundaries.
 - SVG template becomes the source of truth for adjacency/graph logic.

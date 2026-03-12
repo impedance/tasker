@@ -1,8 +1,8 @@
 # Manual E2E Test Checklist
 
-**Version:** 1.1  
+**Version:** 1.2  
 **Last Updated:** 2026-03-12  
-**Purpose:** Manual testing of key MVP flows after the current hardening pass
+**Purpose:** Manual testing of shipped MVP flows in the current repo state
 
 ---
 
@@ -10,7 +10,12 @@
 
 - [ ] Application running (`npm run dev`)
 - [ ] Browser DevTools open (Console + Application/Storage tabs)
-- [ ] No existing data (or use `Settings > Reset Application Data`)
+- [ ] Start from clean app state
+
+Current repo note:
+- `Settings > Reset Application Data` clears app state stored under `tasker:*`.
+- Event history is stored separately and currently survives reset.
+- For a truly clean run, clear the site's IndexedDB/local storage in DevTools or use a fresh browser profile.
 
 ---
 
@@ -72,7 +77,7 @@
 
 ---
 
-## Scenario 3: Complete Province (Hero Moment)
+## Scenario 3: Complete Province (Hero Moment + Chronicle)
 
 **Goal:** Verify province completion and hero moment trigger
 
@@ -92,7 +97,7 @@
 **Pass Criteria:**
 - [ ] Province completes successfully
 - [ ] Hero moment triggers
-- [ ] Chronicle entry created (Automated via tests)
+- [ ] Chronicle entry created
 - [ ] Hero moment cooldown works (complete another immediately - should not show again)
 
 ---
@@ -160,7 +165,7 @@
 
 ---
 
-## Scenario 6: Event Export
+## Scenario 6: Event Export and Viewer
 
 **Goal:** Verify event persistence and export
 
@@ -235,26 +240,26 @@
 
 ---
 
-## Scenario 9: Reset Semantics (State + Events)
+## Scenario 9: Reset Semantics (Current Behavior)
 
-**Goal:** Verify reset behavior matches Settings copy and clears event history
+**Goal:** Verify the current reset implementation, including the event-store exception
 
 1. Perform several actions (create, clarify, start, complete)
 2. Navigate to `/dev/events`
 3. **Expected:** Event history is non-empty
 4. Navigate to `/settings`
 5. Click **Reset Application Data**
-6. Confirm the dialog mentioning app data **including event history**
+6. Confirm the dialog
 7. Wait for automatic reload
-8. Navigate to `/dev/events`
-9. **Expected:** Event history is empty after reset
-10. Navigate to `/map`
-11. **Expected:** No existing campaign/region/province data remains
+8. Navigate to `/map`
+9. **Expected:** No existing campaign/region/province data remains
+10. Navigate to `/dev/events`
+11. **Expected:** Existing event history is still visible in the current build
 
 **Pass Criteria:**
-- [ ] Reset copy matches actual behavior
-- [ ] Events are cleared by reset
-- [ ] App state is fully reset
+- [ ] App state is reset
+- [ ] Event history survives reset in the current implementation
+- [ ] Manual tester notes the Settings copy drift if it is still present
 
 ---
 

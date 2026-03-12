@@ -5,12 +5,13 @@ Keep this file short. Prefer links over duplication.
 ## Start Here
 - Product spec (system of record): `prd.md`
 - Epic backlog + build order: `epics/00-index.md`
-- Active hardening plan: `PLANS/EPIC-16-17-18-hardening-and-alignment.md`
+- Implementation readiness checklist: `epics/IMPLEMENTATION-READINESS.md`
 - Bootstrap execution source: `epics/00-index.md` + `epics/EPIC-02-bootstrap.md` ... `epics/EPIC-05-creation-flows.md`
 - Engineering requirements (how we build): `docs/engineering_requirements.md`
 - Architecture blueprint (module boundaries): `docs/architecture.md`
 - Testing rules: `docs/testing.md`
 - Manual QA checklist: `docs/E2E-CHECKLIST.md`
+- Mechanics QA checklist: `epics/QA-MECHANICS-CHECKLIST.md`
 
 ## Fast Commands
 - `make smoke` — fastest verification loop
@@ -46,3 +47,4 @@ Keep this file short. Prefer links over duplication.
 ## Archive
 - Historical plans that are no longer execution sources live in `PLANS/archive/`.
 - Completed execution plans should be archived once their outcomes are reflected in the active docs.
+- `PLANS/EPIC-16-17-18-hardening-and-alignment.md` is historical context once follow-up doc drift is resolved.
