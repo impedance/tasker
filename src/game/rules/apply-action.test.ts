@@ -283,3 +283,122 @@ describe('checkFortifyTrigger', () => {
         expect(checkFortifyTrigger(province)).toBeNull();
     });
 });
+
+// ============================================================================
+// T1 — Integration tests for apply_tactic payload shapes (UI → domain)
+// ============================================================================
+describe('applyAction — apply_tactic integration', () => {
+    const siegeProvince = makeProvince({ state: 'siege' });
+
+    it('applies scout tactic with full data', () => {
+        const action: DomainAction = {
+            type: 'apply_tactic',
+            payload: {
+                tacticType: 'scout',
+                siegeEventId: 'siege-1',
+                data: {
+                    tacticType: 'scout',
+                    desiredOutcome: 'Published docs',
+                    firstStep: 'Open repo',
+                    estimatedEntryMinutes: 15,
+                },
+            },
+        };
+        const result = applyAction(siegeProvince, action, NOW);
+        expect(result.ok).toBe(true);
+        if (result.ok) {
+            expect(result.province.state).toBe('ready');
+            expect(result.province.desiredOutcome).toBe('Published docs');
+            expect(result.sideEffects.some(e => e.type === 'resolve_siege_event')).toBe(true);
+        }
+    });
+
+    it('applies supply tactic with context', () => {
+        const action: DomainAction = {
+            type: 'apply_tactic',
+            payload: {
+                tacticType: 'supply',
+                siegeEventId: 'siege-1',
+                data: {
+                    tacticType: 'supply',
+                    contextLinks: ['https://example.com'],
+                    contextNotes: 'Helpful notes',
+                },
+            },
+        };
+        const result = applyAction(siegeProvince, action, NOW);
+        expect(result.ok).toBe(true);
+        if (result.ok) {
+            expect(result.province.state).toBe('ready');
+            expect(result.province.contextLinks).toEqual(['https://example.com']);
+            expect(result.sideEffects.some(e => e.type === 'resolve_siege_event')).toBe(true);
+        }
+    });
+
+    it('applies engineer tactic with subProvinceIds', () => {
+        const action: DomainAction = {
+            type: 'apply_tactic',
+            payload: {
+                tacticType: 'engineer',
+                siegeEventId: 'siege-1',
+                data: {
+                    tacticType: 'engineer',
+                    subProvinceIds: ['sub-1', 'sub-2', 'sub-3'],
+                },
+            },
+        };
+        const result = applyAction(siegeProvince, action, NOW);
+        expect(result.ok).toBe(true);
+        if (result.ok) {
+            expect(result.province.state).toBe('ready');
+            expect(result.province.decompositionCount).toBe(1);
+            expect(result.sideEffects.some(e => e.type === 'resolve_siege_event')).toBe(true);
+        }
+    });
+
+    it('applies raid tactic and creates daily move', () => {
+        const action: DomainAction = {
+            type: 'apply_tactic',
+            payload: {
+                tacticType: 'raid',
+                siegeEventId: 'siege-1',
+                data: {
+                    tacticType: 'raid',
+                    durationMinutes: 5,
+                },
+            },
+        };
+        const result = applyAction(siegeProvince, action, NOW);
+        expect(result.ok).toBe(true);
+        if (result.ok) {
+            expect(result.province.state).toBe('in_progress');
+            const dailyMove = result.sideEffects.find(e => e.type === 'create_daily_move');
+            expect(dailyMove).toBeDefined();
+            if (dailyMove?.type === 'create_daily_move') {
+                expect(dailyMove.moveType).toBe('raid');
+                expect(dailyMove.durationMinutes).toBe(5);
+            }
+            expect(result.sideEffects.some(e => e.type === 'resolve_siege_event')).toBe(true);
+        }
+    });
+
+    it('applies retreat tactic', () => {
+        const action: DomainAction = {
+            type: 'apply_tactic',
+            payload: {
+                tacticType: 'retreat',
+                siegeEventId: 'siege-1',
+                data: {
+                    tacticType: 'retreat',
+                    reason: 'Not the right time',
+                },
+            },
+        };
+        const result = applyAction(siegeProvince, action, NOW);
+        expect(result.ok).toBe(true);
+        if (result.ok) {
+            expect(result.province.state).toBe('retreated');
+            expect(result.sideEffects.some(e => e.type === 'resolve_siege_event')).toBe(true);
+        }
+    });
+});

@@ -191,4 +191,7 @@ e2e:
 			[ "$(STRICT)" = "1" ] && exit 2 || true; \
 		fi; \
 	fi
+
+blackbox:
+	@bash tools/refac_blackbox.sh
 # END AGENT HARNESS

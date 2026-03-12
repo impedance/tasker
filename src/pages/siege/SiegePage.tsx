@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { provinceRepository, siegeEventRepository } from '../../storage/repositories';
 import { Province, SiegeEvent, TacticType } from '../../entities/types';
+import type { ApplyTacticPayload } from '../../game/rules/actions';
 import { useApplyAction } from '../../shared/hooks/useApplyAction';
 import {
     Search,
@@ -15,6 +16,33 @@ import {
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '../../shared/ui/dialog';
 import { Button } from '../../shared/ui/button';
 
+type TacticFormData =
+    | { tacticType: 'scout'; desiredOutcome: string; firstStep: string; estimatedEntryMinutes: number }
+    | { tacticType: 'supply'; contextLinks?: string[]; contextNotes?: string }
+    | { tacticType: 'engineer'; subProvinceIds: string[] }
+    | { tacticType: 'raid'; durationMinutes: number }
+    | { tacticType: 'retreat'; reason?: string };
+
+function getInitialTacticData(tacticType: TacticType, province: Province): TacticFormData {
+    switch (tacticType) {
+        case 'scout':
+            return {
+                tacticType: 'scout',
+                desiredOutcome: province.desiredOutcome || '',
+                firstStep: province.firstStep || '',
+                estimatedEntryMinutes: province.estimatedEntryMinutes || 15
+            };
+        case 'raid':
+            return { tacticType: 'raid', durationMinutes: 5 };
+        case 'engineer':
+            return { tacticType: 'engineer', subProvinceIds: [] };
+        case 'supply':
+            return { tacticType: 'supply', contextLinks: [], contextNotes: '' };
+        case 'retreat':
+            return { tacticType: 'retreat' };
+    }
+}
+
 export default function SiegePage() {
     const { provinceId } = useParams<{ provinceId: string }>();
     const navigate = useNavigate();
@@ -22,7 +50,7 @@ export default function SiegePage() {
     const [siegeEvent, setSiegeEvent] = useState<SiegeEvent | null>(null);
     const [loading, setLoading] = useState(true);
     const [selectedTactic, setSelectedTactic] = useState<TacticType | null>(null);
-    const [tacticData, setTacticData] = useState<any>({});
+    const [tacticData, setTacticData] = useState<TacticFormData | null>(null);
     const { execute } = useApplyAction();
 
     useEffect(() => {
@@ -47,35 +75,44 @@ export default function SiegePage() {
         // For tactics that need entry, show dialog
         if (['scout', 'supply', 'engineer', 'raid'].includes(tacticType)) {
             setSelectedTactic(tacticType);
-            if (tacticType === 'scout') {
-                setTacticData({
-                    tacticType: 'scout',
-                    desiredOutcome: province.desiredOutcome || '',
-                    firstStep: province.firstStep || '',
-                    estimatedEntryMinutes: province.estimatedEntryMinutes || 15
-                });
-            } else if (tacticType === 'raid') {
-                setTacticData({ tacticType: 'raid', durationMinutes: 5 });
-            } else if (tacticType === 'engineer') {
-                setTacticData({ tacticType: 'engineer', subSteps: ['', '', ''] });
-            } else {
-                setTacticData({ tacticType });
-            }
+            setTacticData(getInitialTacticData(tacticType, province));
             return;
         }
 
-        await executeTactic(tacticType, { tacticType });
+        // For retreat, execute directly with minimal data
+        await executeTactic(tacticType, { tacticType: 'retreat' });
     };
 
-    const executeTactic = async (type: TacticType, data: any) => {
+    const executeTactic = async (type: TacticType, data: TacticFormData) => {
         if (!province || !siegeEvent) return;
         try {
+            let payloadData: ApplyTacticPayload['data'];
+
+            if (type === 'engineer' && data.tacticType === 'engineer') {
+                // For engineer tactic, create sub-provinces first
+                const subProvinceIds: string[] = [];
+                for (const title of data.subProvinceIds) {
+                    if (!title.trim()) continue;
+                    const subProvince = await provinceRepository.create({
+                        regionId: province.regionId,
+                        title: title.trim(),
+                        state: 'fog',
+                        progressStage: 'scouted',
+                        decompositionCount: 0,
+                    });
+                    subProvinceIds.push(subProvince.id);
+                }
+                payloadData = { tacticType: 'engineer', subProvinceIds };
+            } else {
+                payloadData = data as ApplyTacticPayload['data'];
+            }
+
             await execute(province, {
                 type: 'apply_tactic',
                 payload: {
                     tacticType: type,
                     siegeEventId: siegeEvent.id,
-                    data
+                    data: payloadData
                 }
             });
             navigate(-1);
@@ -147,7 +184,7 @@ export default function SiegePage() {
                     </DialogDescription>
 
                     <div className="space-y-4">
-                        {selectedTactic === 'scout' && (
+                        {selectedTactic === 'scout' && tacticData?.tacticType === 'scout' && (
                             <>
                                 <div>
                                     <label className="block text-xs font-bold text-muted-foreground uppercase mb-1">Outcome</label>
@@ -170,7 +207,7 @@ export default function SiegePage() {
                             </>
                         )}
 
-                        {selectedTactic === 'raid' && (
+                        {selectedTactic === 'raid' && tacticData?.tacticType === 'raid' && (
                             <div>
                                 <label className="block text-xs font-bold text-muted-foreground uppercase mb-1">Duration (min)</label>
                                 <input
@@ -182,23 +219,55 @@ export default function SiegePage() {
                             </div>
                         )}
 
-                        {selectedTactic === 'engineer' && (
+                        {selectedTactic === 'supply' && tacticData?.tacticType === 'supply' && (
+                            <div>
+                                <label className="block text-xs font-bold text-muted-foreground uppercase mb-1">Context Notes</label>
+                                <textarea
+                                    value={tacticData.contextNotes || ''}
+                                    onChange={e => setTacticData({ ...tacticData, contextNotes: e.target.value })}
+                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm"
+                                    rows={3}
+                                />
+                            </div>
+                        )}
+
+                        {selectedTactic === 'engineer' && tacticData?.tacticType === 'engineer' && (
                             <div className="space-y-2">
-                                <label className="block text-xs font-bold text-muted-foreground uppercase mb-1">Micro-steps</label>
-                                {tacticData.subSteps?.map((step: string, i: number) => (
+                                <label className="block text-xs font-bold text-muted-foreground uppercase mb-1">Sub-province titles</label>
+                                {tacticData.subProvinceIds.map((title, i) => (
                                     <input
                                         key={i}
                                         type="text"
-                                        value={step}
-                                        placeholder={`Step ${i + 1}`}
+                                        value={title}
+                                        placeholder={`Sub-province ${i + 1} title`}
                                         onChange={e => {
-                                            const newSteps = [...tacticData.subSteps];
-                                            newSteps[i] = e.target.value;
-                                            setTacticData({ ...tacticData, subSteps: newSteps });
+                                            const newTitles = [...tacticData.subProvinceIds];
+                                            newTitles[i] = e.target.value;
+                                            setTacticData({ ...tacticData, subProvinceIds: newTitles });
                                         }}
                                         className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm"
                                     />
                                 ))}
+                                <div className="flex gap-2 pt-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setTacticData({ ...tacticData, subProvinceIds: [...tacticData.subProvinceIds, ''] })}
+                                        className="text-xs"
+                                    >
+                                        Add sub-province
+                                    </Button>
+                                    {tacticData.subProvinceIds.length > 1 && (
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setTacticData({ ...tacticData, subProvinceIds: tacticData.subProvinceIds.slice(0, -1) })}
+                                            className="text-xs"
+                                        >
+                                            Remove last
+                                        </Button>
+                                    )}
+                                </div>
                             </div>
                         )}
 
@@ -206,7 +275,10 @@ export default function SiegePage() {
                             <Button variant="outline" onClick={() => setSelectedTactic(null)} className="flex-1">
                                 Cancel
                             </Button>
-                            <Button onClick={() => executeTactic(selectedTactic!, tacticData)} className="flex-1 bg-[#f0b35f] text-[#0b1218]">
+                            <Button
+                                onClick={() => tacticData && selectedTactic && executeTactic(selectedTactic, tacticData)}
+                                className="flex-1 bg-[#f0b35f] text-[#0b1218]"
+                            >
                                 Execute
                             </Button>
                         </div>

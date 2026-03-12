@@ -18,7 +18,7 @@ export const domainService = {
                     await dailyMoveRepository.create({
                         date: new Date().toISOString().split('T')[0],
                         provinceId: effect.provinceId,
-                        moveType: effect.moveType as any,
+                        moveType: effect.moveType,
                         durationMinutes: effect.durationMinutes,
                         result: 'started', // Default for now
                     });

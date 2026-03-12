@@ -11,6 +11,7 @@
 
 import { z } from 'zod';
 import { TacticTypeSchema, MoveTypeSchema } from '../../entities/schemas';
+import type { MoveType } from '../../entities/types';
 
 // ============================================================================
 // Payload schemas
@@ -185,6 +186,6 @@ export type SideEffect =
     | {
         type: 'create_daily_move';
         provinceId: string;
-        moveType: string;
+        moveType: MoveType;
         durationMinutes: number;
     };
