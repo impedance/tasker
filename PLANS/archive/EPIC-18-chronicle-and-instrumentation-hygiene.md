@@ -1,5 +1,7 @@
 # Chronicle generation + instrumentation hygiene (P0/P1)
 
+> Archived on 2026-03-11. Superseded by `PLANS/EPIC-16-17-18-hardening-and-alignment.md`.
+
 **ID:** `EPIC-18`  
 **Priority:** `P0`  
 **Status:** `ready`  
@@ -121,4 +123,3 @@ Meaningful actions automatically produce human-readable Chronicle entries and a 
 ## 10) Open questions
 - Should events be prefixed with `tasker:` as well, or stay separate? (Depends on desired reset semantics.)
 - Do we want Chronicle entries per action, or per “session milestone” only?
-

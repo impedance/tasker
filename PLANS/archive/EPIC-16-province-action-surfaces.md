@@ -1,5 +1,7 @@
 # Province action surfaces: Clarify + Province Details (P0)
 
+> Archived on 2026-03-11. Superseded by `PLANS/EPIC-16-17-18-hardening-and-alignment.md`.
+
 **ID:** `EPIC-16`  
 **Priority:** `P0`  
 **Status:** `ready`  
@@ -150,4 +152,3 @@ Users can reliably turn a newly created `fog` province into `ready` via a dedica
 ## 10) Open questions
 - For `ready` provinces, should “Scout” be a `log_move` or should the button label change to “Log progress”?
 - Where should Clarify redirect after submit: back to map, or to province details?
-

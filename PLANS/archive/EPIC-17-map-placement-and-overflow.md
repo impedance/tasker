@@ -1,5 +1,7 @@
 # Map placement and overflow contract (P0)
 
+> Archived on 2026-03-11. Superseded by `PLANS/EPIC-16-17-18-hardening-and-alignment.md`.
+
 **ID:** `EPIC-17`  
 **Priority:** `P0`  
 **Status:** `ready`  
@@ -104,4 +106,3 @@ When a region has no free SVG slots, newly created provinces become explicitly â
 
 ## 10) Open questions
 - Should assignment use domain action `edit_fields` (preferred) or direct repo update?
-
