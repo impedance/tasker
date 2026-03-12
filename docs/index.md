@@ -6,6 +6,8 @@ Keep this file short. Prefer links over duplication.
 - Product spec (system of record): `prd.md`
 - Epic backlog + build order: `epics/00-index.md`
 - Current implementation alignment checklist: `epics/IMPLEMENTATION-READINESS.md`
+- Active hardening umbrella plan: `PLANS/FEAT-01-production-readiness-hardening.md`
+- FEAT-01 execution pack for junior handoff: `PLANS/FEAT-01/00-index.md`
 - Bootstrap execution source: `epics/00-index.md` + `epics/EPIC-02-bootstrap.md` ... `epics/EPIC-05-creation-flows.md`
 - Engineering requirements (how we build): `docs/engineering_requirements.md`
 - Architecture blueprint (module boundaries): `docs/architecture.md`
